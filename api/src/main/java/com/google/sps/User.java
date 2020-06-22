@@ -20,7 +20,7 @@ public class User {
     public User(String email, String username) {
         this.email = email;
         this.username = username;
-    }git ad
+    }
 
     @Override
     public String toString() {

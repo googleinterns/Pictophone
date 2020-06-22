@@ -1,13 +1,8 @@
-runtime: nodejs10
-service: default
+# renamed from app.yaml
+runtime: java11
+service: api
 automatic_scaling:
   min_idle_instances: automatic
   max_idle_instances: automatic
   min_pending_latency: automatic
   max_pending_latency: automatic
-handlers:
-- url: /
-  static_files: build/index.html
-  upload: build/index.html
-- url: /
-  static_dir: build

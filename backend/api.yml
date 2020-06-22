@@ -1,3 +1,0 @@
-# renamed from app.yaml
-runtime: java11
-service: api
