@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+const LC = require('literallycanvas');
 
 class App extends Component {
   state = {
@@ -22,6 +23,11 @@ class App extends Component {
     }
 
     return (
+      <div>
+        <div>
+      <LC.LiterallyCanvasReactComponent imageURLPrefix="lc-assets/img" />
+
+      </div>
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
@@ -29,6 +35,7 @@ class App extends Component {
             <p>{users}</p>
           </div>
         </header>
+      </div>
       </div>
     );
   }
