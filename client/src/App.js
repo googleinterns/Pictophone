@@ -23,27 +23,30 @@ class App extends Component {
   }
 
   send() {
-    this.setState({ sent: true });
+    this.setState({ sent: true, currentPlayerIndex: this.state.currentPlayerIndex + 1});
   }
 
   render() {
-    const { players, currentPlayerIndex } = this.state; {/* &rarr; */}
+    const { players } = this.state;
     console.log(players);
 
     return (
       <div className="App">
         <Link to="/"><button>Back to home</button></Link>
         <h3>GAME 00001</h3>
+
         <div className="player-list">
           {/*
             Dynamically render the player chain with a name list. The 'status'
             indicates whether they are done with their turn.
+            Renders an arrow after the name, if they are not the final player.
           */}
-          {players.map((name, index) => (<div>
-            <Player name={name} status={index - currentPlayerIndex} />
-            {(index !== players.length - 1) ? <p>&rarr;</p> : null}</div>
+          {players.map((name, index) => (<span className="player-list">
+            <Player name={name} status={index - this.state.currentPlayerIndex} />
+            {(index !== players.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
         </div>
+
         <h4>Draw something based on the left image!</h4>
         <div className="img-displays">
           <div classname="prev-img">

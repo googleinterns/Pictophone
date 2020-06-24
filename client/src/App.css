@@ -53,11 +53,7 @@
   float: right;
 }
 
-.done {
-
+.player-list {
+  display: flex;
+  flex-direction: row;
 }
-
-.in-progress {
-
-}
-
