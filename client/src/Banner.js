@@ -5,7 +5,7 @@ class Banner extends Component {
     return (
       <div className="Banner">
         <h1>PICTOPHONE</h1>
-        <p>bob (log out)</p>
+        <p><b>sherb</b> (log out)</p>
       </div>
     );
   }
