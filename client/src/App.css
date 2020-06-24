@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  text-align: left;
 }
 
 .App-logo {
@@ -35,4 +35,20 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.img-displays {
+  display: flex;
+  flex-direction: row;
+}
+
+.lc-container {
+  width: 50%;
+  height: 50%;
+}
+
+.send-drawing {
+  height: 75px;
+  width: 150px;
+  float: right;
 }

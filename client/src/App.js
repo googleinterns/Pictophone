@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { Link } from "react-router-dom";
 const LC = require('literallycanvas');
 
 class App extends Component {
@@ -9,10 +9,21 @@ class App extends Component {
     users: "Not this"
   };
 
+  constructor(props) {
+    super(props);
+    this.state = { sent: false };
+
+    this.send = this.send.bind(this);
+  }
+
   async componentDidMount() {
     const response = await fetch('api/users');
     const body = await response.text();
     this.setState({ users: body, isLoading: false });
+  }
+
+  send() {
+    this.setState({ sent: true });
   }
 
   render() {
@@ -23,19 +34,25 @@ class App extends Component {
     }
 
     return (
-      <div>
-        <div>
-      <LC.LiterallyCanvasReactComponent imageURLPrefix="lc-assets/img" />
-
-      </div>
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <div className="App-intro">
-            <p>{users}</p>
+        <Link to="/"><button>Back to home</button></Link>
+        <h3>GAME 00001</h3>
+        <p>
+          Players: marshal &rarr; ankha &rarr; sherb &rarr; audie &rarr;
+          raymond &rarr; bob &rarr; marina
+        </p>
+        <h4>Draw something based on the left image!</h4>
+        <div className="img-displays">
+          <div classname="prev-img">
+            <img src="kitty.png" alt="placeholder" />
           </div>
-        </header>
-      </div>
+          <div className="lc-container">
+            <LC.LiterallyCanvasReactComponent imageURLPrefix="lc-assets/img" />
+            {!this.state.sent && <button className="send-drawing" onClick={this.send}>Send</button>}
+            {this.state.sent && <p className="send-drawing">Drawing sent!</p>}
+          </div>
+        </div>
+
       </div>
     );
   }
