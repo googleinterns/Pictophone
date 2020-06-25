@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import { Link } from "react-router-dom";
 import Player from './Player.js';
+import { saveAs } from 'file-saver';
 const LC = require('literallycanvas');
 
 class App extends Component {
@@ -15,6 +16,8 @@ class App extends Component {
     this.state = { sent: false, players: [] };
 
     this.send = this.send.bind(this);
+    this.saveDrawing = this.saveDrawing.bind(this);
+    this.setLC = this.setLC.bind(this);
   }
 
   async componentDidMount() {
@@ -24,6 +27,17 @@ class App extends Component {
 
   send() {
     this.setState({ sent: true, currentPlayerIndex: this.state.currentPlayerIndex + 1});
+  }
+
+  saveDrawing() {
+    var filename = "drawing.png";
+    this.state.lc.getImage().toBlob(function(blob) {
+      saveAs(blob, filename);
+    });
+  }
+
+  setLC(lc) {
+    this.setState({lc: lc});
   }
 
   render() {
@@ -53,7 +67,8 @@ class App extends Component {
             <img src="kitty.png" alt="placeholder" />
           </div>
           <div className="lc-container">
-            <LC.LiterallyCanvasReactComponent imageURLPrefix="lc-assets/img" />
+            <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
+            <button onClick={this.saveDrawing}>Download drawing</button>
             {!this.state.sent && <button className="send-drawing" onClick={this.send}>Send</button>}
             {this.state.sent && <p className="send-drawing">Drawing sent!</p>}
           </div>
