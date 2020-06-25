@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import { Link } from "react-router-dom";
 
-import Banner from './Banner';
+import './Home.css';
 
 class Home extends Component {
   render() {
     return (
-      <div className="Home">
-        <Banner />
-        <hr/>
-        Hello world! This is the home page.
-        <Link to="/game"><button>Go to game</button></Link>
+      <div className="wrapper">
+        <div className="title">Pictophone</div>
+        <div className="login">
+          <Link to="/dashboard"><button className="login-button">Login</button></Link>
+        </div>
       </div>
     );
   }
