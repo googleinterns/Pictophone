@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { withRouter } from 'react-router';
 import Player from './Player.js';
 import { saveAs } from 'file-saver';
+import './literallycanvas.css';
 import Banner from './Banner';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
   state = {
     isLoading: true,
-    users: "Not this"
   };
 
   constructor(props) {
@@ -22,6 +23,8 @@ class Canvas extends Component {
   }
 
   async componentDidMount() {
+    const { id } = this.props.match.params
+    console.log(id);
     this.setState({ players: ['marshal', 'ankha', 'sherb', 'audie', 'raymond',
       'bob', 'marina'], currentPlayerIndex: 2 });
   }
@@ -43,11 +46,11 @@ class Canvas extends Component {
 
   render() {
     const { players } = this.state;
-    console.log(players);
 
     return (
-      <div className="App">
+      <div className="Canvas">
         <Banner />
+        <Link to="/"><button>Back to home</button></Link>
         <h3>GAME 00001</h3>
 
         <div className="player-list">
@@ -64,7 +67,7 @@ class Canvas extends Component {
 
         <h4>Draw something based on the left image!</h4>
         <div className="img-displays">
-          <div classname="prev-img">
+          <div className="prev-img">
             <img src="kitty.png" alt="placeholder" />
           </div>
           <div className="lc-container">
@@ -80,4 +83,4 @@ class Canvas extends Component {
   }
 }
 
-export default Canvas;
+export default withRouter(Canvas);

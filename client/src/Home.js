@@ -6,6 +6,7 @@ import './Home.css';
 
 class Home extends Component {
   render() {
+
     return (
       <div className="home-wrapper">
         <div className="home-title">PICTOPHONE</div>
