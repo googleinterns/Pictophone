@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import Player from './Player.js';
 import { saveAs } from 'file-saver';
+import './literallycanvas.css';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
   state = {
     isLoading: true,
-    users: "Not this"
   };
 
   constructor(props) {
@@ -47,7 +47,7 @@ class Canvas extends Component {
     const { players } = this.state;
 
     return (
-      <div className="App">
+      <div className="Canvas">
         <Link to="/"><button>Back to home</button></Link>
         <h3>GAME 00001</h3>
 

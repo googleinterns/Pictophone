@@ -7,10 +7,10 @@ import Canvas from './Canvas';
 
 const Main = () => {
   return (
-    <Switch> {}
+    <Switch>
       <Route exact path='/' component={Home}></Route>
       <Route exact path='/dashboard' component={Dashboard}></Route>
-      <Route exact path='/game' component={Canvas}></Route>
+      <Route path='/game/:id'> <Canvas /> </Route>
     </Switch>
   );
 }
