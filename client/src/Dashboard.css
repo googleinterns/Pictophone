@@ -3,12 +3,17 @@
   height: 100%;
 }
 
-p {
+.greeting {
   padding-left: 1.5em;
-  padding-top: 1.5em;
+  padding-top: 1em;
   font-size: 1.5em;
 }
 
 .dashboard-buttons {
   padding-left: 2.2em;
+}
+
+.games-list {
+  padding-left: 2.2em;
+  padding-top: 1.7em;
 }

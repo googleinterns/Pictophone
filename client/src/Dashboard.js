@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Banner from './Banner';
+import GameSelector from './GameSelector';
 import { Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './Dashboard.css';
@@ -40,6 +41,9 @@ class Dashboard extends Component {
           <HostButton />{' '}
           <JoinButton />{' '}
           <RandomButton />
+        </div>
+        <div className="games-list">
+          <GameSelector />
         </div>
       </div>
     );
