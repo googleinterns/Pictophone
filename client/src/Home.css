@@ -1,4 +1,4 @@
-.wrapper {
+.home-wrapper {
   margin: 0;
   position: absolute;
   top: 50%;
@@ -6,16 +6,11 @@
   transform: translate(-50%, -50%);
 }
 
-.title {
+.home-title {
   font-size: 7em;
 }
 
-.login {
+.login-button {
   text-align: center;
   padding-top: 5em;
-}
-
-.login-button {
-  font-size: 2em;
-  text-align: center;
 }
