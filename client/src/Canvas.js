@@ -3,6 +3,7 @@ import './App.css';
 import { Link } from "react-router-dom";
 import Player from './Player.js';
 import { saveAs } from 'file-saver';
+import Banner from './Banner';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
@@ -46,7 +47,7 @@ class Canvas extends Component {
 
     return (
       <div className="App">
-        <Link to="/"><button>Back to home</button></Link>
+        <Banner />
         <h3>GAME 00001</h3>
 
         <div className="player-list">
