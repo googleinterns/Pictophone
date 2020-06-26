@@ -31,6 +31,9 @@ class RandomButton extends Component {
 
 class Dashboard extends Component {
   render() {
+    // Hard coded for now, these games would be taken from the database
+    const games = ['oo0j05CCUJNqQxSFSNEI'];
+
     return (
       <div className="banner-wrapper">
         <Banner />
@@ -43,7 +46,7 @@ class Dashboard extends Component {
           <RandomButton />
         </div>
         <div className="games-list">
-          <GameSelector />
+          <GameSelector id={games[0]}/>
         </div>
       </div>
     );
