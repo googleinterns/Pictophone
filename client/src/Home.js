@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from "react-router-dom";
-
+import { Button } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.css';
 import './Home.css';
 
 class Home extends Component {
@@ -9,15 +10,12 @@ class Home extends Component {
     const games = ['oo0j05CCUJNqQxSFSNEI'];
 
     return (
-      <div className="Home">
-        Hello world! This is the home page.
-        <Link to={`/game/${games[0]}`}><button>Go to game</button></Link>
-      <div className="wrapper">
-        <div className="title">PICTOPHONE</div>
-        <div className="login">
-          <Link to="/dashboard"><button className="login-button">Login</button></Link>
+      <div className="home-wrapper">
+        <div className="home-title">PICTOPHONE</div>
+        <div className="login-button">
+          <Link to="/dashboard"><Button variant="info" size="lg">Login</Button></Link>
         </div>
-      </div>
+          <Link to={`/game/${games[0]}`}><button>Go to game</button></Link>
       </div>
     );
   }
