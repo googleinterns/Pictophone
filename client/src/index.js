@@ -2,15 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import Home from './Home';
-import Banner from './Banner';
 import * as serviceWorker from './serviceWorker';
 import firebase from 'firebase/app';
 import 'firebase/analytics';
 import {
   BrowserRouter as Router,
-  Switch,
-  Route
 } from "react-router-dom";
 
 var firebaseConfig = {
@@ -28,20 +24,8 @@ firebase.analytics();
 
 ReactDOM.render(
   <React.StrictMode>
-    <Banner />
-    <hr />
     <Router>
-      <Switch>
-
-        <Route exact path="/">
-          <Home />
-        </Route>
-
-        <Route path="/game/:id" >
-          <App />
-        </Route>
-
-      </Switch>
+      <App />
     </Router>
   </React.StrictMode>,
   document.getElementById('root')
