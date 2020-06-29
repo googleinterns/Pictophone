@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import firebase from 'firebase/app';
+import 'firebase/firestore';
 import 'firebase/analytics';
 import {
   BrowserRouter as Router,
