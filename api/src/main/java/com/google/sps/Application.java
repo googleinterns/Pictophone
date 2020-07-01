@@ -10,6 +10,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+
 import java.io.IOException;
 
 @SpringBootApplication
@@ -29,8 +35,19 @@ public class Application {
   }
 
   public void sendNotifications(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+    GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+    String projectId = "phoebeliang-step";
+    FirebaseOptions options = new FirebaseOptions.Builder()
+        .setCredentials(credentials)
+        .setProjectId(projectId)
+        .build();
+    FirebaseApp.initializeApp(options);
+
+    Firestore db = Firestore.getFirestore();
+
     String link = request.getParameter("gameLink");
-    
+
   }
 
 	@GetMapping("/")

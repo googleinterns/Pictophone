@@ -124,16 +124,16 @@ public class Notifications {
               .setApplicationName(APPLICATION_NAME)
               .build();
 
-      String body = "https://google.com";
-      String subject = "test";
-      String to = "pictophone.noreply@gmail.com";
+      String body = "Welcome to Pictophone! Join here: ";
+      String subject = "Prototype Demo";
       String from = "pictophone.noreply@gmail.com";
+      String[] to = {"pictophone.noreply@gmail.com", "anthonyodum@google.com", "phoebeliang@google.com", "tomatocat@google.com", "yueyao@google.com"};
 
       try {
-        MimeMessage encoded = createEmail(to, from, subject, body);
-        Message testMessage = sendMessage(service, from, encoded);
-
-        System.out.println(testMessage);
+        for(String email: to) {
+          MimeMessage encoded = createEmail(email, from, subject, body);
+          Message testMessage = sendMessage(service, from, encoded);
+        }
       } catch(Exception e) {
         System.out.println("Main Method Exception: " + e);
       }
