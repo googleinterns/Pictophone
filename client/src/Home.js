@@ -5,6 +5,7 @@ import { Button } from 'react-bootstrap';
 import { GoogleLogin } from 'react-google-login';
 import 'bootstrap/dist/css/bootstrap.css';
 import './Home.css';
+// import gen from './signedUploadUrl';
 
 const responseGoogle= (response) => {
   console.log(response);
