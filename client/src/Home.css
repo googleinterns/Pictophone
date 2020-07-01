@@ -1,0 +1,16 @@
+.home-wrapper {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.home-title {
+  font-size: 7em;
+}
+
+.login-button {
+  text-align: center;
+  padding-top: 5em;
+}
