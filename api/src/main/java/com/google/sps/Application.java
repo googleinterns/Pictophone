@@ -34,21 +34,21 @@ public class Application {
     }
   }
 
-  public void sendNotifications(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  // public void sendNotifications(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-    GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-    String projectId = "phoebeliang-step";
-    FirebaseOptions options = new FirebaseOptions.Builder()
-        .setCredentials(credentials)
-        .setProjectId(projectId)
-        .build();
-    FirebaseApp.initializeApp(options);
+  //   GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+  //   String projectId = "phoebeliang-step";
+  //   FirebaseOptions options = new FirebaseOptions.Builder()
+  //       .setCredentials(credentials)
+  //       .setProjectId(projectId)
+  //       .build();
+  //   FirebaseApp.initializeApp(options);
 
-    Firestore db = Firestore.getFirestore();
+  //   Firestore db = Firestore.getFirestore();
 
-    String link = request.getParameter("gameLink");
+  //   String link = request.getParameter("gameLink");
 
-  }
+  // }
 
 	@GetMapping("/")
 	public String hello() {
