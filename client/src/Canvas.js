@@ -47,10 +47,11 @@ class Canvas extends Component {
   }
 
   updateGame(game) {
-    console.log(game);
+    // Set state to new game object's state
     this.setState({ currentPlayerIndex: game.currentPlayerIndex,
       players: game.players, drawings: game.drawings,
       timeLimit: game.timeLimit, inProgress: game.inProgress });
+
     // Determine whether to display drawing
     var index = game.players.indexOf(this.state.user);
     if (game.currentPlayerIndex >= index) {
@@ -61,11 +62,23 @@ class Canvas extends Component {
     }
   }
 
-  send() {
+  async send() {
     const { players, currentPlayerIndex, user, gameId} = this.state;
+    // Don't want player to send drawing when it's not their turn
     if (players.indexOf(user) !== currentPlayerIndex) return;
 
-    // TODO: once service keys approved, actually upload the image
+    // Send image to backend
+    const url = await fetch('/api/signUrl', {
+      method: 'POST',
+      body: gameId + user + '.png'
+    }).then((response) => response.text());
+
+    const response = await fetch((url), {
+      method: 'PUT', // *GET, POST, PUT, DELETE, etc.
+      contentType: 'image/png',
+      body: this.state.lc.getImage().toDataURL()
+    });
+
     const gameRef = db.collection('games').doc(gameId);
     gameRef.set({
       currentPlayerIndex: currentPlayerIndex + 1,
