@@ -66,8 +66,7 @@ class Canvas extends Component {
     const { players, currentPlayerIndex, user, gameId} = this.state;
     // Don't want player to send drawing when it's not their turn
     if (players.indexOf(user) !== currentPlayerIndex) return;
-    const dataURL = this.state.lc.getImage().toDataURL();
-    const data = dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+    const data = await new Promise(resolve => this.state.lc.getImage().toBlob(resolve));;
 
     // Send image to backend
     const imgUrl = await fetch('/api/signUrl', {
@@ -84,12 +83,30 @@ class Canvas extends Component {
 
     console.log(imgUrl);
 
+const xhr = new XMLHttpRequest()
+    xhr.open('PUT', imgUrl, true)
+    xhr.onload = () => {
+      const status = xhr.status
+      if (status === 200) {
+        console.log('uploaded')
+      } else {
+        alert('WRONG!')
+      }
+    }
+    xhr.onerror = () => {
+      alert('ERROR')
+    }
+    xhr.setRequestHeader('Content-Type', 'image/png')
+    xhr.send(data)
+
     // PUT request in bucket
+    /*
     const response = await fetch((imgUrl), {
       method: 'PUT',
-      contentType: 'image/png',
+      contentType: 'application/octet-stream',
       body: data
-    })
+    });
+    console.log(response);
 
     /*
     const gameRef = db.collection('games').doc(gameId);

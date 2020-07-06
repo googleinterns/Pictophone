@@ -60,7 +60,7 @@ public class SignedUpload {
 
       // Generate Signed URL
       Map<String, String> extensionHeaders = new HashMap<>();
-      extensionHeaders.put("Content-Type", "application/octet-stream");
+      extensionHeaders.put("Content-Type", "image/png");
 
       URL url =
           storage.signUrl(
