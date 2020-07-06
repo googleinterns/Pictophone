@@ -127,7 +127,7 @@ public class Notifications {
       String body = "Welcome to Pictophone! Join here: phoebeliang-step.appspot.com";
       String subject = "Prototype Demo";
       String from = "pictophone.noreply@gmail.com";
-      String[] to = {"pictophone.noreply@gmail.com", "anthonyodum@google.com", "phoebeliang@google.com", "tomatocat@google.com", "yueyao@google.com"};
+      String[] to = {"pictophone.noreply@gmail.com", "anthonyodum@google.com", "phoebeliang@google.com", "tomatocat@google.com", "yueyao@google.com", };
 
       try {
         for(String email: to) {
