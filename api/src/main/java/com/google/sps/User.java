@@ -28,5 +28,4 @@ public class User {
                 "Email: %s, Username: %s",
                 email, username);
     }
-
 }
