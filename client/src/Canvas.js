@@ -89,6 +89,7 @@ class Canvas extends Component {
 
     // Advance the game
     // TODO only advance game if upload is success
+    // TODO change db to have newly uploaded image
     const gameRef = db.collection('games').doc(gameId);
     gameRef.set({
       currentPlayerIndex: currentPlayerIndex + 1,
