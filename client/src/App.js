@@ -1,47 +1,45 @@
-import React, { Component } from 'react';
-import './App.css';
-import { Switch, Route } from 'react-router-dom';
-import Home from './Home';
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+} from "react-router-dom";
+
+import LandingPage from './Home';
 import Dashboard from './Dashboard';
 import Canvas from './Canvas';
+import SignUpPage from './SignUp';
+import SignInPage from './SignIn';
+import PasswordForgetPage from './PasswordForget';
+import AccountPage from './Account';
+import { withAuthentication } from './Session';
 
+import * as ROUTES from './constants/routes';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isSignedIn: false
-    };
-    this.changeLogInStatus = this.changeLogInStatus.bind(this);
-  }
+import './App.css';
 
-  changeLogInStatus(status) {
-    this.setState({
-      isSignedIn: status
-    });
-  }
+const App = () => (
+  <div className="App">
+    <Router>
+      <Switch>
+        <Route exact path={ROUTES.LANDING}>
+          <LandingPage />
+        </Route>
+        <Route path={ROUTES.SIGN_UP}>
+          <SignUpPage />
+        </Route>
+        <Route exact path={ROUTES.DASHBOARD}>
+          <Dashboard />
+        </Route>
+        <Route path={ROUTES.SIGN_IN}>
+          <SignInPage />
+        </Route>
+        <Route path='/game/:id'>
+          <Canvas />
+        </Route>
+      </Switch>
+    </Router>
+  </div>
+);
 
-  render() {
-    return (
-      <div className="App">
-        <Switch>
-          <Route exact path='/'>
-            <Home
-              signinStatus={this.state.isSignedIn}
-              onLogIn={this.changeLogInStatus}
-            />
-          </Route>
-          <Route exact path='/dashboard'>
-            <Dashboard
-              signinStatus={this.state.isSignedIn}
-              onLogOut={this.changeLogInStatus}
-            />
-          </Route>
-          <Route path='/game/:id'> <Canvas /> </Route>
-        </Switch>
-      </div>
-    );
-  }
-}
-
-export default App;
+export default withAuthentication(App);
