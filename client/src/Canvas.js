@@ -68,52 +68,32 @@ class Canvas extends Component {
     if (players.indexOf(user) !== currentPlayerIndex) return;
     const data = await new Promise(resolve => this.state.lc.getImage().toBlob(resolve));;
 
-    // Send image to backend
+    // Send image URL to backend to sign
     const imgUrl = await fetch('/api/signUrl', {
       method: 'POST',
       headers: {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        url: gameId + user + '.png',
-        data: data
-      })
+      body: gameId + user + '.png',
     }).then((response) => response.text());
 
-    console.log(imgUrl);
-
-const xhr = new XMLHttpRequest()
-    xhr.open('PUT', imgUrl, true)
-    xhr.onload = () => {
-      const status = xhr.status
-      if (status === 200) {
-        console.log('uploaded')
-      } else {
-        alert('WRONG!')
-      }
-    }
+    // PUT data in bucket. For some reason fetch doesn't work, but xhr does
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', imgUrl, true);
     xhr.onerror = () => {
-      alert('ERROR')
-    }
-    xhr.setRequestHeader('Content-Type', 'image/png')
-    xhr.send(data)
+      alert('There was an error uploading your image :(')
+    };
+    xhr.setRequestHeader('Content-Type', 'image/png');
+    xhr.send(data);
 
-    // PUT request in bucket
-    /*
-    const response = await fetch((imgUrl), {
-      method: 'PUT',
-      contentType: 'application/octet-stream',
-      body: data
-    });
-    console.log(response);
-
-    /*
+    // Advance the game
+    // TODO only advance game if upload is success
     const gameRef = db.collection('games').doc(gameId);
     gameRef.set({
       currentPlayerIndex: currentPlayerIndex + 1,
       inProgress: (currentPlayerIndex + 1) === players.length
-    }, { merge: true }); */
+    }, { merge: true });
   }
 
   saveDrawing() {

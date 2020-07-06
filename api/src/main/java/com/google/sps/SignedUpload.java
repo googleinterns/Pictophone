@@ -2,8 +2,6 @@ package com.google.sps;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,20 +27,9 @@ import java.util.concurrent.TimeUnit;
 public class SignedUpload {
     static WebClient webClient = WebClient.create();
 
-    @RequestMapping(value = "/api/signUrl", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    String sign(@RequestBody Map<String, Object> params) throws Exception {
-      String signedUrl = generateV4GPutObjectSignedUrl((String) params.get("url"));
-      return signedUrl;
-      // return uploadImage(signedUrl, (String) params.get("data"));
-    }
-
-    public static String uploadImage(String signedUrl, String data) {
-      String resp = webClient.put().uri(signedUrl)
-        .body(BodyInserters.fromValue(data))
-        .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE)
-        .retrieve().bodyToMono(String.class).block();
-      System.out.println(resp);
-      return resp;
+    @PostMapping("/api/signUrl")
+    String sign(@RequestBody String url) throws Exception {
+      return generateV4GPutObjectSignedUrl(url);
     }
 
     // Taken from https://cloud.google.com/storage/docs/access-control/signing-urls-with-helpers
