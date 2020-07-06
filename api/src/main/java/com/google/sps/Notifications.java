@@ -108,34 +108,35 @@ public class Notifications {
   }
 
   private static Message sendMessage(Gmail service, String userId, MimeMessage emailContent)
-      throws MessagingException, IOException {
-    Message message = createMessageWithEmail(emailContent);
-    message = service.users().messages().send(userId, message).execute();
+    throws MessagingException, IOException {
+      
+  Message message = createMessageWithEmail(emailContent);
+  message = service.users().messages().send(userId, message).execute();
 
-    System.out.println("Message id: " + message.getId());
-    System.out.println(message.toPrettyString());
-        return message;
-    }
+  System.out.println("Message id: " + message.getId());
+  System.out.println(message.toPrettyString());
+      return message;
+  }
 
-    public static void sendNotification() throws IOException, GeneralSecurityException {
-      // Build a new authorized API client service.
-      final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-      Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-              .setApplicationName(APPLICATION_NAME)
-              .build();
+  public static void sendNotification() throws IOException, GeneralSecurityException {
+    // Build a new authorized API client service.
+    final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+    Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+            .setApplicationName(APPLICATION_NAME)
+            .build();
 
-      String body = "Welcome to Pictophone! Join here: phoebeliang-step.appspot.com";
-      String subject = "Prototype Demo";
-      String from = "pictophone.noreply@gmail.com";
-      String[] to = {"pictophone.noreply@gmail.com", "anthonyodum@google.com", "phoebeliang@google.com", "tomatocat@google.com", "yueyao@google.com", };
+    String body = "Welcome to Pictophone! Join here: phoebeliang-step.appspot.com";
+    String subject = "Prototype Demo";
+    String from = "pictophone.noreply@gmail.com";
+    String[] to = {"pictophone.noreply@gmail.com", "anthonyodum@google.com", "phoebeliang@google.com", "tomatocat@google.com", "yueyao@google.com", };
 
-      try {
-        for(String email: to) {
-          MimeMessage encoded = createEmail(email, from, subject, body);
-          Message testMessage = sendMessage(service, from, encoded);
-        }
-      } catch(Exception e) {
-        System.out.println("Main Method Exception: " + e);
+    try {
+      for(String email: to) {
+        MimeMessage encoded = createEmail(email, from, subject, body);
+        Message testMessage = sendMessage(service, from, encoded);
       }
+    } catch(Exception e) {
+      System.out.println("Main Method Exception: " + e);
     }
+  }
 }
