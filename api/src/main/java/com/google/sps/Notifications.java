@@ -109,7 +109,6 @@ public class Notifications {
 
   private static Message sendMessage(Gmail service, String userId, MimeMessage emailContent)
     throws MessagingException, IOException {
-
   Message message = createMessageWithEmail(emailContent);
   message = service.users().messages().send(userId, message).execute();
 
@@ -130,8 +129,8 @@ public class Notifications {
     String from = "pictophone.noreply@gmail.com";
 
     try {
-      for(String email: to) {
-        MimeMessage encoded = createEmail(email, from, subject, body);
+      for(Email email: emails) {
+        MimeMessage encoded = createEmail(email.player.email, from, subject, body);
         Message testMessage = sendMessage(service, from, encoded);
       }
     } catch(Exception e) {
