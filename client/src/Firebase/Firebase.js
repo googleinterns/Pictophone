@@ -24,6 +24,7 @@ class Firebase {
     this.db = app.firestore();
     // For static firebase-admin utility methods
     this.firestore = app.firestore;
+    this.fieldValue = app.firestore.FieldValue;
   }
 
   // *** Auth API ***
