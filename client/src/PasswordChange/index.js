@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { compose } from 'recompose';
 
 import { withFirebase } from '../Firebase';
+import * as ROUTES from '../constants/routes';
 
 const INITIAL_STATE = {
   passwordOne: '',
@@ -8,7 +11,7 @@ const INITIAL_STATE = {
   error: null,
 };
 
-class PasswordChangeForm extends Component {
+class PasswordChangeFormBase extends Component {
   constructor(props) {
     super(props);
 
@@ -22,6 +25,7 @@ class PasswordChangeForm extends Component {
       .doPasswordUpdate(passwordOne)
       .then(() => {
         this.setState({ ...INITIAL_STATE });
+        this.props.history.push(ROUTES.DASHBOARD);
       })
       .catch(error => {
         this.setState({ error });
@@ -66,4 +70,9 @@ class PasswordChangeForm extends Component {
   }
 }
 
-export default withFirebase(PasswordChangeForm);
+const PasswordChangeForm = compose(
+  withRouter,
+  withFirebase,
+)(PasswordChangeFormBase);
+
+export default PasswordChangeForm;
