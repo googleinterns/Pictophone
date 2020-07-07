@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
-    @GetMapping("/api/users")
-    String users() {
-        return "Hello get";
-    }
+  @GetMapping("/api/users")
+  String users() {
+    return "Hello get";
+  }
 }
