@@ -44,6 +44,9 @@ class SignUpFormBase extends Component {
           );
       })
       .then(() => {
+        return this.props.firebase.doSendEmailVerification();
+      })
+      .then(() => {
         this.setState({ ...INITIAL_STATE });
         this.props.history.push(ROUTES.DASHBOARD);
       })
