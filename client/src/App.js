@@ -37,6 +37,9 @@ const App = () => (
         <Route path={ROUTES.ACCOUNT}>
           <AccountPage />
         </Route>
+        <Route path={ROUTES.PASSWORD_FORGET}>
+          <PasswordForgetPage />
+        </Route>
         <Route path='/game/:id'>
           <Canvas />
         </Route>
