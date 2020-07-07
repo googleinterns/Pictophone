@@ -38,7 +38,7 @@ public class SignedUpload {
     String bucketName = "pictophone-drawings";
 
     Credentials credentials = GoogleCredentials
-      .fromStream(new FileInputStream("../config.json"));
+      .fromStream(new FileInputStream("./config.json"));
     Storage storage = StorageOptions.newBuilder().setCredentials(credentials)
       .setProjectId(projectId).build().getService();
 
