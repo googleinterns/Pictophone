@@ -6,6 +6,7 @@ import Player from './Player.js';
 import { saveAs } from 'file-saver';
 import './literallycanvas.css';
 import Banner from './Banner';
+import { withAuthorization } from './Session';
 import { withFirebase } from './Firebase';
 import { compose } from 'recompose';
 const LC = require('literallycanvas');
@@ -156,7 +157,10 @@ class Canvas extends Component {
   }
 }
 
+const condition = authUser => !!authUser;
+
 export default compose(
+  withAuthorization(condition),
   withRouter,
   withFirebase,
 )(Canvas);

@@ -10,9 +10,8 @@ import Dashboard from './Dashboard';
 import Canvas from './Canvas';
 import SignUpPage from './SignUp';
 import SignInPage from './SignIn';
-// phoebe will implement these later. remove for now
-// import PasswordForgetPage from './PasswordForget';
-// import AccountPage from './Account';
+import PasswordForgetPage from './PasswordForget';
+import AccountPage from './Account';
 import { withAuthentication } from './Session';
 
 import * as ROUTES from './constants/routes';
@@ -34,6 +33,12 @@ const App = () => (
         </Route>
         <Route path={ROUTES.SIGN_IN}>
           <SignInPage />
+        </Route>
+        <Route path={ROUTES.ACCOUNT}>
+          <AccountPage />
+        </Route>
+        <Route path={ROUTES.PASSWORD_FORGET}>
+          <PasswordForgetPage />
         </Route>
         <Route path='/game/:id'>
           <Canvas />
