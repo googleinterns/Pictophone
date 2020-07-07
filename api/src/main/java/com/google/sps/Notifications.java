@@ -123,14 +123,12 @@ public class Notifications {
     Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
             .setApplicationName(APPLICATION_NAME)
             .build();
-
-    String body = "Welcome to Pictophone! Join here: phoebeliang-step.appspot.com";
-    String subject = "Prototype Demo";
+            
     String from = "pictophone.noreply@gmail.com";
 
     try {
       for(Email email: emails) {
-        MimeMessage encoded = createEmail(email.player.getEmail(), from, subject, body);
+        MimeMessage encoded = createEmail(email.player.getEmail(), from, email.getSubject(), email.getBody());
         Message testMessage = sendMessage(service, from, encoded);
       }
     } catch(Exception e) {

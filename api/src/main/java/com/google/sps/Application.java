@@ -25,13 +25,13 @@ import java.util.List;
 
 @SpringBootApplication
 @RestController
-@WebServlet("/notify")
-public class Application {
 
+public class Application {
+  @GetMapping("/notify")
 	public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
 
-    List<Email> emails = new ArrayList<>();
+    List<Email> emails = prepareEmail();
 
     try {
       Notifications.sendNotification(emails);
@@ -41,7 +41,7 @@ public class Application {
     }
   }
 
-  public void sendNotifications(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public List<Email> prepareEmail(HttpServletRequest request, HttpServletResponse response) throws IOException {
     GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
     String projectId = "phoebeliang-step";
     FirebaseOptions options = new FirebaseOptions.Builder()
@@ -53,23 +53,34 @@ public class Application {
     Firestore db = FirestoreClient.getFirestore();
 
     Iterable<DocumentReference> users = db.collection("users").listDocuments();
-    List<User> players = new ArrayList<>();
+    String link = request.getParameter("gameLink");
+    List<Email> emails = startGameEmail(users, link);
 
+    return emails;
+  }
+
+  public List<Email> startGameEmail(Iterable<DocumentReference> users, String gameLink) {
+    List<Email> emails = new ArrayList<>();
     for(DocumentReference user: users) {
       try {
         DocumentSnapshot docSnap = user.get().get();
 
+        //Retrieves player information
         String playerEmail = docSnap.getString("email");
         String playerName = docSnap.getString("username");
 
-        players.add(new User(playerEmail, playerName));
+        //Adding player to Email object
+        emails.add(new Email(new User(playerEmail, playerName)));
+
+        //Adds Start game message to the email object
+        emails.get(emails.size()-1).startGame(gameLink);
+
       } catch(Exception e) {
         System.out.println(e);
       }
     }
 
-    String link = request.getParameter("gameLink");
-
+    return emails;
   }
 
 	@GetMapping("/")
