@@ -29,4 +29,11 @@ public class User {
       email, username);
   }
 
+    public String getEmail() {
+      return email;
+    }
+
+    public String getName() {
+      return username;
+    }
 }
