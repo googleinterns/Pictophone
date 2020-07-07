@@ -30,15 +30,6 @@ public class Application {
   @GetMapping("/notify")
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
-
-    List<Email> emails = prepareEmail();
-
-    try {
-      Notifications.sendNotification(emails);
-    } catch(Exception e) {
-      System.out.println("Working Directory = " + System.getProperty("user.dir"));
-      System.out.println("Exception Caught Here: " + e);
-    }
   }
 
   public List<Email> prepareEmail(HttpServletRequest request, HttpServletResponse response) throws IOException {
