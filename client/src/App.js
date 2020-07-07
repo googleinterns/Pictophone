@@ -10,8 +10,9 @@ import Dashboard from './Dashboard';
 import Canvas from './Canvas';
 import SignUpPage from './SignUp';
 import SignInPage from './SignIn';
-import PasswordForgetPage from './PasswordForget';
-import AccountPage from './Account';
+// phoebe will implement these later. remove for now
+// import PasswordForgetPage from './PasswordForget';
+// import AccountPage from './Account';
 import { withAuthentication } from './Session';
 
 import * as ROUTES from './constants/routes';

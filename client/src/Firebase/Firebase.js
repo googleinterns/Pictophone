@@ -20,7 +20,10 @@ class Firebase {
     app.analytics();
 
     this.auth = app.auth();
+    // Access the database
     this.db = app.firestore();
+    // For static firebase-admin utility methods
+    this.firestore = app.firestore;
   }
 
   // *** Auth API ***

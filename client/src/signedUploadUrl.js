@@ -4,7 +4,10 @@ const bucketName = 'pictophone-drawings';
 const {Storage} = require('@google-cloud/storage');
 
 // Creates a client
-const storage = new Storage();
+const storage = new Storage({
+  projectId: 'phoebeliang-step',
+  keyFilename: '../config.json'
+});
 
 async function generateV4UploadSignedUrl(filename) {
   // These options will allow temporary uploading of the file with outgoing
