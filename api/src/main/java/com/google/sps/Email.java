@@ -14,6 +14,6 @@ public class Email {
 
   private void startGame(String gameLink) {
     subject = "You have an invitation!";
-    body = "Welcome to Pictophone!\n\n" + player.username + " has invited you to a game! Join here: " + gameLink;
+    body = "Welcome to Pictophone!\n\n" + player.getName() + " has invited you to a game! Join here: " + gameLink;
   }
 }

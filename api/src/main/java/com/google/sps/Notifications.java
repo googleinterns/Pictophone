@@ -130,7 +130,7 @@ public class Notifications {
 
     try {
       for(Email email: emails) {
-        MimeMessage encoded = createEmail(email.player.email, from, subject, body);
+        MimeMessage encoded = createEmail(email.player.getEmail(), from, subject, body);
         Message testMessage = sendMessage(service, from, encoded);
       }
     } catch(Exception e) {

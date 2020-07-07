@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import { Button } from 'react-bootstrap';
+
 import Banner from './Banner';
 import GameSelector from './GameSelector';
-import { Button } from 'react-bootstrap';
+
 import 'bootstrap/dist/css/bootstrap.css';
 import './Dashboard.css';
 
@@ -38,7 +40,7 @@ class Dashboard extends Component {
       <div className="banner-wrapper">
         <Banner />
         <div className="greeting">
-          <p>Hi, Bob! Here are your games:</p>
+          <p>Hi, Sherb! Here are your games:</p>
         </div>
         <div className="dashboard-buttons">
           <HostButton />{' '}

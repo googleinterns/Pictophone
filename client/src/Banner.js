@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { Navbar } from 'react-bootstrap';
+
+import SignOutButton from './SignOut';
+
 import 'bootstrap/dist/css/bootstrap.css';
 import './Banner.css';
 
@@ -12,7 +14,7 @@ class Banner extends Component {
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <Navbar.Text className="banner-log-out">
-            <b>sherb</b> <Link to="/">(log out)</Link>
+            <SignOutButton />
           </Navbar.Text>
         </Navbar.Collapse>
       </Navbar>

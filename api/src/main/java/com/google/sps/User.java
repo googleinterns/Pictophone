@@ -12,8 +12,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    String email;
-    String username;
+    private String email;
+    private String username;
 
     protected User() {}
 
@@ -27,5 +27,13 @@ public class User {
         return String.format(
                 "Email: %s, Username: %s",
                 email, username);
+    }
+
+    public String getEmail() {
+      return email;
+    }
+
+    public String getName() {
+      return username;
     }
 }

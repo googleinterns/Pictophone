@@ -42,7 +42,6 @@ public class Application {
   }
 
   public void sendNotifications(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
     GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
     String projectId = "phoebeliang-step";
     FirebaseOptions options = new FirebaseOptions.Builder()
@@ -59,7 +58,6 @@ public class Application {
     for(DocumentReference user: users) {
       try {
         DocumentSnapshot docSnap = user.get().get();
-
 
         String playerEmail = docSnap.getString("email");
         String playerName = docSnap.getString("username");

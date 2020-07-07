@@ -1,37 +1,45 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+} from "react-router-dom";
+
+import LandingPage from './Home';
+import Dashboard from './Dashboard';
+import Canvas from './Canvas';
+import SignUpPage from './SignUp';
+import SignInPage from './SignIn';
+import PasswordForgetPage from './PasswordForget';
+import AccountPage from './Account';
+import { withAuthentication } from './Session';
+
+import * as ROUTES from './constants/routes';
+
 import './App.css';
 
-class App extends Component {
-  state = {
-    isLoading: true,
-    users: "Not this"
-  };
+const App = () => (
+  <div className="App">
+    <Router>
+      <Switch>
+        <Route exact path={ROUTES.LANDING}>
+          <LandingPage />
+        </Route>
+        <Route path={ROUTES.SIGN_UP}>
+          <SignUpPage />
+        </Route>
+        <Route exact path={ROUTES.DASHBOARD}>
+          <Dashboard />
+        </Route>
+        <Route path={ROUTES.SIGN_IN}>
+          <SignInPage />
+        </Route>
+        <Route path='/game/:id'>
+          <Canvas />
+        </Route>
+      </Switch>
+    </Router>
+  </div>
+);
 
-  async componentDidMount() {
-    const response = await fetch('api/users');
-    const body = await response.text();
-    this.setState({ users: body, isLoading: false });
-  }
-
-  render() {
-    const {users, isLoading} = this.state;
-
-    if (isLoading) {
-      return <p>Loading...</p>;
-    }
-
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <div className="App-intro">
-            <p>{users}</p>
-          </div>
-        </header>
-      </div>
-    );
-  }
-}
-
-export default App;
+export default withAuthentication(App);
