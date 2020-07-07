@@ -3,6 +3,7 @@ import { Button } from 'react-bootstrap';
 
 import Banner from './Banner';
 import GameSelector from './GameSelector';
+import { withAuthorization } from './Session';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './Dashboard.css';
@@ -55,5 +56,6 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard;
+const condition = authUser => !!authUser;
 
+export default withAuthorization(condition)(Dashboard);
