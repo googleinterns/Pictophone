@@ -6,8 +6,8 @@ import Player from './Player.js';
 import { saveAs } from 'file-saver';
 import './literallycanvas.css';
 import Banner from './Banner';
-import db from './firebase';
-import 'firebase/firestore';
+import { withFirebase } from './Firebase';
+import { compose } from 'recompose';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
@@ -31,13 +31,13 @@ class Canvas extends Component {
     // TODO: Add error handling for invalid game/nonexistent ID
     const { id } = this.props.match.params;
     // TODO fetch user from firebase auth
-    this.setState({ gameId: id, user: 'testuser2' });
+    this.setState({ gameId: id, user: 'testuser3' });
     this.fetchGame(id);
   }
 
   fetchGame(gameId) {
     // Set up listener for game data change
-    const doc = db.collection('games').doc(gameId);
+    const doc = this.props.firebase.db.collection('games').doc(gameId);
     doc.onSnapshot(docSnapshot => {
       this.updateGame(docSnapshot.data());
     }, err => {
@@ -47,10 +47,11 @@ class Canvas extends Component {
   }
 
   updateGame(game) {
-    console.log(game);
+    // Set state to new game object's state
     this.setState({ currentPlayerIndex: game.currentPlayerIndex,
       players: game.players, drawings: game.drawings,
       timeLimit: game.timeLimit, inProgress: game.inProgress });
+
     // Determine whether to display drawing
     var index = game.players.indexOf(this.state.user);
     if (game.currentPlayerIndex >= index) {
@@ -61,16 +62,45 @@ class Canvas extends Component {
     }
   }
 
-  send() {
+  async send() {
     const { players, currentPlayerIndex, user, gameId} = this.state;
+    // Don't want player to send drawing when it's not their turn
     if (players.indexOf(user) !== currentPlayerIndex) return;
+    const data = await new Promise(resolve => this.state.lc.getImage().toBlob(resolve));;
+    const url = 'https://storage.cloud.google.com/pictophone-drawings/';
 
-    // TODO: once service keys approved, actually upload the image
-    const gameRef = db.collection('games').doc(gameId);
-    gameRef.set({
-      currentPlayerIndex: currentPlayerIndex + 1,
-      inProgress: (currentPlayerIndex + 1) === players.length
-    }, { merge: true });
+    // Send image URL to backend to sign
+    // TODO add error handling
+    const imgUrl = await fetch('/api/signUrl', {
+      method: 'POST',
+      headers: {
+      'Accept': 'application/json, text/plain, */*',
+      'Content-Type': 'application/json'
+      },
+      body: gameId + user + '.png',
+    }).then((response) => response.text());
+
+    // PUT data in bucket. For some reason fetch doesn't work, but xhr does
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', imgUrl, true);
+    xhr.onerror = () => {
+      alert('There was an error uploading your image :(')
+    };
+    xhr.setRequestHeader('Content-Type', 'image/png');
+    xhr.send(data);
+    xhr.onreadystatechange = () => {
+       if (xhr.readyState === 4 && xhr.status === 200){
+          // Advance the game if the image was uploaded successfully
+          const gameRef = this.props.firebase.db.collection('games').doc(gameId);
+          gameRef.update({
+            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + user + '.png')
+          })
+          gameRef.set({
+            currentPlayerIndex: currentPlayerIndex + 1,
+            inProgress: (currentPlayerIndex + 1) === players.length
+          }, { merge: true });
+       }
+    }
   }
 
   saveDrawing() {
@@ -126,4 +156,7 @@ class Canvas extends Component {
   }
 }
 
-export default withRouter(Canvas);
+export default compose(
+  withRouter,
+  withFirebase,
+)(Canvas);
