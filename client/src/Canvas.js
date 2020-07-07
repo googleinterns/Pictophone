@@ -8,6 +8,8 @@ import './literallycanvas.css';
 import Banner from './Banner';
 import db from './firebase';
 import 'firebase/firestore';
+import { withAuthorization } from './Session';
+import { compose } from 'recompose';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
@@ -126,4 +128,9 @@ class Canvas extends Component {
   }
 }
 
-export default withRouter(Canvas);
+const condition = authUser => !!authUser;
+
+export default compose(
+  withAuthorization(condition),
+  withRouter,
+)(Canvas);
