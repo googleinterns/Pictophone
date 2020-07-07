@@ -9,7 +9,6 @@ import Banner from './Banner';
 import { withFirebase } from './Firebase';
 import { compose } from 'recompose';
 const LC = require('literallycanvas');
-// const db = this.props.firebase.db;
 
 class Canvas extends Component {
 
@@ -32,7 +31,7 @@ class Canvas extends Component {
     // TODO: Add error handling for invalid game/nonexistent ID
     const { id } = this.props.match.params;
     // TODO fetch user from firebase auth
-    this.setState({ gameId: id, user: 'testuser2' });
+    this.setState({ gameId: id, user: 'testuser3' });
     this.fetchGame(id);
   }
 
@@ -68,8 +67,10 @@ class Canvas extends Component {
     // Don't want player to send drawing when it's not their turn
     if (players.indexOf(user) !== currentPlayerIndex) return;
     const data = await new Promise(resolve => this.state.lc.getImage().toBlob(resolve));;
+    const url = 'https://storage.cloud.google.com/pictophone-drawings/';
 
     // Send image URL to backend to sign
+    // TODO add error handling
     const imgUrl = await fetch('/api/signUrl', {
       method: 'POST',
       headers: {
@@ -87,15 +88,19 @@ class Canvas extends Component {
     };
     xhr.setRequestHeader('Content-Type', 'image/png');
     xhr.send(data);
-
-    // Advance the game
-    // TODO only advance game if upload is success
-    // TODO change db to have newly uploaded image
-    const gameRef = this.props.firebase.db.collection('games').doc(gameId);
-    gameRef.set({
-      currentPlayerIndex: currentPlayerIndex + 1,
-      inProgress: (currentPlayerIndex + 1) === players.length
-    }, { merge: true });
+    xhr.onreadystatechange = () => {
+       if (xhr.readyState === 4 && xhr.status === 200){
+          // Advance the game if the image was uploaded successfully
+          const gameRef = this.props.firebase.db.collection('games').doc(gameId);
+          gameRef.update({
+            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + user + '.png')
+          })
+          gameRef.set({
+            currentPlayerIndex: currentPlayerIndex + 1,
+            inProgress: (currentPlayerIndex + 1) === players.length
+          }, { merge: true });
+       }
+    }
   }
 
   saveDrawing() {
