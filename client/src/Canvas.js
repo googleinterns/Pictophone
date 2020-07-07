@@ -6,9 +6,10 @@ import Player from './Player.js';
 import { saveAs } from 'file-saver';
 import './literallycanvas.css';
 import Banner from './Banner';
-import db from './firebase';
-import 'firebase/firestore';
+import { withFirebase } from './Firebase';
+import { compose } from 'recompose';
 const LC = require('literallycanvas');
+// const db = this.props.firebase.db;
 
 class Canvas extends Component {
 
@@ -37,7 +38,7 @@ class Canvas extends Component {
 
   fetchGame(gameId) {
     // Set up listener for game data change
-    const doc = db.collection('games').doc(gameId);
+    const doc = this.props.firebase.db.collection('games').doc(gameId);
     doc.onSnapshot(docSnapshot => {
       this.updateGame(docSnapshot.data());
     }, err => {
@@ -90,7 +91,7 @@ class Canvas extends Component {
     // Advance the game
     // TODO only advance game if upload is success
     // TODO change db to have newly uploaded image
-    const gameRef = db.collection('games').doc(gameId);
+    const gameRef = this.props.firebase.db.collection('games').doc(gameId);
     gameRef.set({
       currentPlayerIndex: currentPlayerIndex + 1,
       inProgress: (currentPlayerIndex + 1) === players.length
@@ -150,4 +151,7 @@ class Canvas extends Component {
   }
 }
 
-export default withRouter(Canvas);
+export default compose(
+  withRouter,
+  withFirebase,
+)(Canvas);
