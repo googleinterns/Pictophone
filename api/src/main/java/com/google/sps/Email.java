@@ -17,7 +17,7 @@ public class Email {
       gameLink = "Link not found";
     }
     subject = "You have an invitation!";
-    body = "Welcome to Pictophone!\n\n" + player.getName() + " has invited you to a game! Join here: " + gameLink;
+    body = "Welcome to Pictophone!\n\n" + player.getName() + " has invited you to a game! Join here: http://phoebeliang-step.appspot.com/game/" + gameID;
   }
 
   public String getBody(){

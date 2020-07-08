@@ -15,8 +15,6 @@ public class User {
     private String email;
     private String username;
 
-    protected User() {}
-
     public User(String email, String username) {
         this.email = email;
         this.username = username;
