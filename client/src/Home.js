@@ -13,6 +13,7 @@ class Home extends Component {
         <div className="home-title">PICTOPHONE</div>
         <div className="login-button">
           <Link to="/signup"><Button variant="info" size="lg" id="loginButton">Sign Up</Button></Link>
+          {' '}
           <Link to="/signin"><Button variant="info" size="lg" id="loginButton">Sign In</Button></Link>
         </div>
       </div>
