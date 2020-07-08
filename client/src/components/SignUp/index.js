@@ -3,7 +3,7 @@ import { Link, withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
 
 import { withFirebase } from '../Firebase';
-import * as ROUTES from '../constants/routes';
+import * as ROUTES from '../../constants/routes';
 
 const SignUpPage = () => (
   <div>
