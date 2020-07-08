@@ -5,7 +5,6 @@ import { compose } from 'recompose';
 import { SignUpLink } from '../SignUp';
 import { PasswordForgetLink } from '../PasswordForget';
 import { withFirebase } from '../Firebase';
-import * as ROUTES from '../../constants/routes';
 
 const SignInPage = () => (
   <div>
@@ -34,9 +33,9 @@ class SignInFormBase extends Component {
 
     this.props.firebase
       .doSignInWithEmailAndPassword(email, password)
-      .then(() => {
+      .then(authUser => {
         this.setState({ ...INITIAL_STATE });
-        this.props.history.push(ROUTES.DASHBOARD);
+        this.props.history.push(`/dashboard/${authUser.user.uid}`);
       })
       .catch(error => {
         this.setState({ error });

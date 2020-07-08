@@ -8,7 +8,6 @@ import {
   withAuthorization,
   withEmailVerification,
 } from '../Session';
-import * as ROUTES from '../../constants/routes';
 
 const AccountPage = () => (
   <AuthUserContext.Consumer>
@@ -16,7 +15,7 @@ const AccountPage = () => (
       <div>
         <h1>Account: {authUser.email}</h1>
         <PasswordChangeForm />
-        <button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></button>
+        <button type="button"><Link to={`/dashboard/${authUser.uid}`}>Back to dashboard</Link></button>
       </div>
     )}
   </AuthUserContext.Consumer>
