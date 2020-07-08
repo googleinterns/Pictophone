@@ -14,6 +14,7 @@
     "firebase": "^7.15.5",
     "firebase-admin": "^8.12.1",
     "jquery": "^3.5.1",
+    "jszip": "^3.5.0",
     "literallycanvas": "^0.5.2",
     "popper.js": "^1.16.1",
     "query-string": "^6.13.1",

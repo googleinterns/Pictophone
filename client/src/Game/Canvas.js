@@ -1,21 +1,15 @@
 import React, { Component } from 'react';
-import './App.css';
-import { Link } from 'react-router-dom';
+import '../App.css';
 import { withRouter } from 'react-router';
 import Player from './Player.js';
 import { saveAs } from 'file-saver';
 import './literallycanvas.css';
-import Banner from './Banner';
-import { withAuthorization } from './Session';
-import { withFirebase } from './Firebase';
+import { withAuthorization, withEmailVerification } from '../Session';
+import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
-
-  state = {
-    isLoading: true,
-  };
 
   constructor(props) {
     super(props);
@@ -120,11 +114,6 @@ class Canvas extends Component {
     const { players, drawings, user, gameId } = this.state;
 
     return (
-      <div className="Canvas">
-        <Banner />
-        <Link to="/"><button>Back to home</button></Link>
-        <h3>GAME { gameId }</h3>
-
         <div className="player-list">
           {/*
             Dynamically render the player chain with a name list. The 'status'
@@ -163,4 +152,5 @@ export default compose(
   withAuthorization(condition),
   withRouter,
   withFirebase,
+  withEmailVerification,
 )(Canvas);
