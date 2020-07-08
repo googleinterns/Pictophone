@@ -45,7 +45,7 @@ class Canvas extends Component {
     // Set state to new game object's state
     this.setState({ currentPlayerIndex: game.currentPlayerIndex,
       players: game.players, drawings: game.drawings,
-      timeLimit: game.timeLimit, inProgress: game.inProgress });
+      timeLimit: game.timeLimit });
 
     // Determine whether to display drawing
     var index = game.players.indexOf(this.state.user);
