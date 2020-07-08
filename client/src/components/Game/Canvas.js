@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import '../App.css';
+import '../App/App.css';
 import { withRouter } from 'react-router';
 import Player from './Player.js';
 import { saveAs } from 'file-saver';
@@ -114,6 +114,7 @@ class Canvas extends Component {
     const { players, drawings, user, gameId } = this.state;
 
     return (
+      <div>
         <div className="player-list">
           {/*
             Dynamically render the player chain with a name list. The 'status'
@@ -140,7 +141,6 @@ class Canvas extends Component {
             {this.state.sent && <p className="send-drawing">Drawing sent!</p>}
           </div>
         </div>
-
       </div>
     );
   }

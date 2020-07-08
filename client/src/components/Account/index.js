@@ -8,7 +8,7 @@ import {
   withAuthorization,
   withEmailVerification,
 } from '../Session';
-import * as ROUTES from '../constants/routes';
+import * as ROUTES from '../../constants/routes';
 
 const AccountPage = () => (
   <AuthUserContext.Consumer>

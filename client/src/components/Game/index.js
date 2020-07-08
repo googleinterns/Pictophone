@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import '../App.css';
+import '../App/App.css';
 import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import Banner from '../Banner';
-import { withAuthorization, withEmailVerification } from '../Session';;
+import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
-import * as ROUTES from '../constants/routes';
+import * as ROUTES from '../../constants/routes';
+import Endgame from './Endgame';
+import Canvas from './Canvas';
 
 class Game extends Component {
 
