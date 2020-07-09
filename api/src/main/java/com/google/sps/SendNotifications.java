@@ -10,10 +10,13 @@ import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.api.services.gmail.model.Message;
+import com.google.api.core.ApiFuture;
 import com.google.api.services.gmail.Gmail;
 
 import java.io.ByteArrayOutputStream;
@@ -22,6 +25,7 @@ import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -53,28 +57,32 @@ public class SendNotifications {
     List<Email> emails = new ArrayList<>();
 
     DocumentReference game = db.collection("games").document(gameID);
-    CollectionReference players = db.collection("users");
+
     try {
       DocumentSnapshot gameDocSnap = game.get().get();
-      System.out.println("Is this the error?...");
       List<String> playerNames = (List<String>) gameDocSnap.get("players");
-      System.out.println(playerNames);
 
       for(String player: playerNames) {
+        ApiFuture<QuerySnapshot> futurePlayers = db.collection("users").whereEqualTo("username", player).get();
+        List<QueryDocumentSnapshot> usersDocSnap = futurePlayers.get().getDocuments();
 
-        DocumentSnapshot usersDocSnap = players.document(player).get().get();
-
-        //Retrieves player information
-        String playerEmail = usersDocSnap.getString("email");
-        String playerName = usersDocSnap.getString("username");
+        // Retrieves player information
+        Map<String,Object> playerInfo = usersDocSnap.get(0).getData();
+        String playerEmail = (String) playerInfo.get("email");
+        String playerName = (String) playerInfo.get("username");
 
         System.out.println(playerEmail);
 
-        //Adding player to Email object
+        // Adding player to Email object
         emails.add(new Email(new User(playerEmail, playerName)));
 
-        //Adds Start game message to the email object
-        emails.get(emails.size()-1).playerTurn(gameID);
+        // Adds Start game message to the email object
+        if(emails.isEmpty()) {
+          System.out.println("No emails to send!");
+          System.exit(0);
+        } else {
+          emails.get(emails.size()-1).playerTurn(gameID);
+        }
       }
     } catch (Exception e) {
       System.out.println(e);
@@ -85,20 +93,14 @@ public class SendNotifications {
 
   @GetMapping("/notifyTurn")
   public void playerTurnEmail() throws IOException {
-
-    System.out.println("Working...");
-
     List<Email> emails = gatherRecipients();
     final String FROM = "pictophone.noreply@gmail.com";
 
-    System.out.println("recipients gathered...: " + emails);
     try{
       Gmail service = ServiceCreation.createService();
 
-      System.out.println(service);
       for(Email email: emails) {
-        System.out.println("Sending email..: " + email);
-        MimeMessage encoded = createEmail(email.player.getEmail(), FROM, email.getSubject(), email.getBody());
+        MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
         Message testMessage = sendMessage(service, FROM, encoded);
       }
     } catch(Exception e) {
@@ -110,21 +112,17 @@ public class SendNotifications {
   //***********************HELPER METHODS**********************************
 
   private static MimeMessage createEmail(String to, String from, String subject, String bodyText)
-      throws MessagingException {
-        System.out.println("create");
+    throws MessagingException {
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
 
     MimeMessage email = new MimeMessage(session);
-
-    System.out.println("session");
 
     email.setFrom(new InternetAddress(from));
     email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
     email.setSubject(subject);
     email.setText(bodyText);
 
-    System.out.println("Email Created: " + email.toString());
     return email;
   }
 

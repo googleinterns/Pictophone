@@ -2,12 +2,12 @@ package com.google.sps;
 
 public class Email {
 
- User player;
+ private final User player;
  private String subject;
  private String body;
 
-  public Email(User p) {
-    p = player;
+  public Email(User player) {
+    this.player = player;
     subject = "Subject";
     body = "body";
   }
@@ -28,5 +28,10 @@ public class Email {
 
   public String getSubject(){
     return subject;
+  }
+
+  public String getEmail(){
+
+    return player.getEmail();
   }
 }
