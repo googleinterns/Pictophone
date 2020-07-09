@@ -12,8 +12,6 @@ public class Application {
 	public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
 
-    //List<Email> emails = prepareEmail();
-
     try {
       ServiceCreation.createService();
     } catch(Exception e) {
@@ -26,5 +24,4 @@ public class Application {
 	public String hello() {
 		return "Hello world!";
 	}
-
 }
