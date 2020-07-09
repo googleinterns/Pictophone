@@ -14,6 +14,7 @@ class GameSelector extends Component {
     this.state = {
       loading: false,
       games: [],
+      currentUser: '',
     };
   }
 
@@ -31,14 +32,11 @@ class GameSelector extends Component {
             .game(game)
             .onSnapshot(snapshot => {
               games.push({ ...snapshot.data(), gameId: snapshot.id });
-              this.setState({games});
+              this.setState({ games });
             })
         );
 
-          this.setState({
-            loading: false,
-          });
-
+        this.setState({ loading: false, currentUser: snapshot.data().username });
       });
   }
 
@@ -52,20 +50,30 @@ class GameSelector extends Component {
     return (
       <div>
         {loading && <div>Loading...</div>}
-        {games && (
-          <Game game={games} />
-        )}
+        {games.map(game => (
+          <Game key={game.gameId} game={game} />
+        ))}
       </div>
     );
   }
 }
 
 const Game = (props) => (
-  <Card border="dark" style={{ width: '97.5'}}>
-    <Link to={`/game/`}>
-      <Card.Header>started by <b>{props.game[0] && props.game[0].players[0]}</b> on <b>06 June 2020</b></Card.Header>
-    </Link>
-  </Card>
+  <div className="game-card">
+    {props.game && (
+      <Card border="dark" style={{ width: '97.5%'}}>
+        <Link to={`/game/${props.game.gameId}`}>
+          <Card.Header>started by <b>{props.game.players[0]}</b> on <b>{props.game.startDate.toDate().toDateString()}</b></Card.Header>
+          <Card.Body>
+            <Card.Title>{props.game.gameName.toUpperCase()}</Card.Title>
+            <Card.Text>
+              currently <b>{props.game.players[props.game.currentPlayerIndex]}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
+            </Card.Text>
+          </Card.Body>
+        </Link>
+      </Card>
+    )}
+  </div>
 )
 
 export default withFirebase(GameSelector);
