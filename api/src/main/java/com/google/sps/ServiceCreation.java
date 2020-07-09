@@ -75,6 +75,8 @@ public class ServiceCreation {
             .setApplicationName(APPLICATION_NAME)
             .build();
 
+            System.out.println("Service Created..: " + service);
+
     return service;
   }
 }

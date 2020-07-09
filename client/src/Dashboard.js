@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
+import { compose } from 'recompose';
 
 import Banner from './Banner';
 import GameSelector from './GameSelector';
+import { withAuthorization, withEmailVerification } from './Session';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './Dashboard.css';
@@ -55,5 +57,9 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard;
+const condition = authUser => !!authUser;
 
+export default compose(
+  withEmailVerification,
+  withAuthorization(condition),
+)(Dashboard);

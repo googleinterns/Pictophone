@@ -2,27 +2,16 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
 
-import { SignUpLink } from '../SignUp';
-import { PasswordForgetLink } from '../PasswordForget';
 import { withFirebase } from '../Firebase';
 import * as ROUTES from '../constants/routes';
 
-const SignInPage = () => (
-  <div>
-    <h1>SignIn</h1>
-    <SignInForm />
-    <PasswordForgetLink />
-    <SignUpLink />
-  </div>
-);
-
 const INITIAL_STATE = {
-  email: '',
-  password: '',
+  passwordOne: '',
+  passwordTwo: '',
   error: null,
 };
 
-class SignInFormBase extends Component {
+class PasswordChangeFormBase extends Component {
   constructor(props) {
     super(props);
 
@@ -30,10 +19,10 @@ class SignInFormBase extends Component {
   }
 
   onSubmit = event => {
-    const { email, password } = this.state;
+    const { passwordOne } = this.state;
 
     this.props.firebase
-      .doSignInWithEmailAndPassword(email, password)
+      .doPasswordUpdate(passwordOne)
       .then(() => {
         this.setState({ ...INITIAL_STATE });
         this.props.history.push(ROUTES.DASHBOARD);
@@ -50,28 +39,29 @@ class SignInFormBase extends Component {
   };
 
   render() {
-    const { email, password, error } = this.state;
+    const { passwordOne, passwordTwo, error } = this.state;
 
-    const isInvalid = password === '' || email === '';
+    const isInvalid =
+      passwordOne !== passwordTwo || passwordOne === '';
 
     return (
       <form onSubmit={this.onSubmit}>
         <input
-          name="email"
-          value={email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          name="password"
-          value={password}
+          name="passwordOne"
+          value={passwordOne}
           onChange={this.onChange}
           type="password"
-          placeholder="Password"
+          placeholder="New Password"
+        />
+        <input
+          name="passwordTwo"
+          value={passwordTwo}
+          onChange={this.onChange}
+          type="password"
+          placeholder="Confirm New Password"
         />
         <button disabled={isInvalid} type="submit">
-          Sign In
+          Reset My Password
         </button>
 
         {error && <p>{error.message}</p>}
@@ -80,11 +70,9 @@ class SignInFormBase extends Component {
   }
 }
 
-const SignInForm = compose(
+const PasswordChangeForm = compose(
   withRouter,
   withFirebase,
-)(SignInFormBase);
+)(PasswordChangeFormBase);
 
-export default SignInPage;
-
-export { SignInForm };
+export default PasswordChangeForm;
