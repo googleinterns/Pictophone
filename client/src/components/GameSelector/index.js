@@ -1,24 +1,70 @@
 import React, { Component } from 'react';
 import { Card } from 'react-bootstrap';
 import { Link } from "react-router-dom";
+
+import { withFirebase } from '../Firebase';
+
 import 'bootstrap/dist/css/bootstrap.css';
 import './GameSelector.css';
 
 class GameSelector extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      loading: false,
+      games: [],
+    };
+  }
+
+  componentDidMount() {
+    this.setState({ loading: true });
+
+    this.unsubscribe = this.props.firebase
+      .user(this.props.uid)
+      .onSnapshot(snapshot => {
+        let gamesList = snapshot.data().games;
+        let games = [];
+
+        gamesList.forEach(game =>
+          this.props.firebase
+            .game(game)
+            .onSnapshot(snapshot => {
+              games.push({ ...snapshot.data(), gameId: snapshot.id })
+            }),
+        );
+
+        this.setState({
+          games,
+          loading: false,
+        });
+      });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
   render() {
+    const { games, loading } = this.state;
+
     return (
-      <Card border="dark" style={{ width: '97.5%'}}>
-        <Link to={`/game/${this.props.id}`}>
-          <Card.Header>started by <b>marshall</b> on <b>06 June 2020</b></Card.Header>
-          <Card.Body>
-            <Card.Title>GAME 1</Card.Title>
-            <Card.Text>currently <b>sherb's</b> turn (3/7)</Card.Text>
-            <Card.Text><b>3</b> players to go before your turn!</Card.Text>
-          </Card.Body>
-        </Link>
-      </Card>
+      <div>
+        {loading && <div>Loading...</div>}
+        {games !== undefined && (
+          <Game game={games} />
+        )}
+      </div>
     );
   }
 }
 
-export default GameSelector;
+const Game = (props) => (
+  <Card border="dark" style={{ width: '97.5'}}>
+    <Link to={`/game/`}>
+      <Card.Header key={props.game[0]}>started by <b>{props.game[0]}</b> on <b>06 June 2020</b></Card.Header>
+    </Link>
+  </Card>
+)
+
+export default withFirebase(GameSelector);

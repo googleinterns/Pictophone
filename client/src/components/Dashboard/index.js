@@ -4,7 +4,7 @@ import { compose } from 'recompose';
 
 import Banner from '../Banner';
 import GameSelector from '../GameSelector';
-import { withAuthorization, withEmailVerification } from '../Session';
+import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
 import { withFirebase } from '../Firebase';
 
 import 'bootstrap/dist/css/bootstrap.css';
@@ -67,8 +67,6 @@ class Dashboard extends Component {
   }
 
   render() {
-    // Hard coded for now, these games would be taken from the database
-    const games = ['oo0j05CCUJNqQxSFSNEI'];
     const { user, loading } = this.state;
 
     return (
@@ -86,7 +84,11 @@ class Dashboard extends Component {
               <RandomButton />
             </div>
             <div className="games-list">
-              <GameSelector id={games[0]}/>
+              <AuthUserContext.Consumer>
+                {authUser =>
+                  <GameSelector uid={authUser.uid} />
+                }
+              </AuthUserContext.Consumer>
             </div>
           </div>
         )}

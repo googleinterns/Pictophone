@@ -78,6 +78,12 @@ class Firebase {
   user = uid => this.db.doc(`users/${uid}`);
 
   users = () => this.db.collection('users');
+
+  // *** Game API ***
+
+  game = gameId => this.db.doc(`games/${gameId}`);
+
+  games = () => this.db.collection('games');
 }
 
 export default Firebase;
