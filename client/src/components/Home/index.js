@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 
-import 'bootstrap/dist/css/bootstrap.css';
+import '../../../node_modules/bootstrap/dist/css/bootstrap.css';
 import './Home.css';
-// import gen from './signedUploadUrl';
 
 class Home extends Component {
   render() {

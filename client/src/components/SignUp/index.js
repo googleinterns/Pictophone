@@ -3,7 +3,7 @@ import { Link, withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
 
 import { withFirebase } from '../Firebase';
-import * as ROUTES from '../constants/routes';
+import * as ROUTES from '../../constants/routes';
 
 const SignUpPage = () => (
   <div>
@@ -39,6 +39,7 @@ class SignUpFormBase extends Component {
           .set({
             username,
             email,
+            gamesList: [],
           },
           { merge: true },
           );
@@ -83,7 +84,7 @@ class SignUpFormBase extends Component {
           value={username}
           onChange={this.onChange}
           type="text"
-          placeholder="Full Name"
+          placeholder="Username"
         />
         <input
           name="email"

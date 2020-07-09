@@ -1,0 +1,1 @@
+var JSZip = require('jszip');

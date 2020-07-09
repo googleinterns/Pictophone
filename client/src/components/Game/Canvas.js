@@ -1,21 +1,15 @@
 import React, { Component } from 'react';
-import './App.css';
-import { Link } from 'react-router-dom';
+import '../App/App.css';
 import { withRouter } from 'react-router';
 import Player from './Player.js';
 import { saveAs } from 'file-saver';
 import './literallycanvas.css';
-import Banner from './Banner';
-import { withAuthorization, withEmailVerification } from './Session';
-import { withFirebase } from './Firebase';
+import { withAuthorization, withEmailVerification } from '../Session';
+import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
-
-  state = {
-    isLoading: true,
-  };
 
   constructor(props) {
     super(props);
@@ -51,7 +45,7 @@ class Canvas extends Component {
     // Set state to new game object's state
     this.setState({ currentPlayerIndex: game.currentPlayerIndex,
       players: game.players, drawings: game.drawings,
-      timeLimit: game.timeLimit, inProgress: game.inProgress });
+      timeLimit: game.timeLimit });
 
     // Determine whether to display drawing
     var index = game.players.indexOf(this.state.user);
@@ -123,11 +117,7 @@ class Canvas extends Component {
     const { players, drawings, user, gameId } = this.state;
 
     return (
-      <div className="Canvas">
-        <Banner />
-        <Link to="/"><button>Back to home</button></Link>
-        <h3>GAME { gameId }</h3>
-
+      <div>
         <div className="player-list">
           {/*
             Dynamically render the player chain with a name list. The 'status'
@@ -154,7 +144,6 @@ class Canvas extends Component {
             {this.state.sent && <p className="send-drawing">Drawing sent!</p>}
           </div>
         </div>
-
       </div>
     );
   }
