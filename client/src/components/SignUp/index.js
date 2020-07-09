@@ -39,6 +39,7 @@ class SignUpFormBase extends Component {
           .set({
             username,
             email,
+            gamesList: [],
           },
           { merge: true },
           );
