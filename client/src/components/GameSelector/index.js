@@ -30,14 +30,15 @@ class GameSelector extends Component {
           this.props.firebase
             .game(game)
             .onSnapshot(snapshot => {
-              games.push({ ...snapshot.data(), gameId: snapshot.id })
-            }),
+              games.push({ ...snapshot.data(), gameId: snapshot.id });
+              this.setState({games});
+            })
         );
 
-        this.setState({
-          games,
-          loading: false,
-        });
+          this.setState({
+            loading: false,
+          });
+
       });
   }
 
@@ -51,7 +52,7 @@ class GameSelector extends Component {
     return (
       <div>
         {loading && <div>Loading...</div>}
-        {games !== undefined && (
+        {games && (
           <Game game={games} />
         )}
       </div>
@@ -62,7 +63,7 @@ class GameSelector extends Component {
 const Game = (props) => (
   <Card border="dark" style={{ width: '97.5'}}>
     <Link to={`/game/`}>
-      <Card.Header key={props.game[0]}>started by <b>{props.game[0]}</b> on <b>06 June 2020</b></Card.Header>
+      <Card.Header>started by <b>{props.game[0] && props.game[0].players[0]}</b> on <b>06 June 2020</b></Card.Header>
     </Link>
   </Card>
 )
