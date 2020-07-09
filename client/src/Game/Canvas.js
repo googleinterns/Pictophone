@@ -23,7 +23,6 @@ class Canvas extends Component {
   }
 
   async componentDidMount() {
-    // TODO: Add error handling for invalid game/nonexistent ID
     const { id } = this.props.match.params;
     // TODO fetch user from firebase auth
     this.setState({ gameId: id, user: 'testuser3' });
@@ -66,7 +65,7 @@ class Canvas extends Component {
 
     // Send image URL to backend to sign
     // TODO add error handling
-    const imgUrl = await fetch('/api/signUrl', {
+    const imgUrl = await fetch('/api/signUpload', {
       method: 'POST',
       headers: {
       'Accept': 'application/json, text/plain, */*',
@@ -111,9 +110,10 @@ class Canvas extends Component {
   }
 
   render() {
-    const { players, drawings, user, gameId } = this.state;
+    const { players, drawings, user } = this.state;
 
     return (
+      <div className="Canvas">
         <div className="player-list">
           {/*
             Dynamically render the player chain with a name list. The 'status'

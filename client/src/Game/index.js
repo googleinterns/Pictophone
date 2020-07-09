@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
+import { withFirebase } from '../Firebase';
 import '../App.css';
 import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import Banner from '../Banner';
-import { withAuthorization, withEmailVerification } from '../Session';;
-import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
+import Canvas from './Canvas';
+import Endgame from './Endgame';
 import * as ROUTES from '../constants/routes';
+import { withAuthorization, withEmailVerification } from '../Session';;
 
 class Game extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {};
 
     this.fetchGame = this.fetchGame.bind(this);
     this.updateGame = this.updateGame.bind(this);
@@ -20,7 +23,7 @@ class Game extends Component {
   async componentDidMount() {
     // TODO: Add error handling for invalid game/nonexistent ID
     const { id } = this.props.match.params;
-    // TODO fetch user from firebase auth
+    console.log(id);
     this.setState({ gameId: id });
     this.fetchGame(id);
   }
@@ -44,11 +47,11 @@ class Game extends Component {
     const { gameId, inProgress } = this.state;
 
     return (
-      <div className="Canvas">
+      <div className="Game">
         <Banner />
         <Link to={ROUTES.DASHBOARD}><button>Back to home</button></Link>
         <h3>GAME { gameId }</h3>
-        {inProgress? <Endgame /> : <Canvas />}
+        {inProgress ? <Canvas /> : <Endgame />}
       </div>
     );
   }
