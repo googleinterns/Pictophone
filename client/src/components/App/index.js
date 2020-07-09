@@ -5,16 +5,16 @@ import {
   Switch,
 } from "react-router-dom";
 
-import LandingPage from './Home';
-import Dashboard from './Dashboard';
-import Canvas from './Canvas';
-import SignUpPage from './SignUp';
-import SignInPage from './SignIn';
-import PasswordForgetPage from './PasswordForget';
-import AccountPage from './Account';
-import { withAuthentication } from './Session';
+import LandingPage from '../Home';
+import Dashboard from '../Dashboard';
+import Game from '../Game';
+import SignUpPage from '../SignUp';
+import SignInPage from '../SignIn';
+import PasswordForgetPage from '../PasswordForget';
+import AccountPage from '../Account';
+import { withAuthentication } from '../Session';
 
-import * as ROUTES from './constants/routes';
+import * as ROUTES from '../../constants/routes';
 
 import './App.css';
 
@@ -34,8 +34,14 @@ const App = () => (
         <Route path={ROUTES.SIGN_IN}>
           <SignInPage />
         </Route>
+        <Route path={ROUTES.ACCOUNT}>
+          <AccountPage />
+        </Route>
+        <Route path={ROUTES.PASSWORD_FORGET}>
+          <PasswordForgetPage />
+        </Route>
         <Route path='/game/:id'>
-          <Canvas />
+          <Game />
         </Route>
       </Switch>
     </Router>
