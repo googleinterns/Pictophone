@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,7 +70,7 @@ public class SendNotifications {
         // Adding player to Email object
         if (emailType.equalsIgnoreCase("start")) {
           emails.add(Email.startGameEmail(gameID, new User(playerEmail, playerName)));
-        } else if (emailType.equalsIgnoreCase("end")) {
+        } else if (emailType.equalsIgnoreCase("end") || emailType.equalsIgnoreCase("turn")) {
           emails.add(Email.endGameEmail(new User(playerEmail, playerName)));
         }
 
@@ -115,7 +116,8 @@ public class SendNotifications {
   }
 
   @GetMapping("/notify")
-  public void sendEmail(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void sendEmail(HttpServletRequest request, HttpServletResponse response)
+      throws IOException, InterruptedException, ExecutionException {
 
     if (!firebaseInitialized) {
       GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
@@ -129,16 +131,21 @@ public class SendNotifications {
     Firestore db = FirestoreClient.getFirestore();
 
     String emailType = request.getParameter("emailType");
+    String gameID = request.getParameter("gameID");
     final String FROM = "pictophone.noreply@gmail.com";
     URL url = new URL("https://s.yimg.com/uu/api/res/1.2/DdytqdFTgtQuxVrHLDdmjQ--~B/aD03MTY7dz0xMDgwO3NtPTE7YXBwaWQ9eXRhY2h5b24-/https://media-mbst-pub-ue1.s3.amazonaws.com/creatr-uploaded-images/2019-11/7b5b5330-112b-11ea-a77f-7c019be7ecae");
 
-    if (emailType.equalsIgnoreCase("start") || emailType.equalsIgnoreCase("end")) {
+    DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
+    int amtOfPlayers = ((List<String>) docSnap.get("players")).size();
+    int currentPlayer = (int) ((long) docSnap.get("currentPlayerIndex"));
+
+    if (emailType.equalsIgnoreCase("start") || emailType.equalsIgnoreCase("end") || (currentPlayer+1) >= amtOfPlayers) {
       List<Email> emails = gatherRecipients(request, response, db);
 
       try {
         Gmail service = ServiceCreation.createService();
 
-        if(emailType.equalsIgnoreCase("end")) {
+        if(emailType.equalsIgnoreCase("end") || emailType.equalsIgnoreCase("turn")) {
           for (Email email : emails) {
             MimeMessage encoded = createEmailWithAttachment(email.getEmail(), FROM, email.getSubject(), email.getBody(), url);
             Message testMessage = sendMessage(service, FROM, encoded);
