@@ -15,8 +15,8 @@ class Banner extends Component {
         <Navbar.Brand bsPrefix="banner-title">PICTOPHONE</Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
-          <Nav.Link>
-            <Link to={ROUTES.ACCOUNT}>Account</Link>
+          <Nav.Link as={Link} to={ROUTES.ACCOUNT}>
+            Account
           </Nav.Link>
           <Navbar.Text className="banner-log-out">
             <SignOutButton />

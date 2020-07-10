@@ -23,17 +23,16 @@ class Canvas extends Component {
   }
 
   async componentDidMount() {
-    // TODO: Add error handling for invalid game/nonexistent ID
     const { id } = this.props.match.params;
     // TODO fetch user from firebase auth
-    this.setState({ gameId: id, user: 'testuser3' });
+    this.setState({ gameId: id, user: 'testuser1' });
     this.fetchGame(id);
   }
 
   fetchGame(gameId) {
     // Set up listener for game data change
-    const doc = this.props.firebase.db.collection('games').doc(gameId);
-    doc.onSnapshot(docSnapshot => {
+    const game = this.props.firebase.game(gameId);
+    game.onSnapshot(docSnapshot => {
       this.updateGame(docSnapshot.data());
     }, err => {
       console.log(`Encountered error: ${err}`);
@@ -66,7 +65,7 @@ class Canvas extends Component {
 
     // Send image URL to backend to sign
     // TODO add error handling
-    const imgUrl = await fetch('/api/signUrl', {
+    const imgUrl = await fetch('/api/signUpload', {
       method: 'POST',
       headers: {
       'Accept': 'application/json, text/plain, */*',
@@ -75,7 +74,7 @@ class Canvas extends Component {
       body: gameId + user + '.png',
     }).then((response) => response.text());
 
-    //Send information for email
+    // Send information for email
     fetch('/notifyTurn?gameID=' + gameId)
 
     // PUT data in bucket. For some reason fetch doesn't work, but xhr does
@@ -89,7 +88,7 @@ class Canvas extends Component {
     xhr.onreadystatechange = () => {
        if (xhr.readyState === 4 && xhr.status === 200){
           // Advance the game if the image was uploaded successfully
-          const gameRef = this.props.firebase.db.collection('games').doc(gameId);
+          const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
             drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + user + '.png')
           })
@@ -114,7 +113,9 @@ class Canvas extends Component {
   }
 
   render() {
-    const { players, drawings, user, gameId } = this.state;
+    const { players, drawings, user,
+      currentPlayerIndex, display, sent } = this.state;
+    const userIndex = players.indexOf(user);
 
     return (
       <div>
@@ -125,7 +126,7 @@ class Canvas extends Component {
             Renders an arrow after the name, if they are not the final player.
           */}
           {players.map((name, index) => (<span className="player-list">
-            <Player name={name} status={index - this.state.currentPlayerIndex} />
+            <Player name={name} status={index - currentPlayerIndex} />
             {(index !== players.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
         </div>
@@ -133,15 +134,22 @@ class Canvas extends Component {
         <h4>Draw something based on the left image!</h4>
         <div className="img-displays">
           <div className="prev-img">
-            {/* TODO: add error checking for first player */}
-            {this.state.display ? <img src={drawings[players.indexOf(user) - 1]} alt="previous drawing" />
-            : <p>It is not your turn yet. Please sit tight to receive the image!</p> }
+            { // Check whether or not to display the previous image.
+              (() => {
+                if (userIndex === 0) {
+                 return <p>Draw an image to send to the next person!</p>
+                } else if (display) {
+                  return <img src={drawings[players.indexOf(user) - 1]} alt="previous drawing" />
+                } else {
+                  return <p>It is not your turn yet. Please sit tight to receive the image!</p>
+              }})()
+            }
           </div>
           <div className="lc-container">
             <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
             <button onClick={this.saveDrawing}>Download drawing</button>
-            {!this.state.sent && <button className="send-drawing" onClick={this.send}>Send</button>}
-            {this.state.sent && <p className="send-drawing">Drawing sent!</p>}
+            {sent ? <p className="send-drawing">Drawing sent!</p>
+              : <button className="send-drawing" onClick={this.send}>Send</button>}
           </div>
         </div>
       </div>

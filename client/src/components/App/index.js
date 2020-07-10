@@ -12,7 +12,7 @@ import SignUpPage from '../SignUp';
 import SignInPage from '../SignIn';
 import PasswordForgetPage from '../PasswordForget';
 import AccountPage from '../Account';
-import { withAuthentication } from '../Session';
+import { withAuthentication, AuthUserContext } from '../Session';
 
 import * as ROUTES from '../../constants/routes';
 
@@ -29,7 +29,11 @@ const App = () => (
           <SignUpPage />
         </Route>
         <Route exact path={ROUTES.DASHBOARD}>
-          <Dashboard />
+          <AuthUserContext.Consumer>
+            {authUser =>
+              <Dashboard authUser={authUser} />
+            }
+          </AuthUserContext.Consumer>
         </Route>
         <Route path={ROUTES.SIGN_IN}>
           <SignInPage />
