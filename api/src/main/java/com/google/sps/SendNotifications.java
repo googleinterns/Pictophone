@@ -21,13 +21,18 @@ import com.google.api.services.gmail.Gmail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.URLDataSource;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.*;
 
@@ -41,7 +46,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class SendNotifications {
   boolean firebaseInitialized = false;
 
-  public List<Email> gatherRecipients(HttpServletRequest request, HttpServletResponse response, Firestore db) throws IOException {
+  public List<Email> gatherRecipients(HttpServletRequest request, HttpServletResponse response, Firestore db)
+      throws IOException {
 
     String gameID = request.getParameter("gameID");
     String emailType = request.getParameter("emailType");
@@ -53,7 +59,7 @@ public class SendNotifications {
       DocumentSnapshot gameDocSnap = game.get().get();
       List<String> playerNames = (List<String>) gameDocSnap.get("players");
 
-      for(String player: playerNames) {
+      for (String player : playerNames) {
         DocumentSnapshot usersDocSnap = players.document(player).get().get();
 
         // Retrieves player information
@@ -61,15 +67,14 @@ public class SendNotifications {
         String playerName = usersDocSnap.getString("username");
 
         // Adding player to Email object
-        if(emailType.equalsIgnoreCase("start")) {
+        if (emailType.equalsIgnoreCase("start")) {
           emails.add(Email.startGameEmail(gameID, new User(playerEmail, playerName)));
-        } else if(emailType.equalsIgnoreCase("end")) {
-          emails.add(Email.startGameEmail(gameID, new User(playerEmail, playerName)));
+        } else if (emailType.equalsIgnoreCase("end")) {
+          emails.add(Email.endGameEmail(new User(playerEmail, playerName)));
         }
 
-
         // Checks if there are any players
-        if(emails.isEmpty()) {
+        if (emails.isEmpty()) {
           throw new IllegalArgumentException();
         }
       }
@@ -80,7 +85,8 @@ public class SendNotifications {
     return emails;
   }
 
-  public Email getNextPlayer(HttpServletRequest request, HttpServletResponse response, Firestore db) throws IOException {
+  public Email getNextPlayer(HttpServletRequest request, HttpServletResponse response, Firestore db)
+      throws IOException {
     String gameID = request.getParameter("gameID");
     DocumentReference game = db.collection("games").document(gameID);
     CollectionReference players = db.collection("users");
@@ -89,7 +95,7 @@ public class SendNotifications {
     try {
       DocumentSnapshot gameDocSnap = game.get().get();
       int currentPlayerIndex = (int) ((long) gameDocSnap.get("currentPlayerIndex"));
-      String playerName = ((List<String>) gameDocSnap.get("players")).get(currentPlayerIndex+1);
+      String playerName = ((List<String>) gameDocSnap.get("players")).get(currentPlayerIndex + 1);
 
       DocumentSnapshot usersDocSnap = players.document(playerName).get().get();
 
@@ -97,11 +103,11 @@ public class SendNotifications {
       String playerEmail = usersDocSnap.getString("email");
 
       notification = Email.playerTurnEmail(gameID, new User(playerEmail, playerName));
-    } catch(Exception e) {
+    } catch (Exception e) {
       System.out.println("Exception with QuerySnapshot" + e);
     }
 
-    if(notification == null) {
+    if (notification == null) {
       throw new IllegalArgumentException();
     }
 
@@ -111,11 +117,12 @@ public class SendNotifications {
   @GetMapping("/notify")
   public void sendEmail(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-    if(!firebaseInitialized) {
+    if (!firebaseInitialized) {
       GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
       String projectId = "phoebeliang-step";
-      FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).setProjectId(projectId).build();
-      {FirebaseApp.initializeApp(options);}
+      FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).setProjectId(projectId)
+          .build();
+      FirebaseApp.initializeApp(options);
       firebaseInitialized = true;
     }
 
@@ -123,41 +130,49 @@ public class SendNotifications {
 
     String emailType = request.getParameter("emailType");
     final String FROM = "pictophone.noreply@gmail.com";
+    URL url = new URL("https://s.yimg.com/uu/api/res/1.2/DdytqdFTgtQuxVrHLDdmjQ--~B/aD03MTY7dz0xMDgwO3NtPTE7YXBwaWQ9eXRhY2h5b24-/https://media-mbst-pub-ue1.s3.amazonaws.com/creatr-uploaded-images/2019-11/7b5b5330-112b-11ea-a77f-7c019be7ecae");
 
-    if(emailType.equalsIgnoreCase("start") || emailType.equalsIgnoreCase("end")) {
+    if (emailType.equalsIgnoreCase("start") || emailType.equalsIgnoreCase("end")) {
       List<Email> emails = gatherRecipients(request, response, db);
 
-      try{
+      try {
         Gmail service = ServiceCreation.createService();
 
-        for(Email email: emails) {
-          MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
-          Message testMessage = sendMessage(service, FROM, encoded);
+        if(emailType.equalsIgnoreCase("end")) {
+          for (Email email : emails) {
+            MimeMessage encoded = createEmailWithAttachment(email.getEmail(), FROM, email.getSubject(), email.getBody(), url);
+            Message testMessage = sendMessage(service, FROM, encoded);
+          }
+        } else {
+          for (Email email : emails) {
+            MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
+            Message testMessage = sendMessage(service, FROM, encoded);
+          }
         }
-      } catch(Exception e) {
+      } catch (Exception e) {
         System.out.println("Method Exception: " + e);
         System.err.println(e);
       }
-    } else if(emailType.equalsIgnoreCase("turn")) {
+    } else if (emailType.equalsIgnoreCase("turn")) {
       Email player = getNextPlayer(request, response, db);
       System.out.println(player.getEmail());
 
-      try{
+      try {
         Gmail service = ServiceCreation.createService();
 
         MimeMessage encoded = createEmail(player.getEmail(), FROM, player.getSubject(), player.getBody());
         Message testMessage = sendMessage(service, FROM, encoded);
-      } catch(Exception e) {
+      } catch (Exception e) {
         System.out.println("Exception with service: " + e);
       }
     }
 
   }
 
-  //***********************HELPER METHODS**********************************
+  // ***********************HELPER METHODS**********************************
 
   private static MimeMessage createEmail(String to, String from, String subject, String bodyText)
-    throws MessagingException {
+      throws MessagingException {
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
 
@@ -182,12 +197,43 @@ public class SendNotifications {
   }
 
   private static Message sendMessage(Gmail service, String userId, MimeMessage emailContent)
-    throws MessagingException, IOException {
-  Message message = createMessageWithEmail(emailContent);
-  message = service.users().messages().send(userId, message).execute();
+      throws MessagingException, IOException {
+    Message message = createMessageWithEmail(emailContent);
+    message = service.users().messages().send(userId, message).execute();
 
-  System.out.println("Message id: " + message.getId());
-  System.out.println(message.toPrettyString());
-      return message;
+    System.out.println("Message id: " + message.getId());
+    System.out.println(message.toPrettyString());
+    return message;
   }
+
+  public static MimeMessage createEmailWithAttachment(String to, String from, String subject, String bodyText,
+      URL imgURL)
+            throws MessagingException, IOException {
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+
+        MimeMessage email = new MimeMessage(session);
+
+        email.setFrom(new InternetAddress(from));
+        email.addRecipient(javax.mail.Message.RecipientType.TO,
+                new InternetAddress(to));
+        email.setSubject(subject);
+
+        MimeBodyPart mimeBodyPart = new MimeBodyPart();
+        mimeBodyPart.setContent(bodyText, "text/plain");
+
+        Multipart multipart = new MimeMultipart();
+        multipart.addBodyPart(mimeBodyPart);
+
+        mimeBodyPart = new MimeBodyPart();
+        DataSource source = new URLDataSource(imgURL);
+
+        mimeBodyPart.setDataHandler(new DataHandler(source));
+        mimeBodyPart.setFileName("Endgame Photo");
+
+        multipart.addBodyPart(mimeBodyPart);
+        email.setContent(multipart);
+
+        return email;
+    }
 }

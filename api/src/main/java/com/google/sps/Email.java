@@ -26,6 +26,13 @@ public class Email {
     return new Email(player, tempSubject, tempBody);
   }
 
+  public static Email endGameEmail(User player) {
+    String tempSubject = "The game has ended!";
+    String tempBody = "Thanks for playing! Find all the images from the game attached below. Come play again sometime:\n\nhttp://phoebeliang-step.appspot.com";
+
+    return new Email(player, tempSubject, tempBody);
+  }
+
   public String getBody(){
     return body;
   }
