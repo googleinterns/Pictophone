@@ -75,6 +75,9 @@ class Canvas extends Component {
       body: gameId + user + '.png',
     }).then((response) => response.text());
 
+    //Send information for email
+    fetch('/notifyTurn?gameID=' + gameId)
+
     // PUT data in bucket. For some reason fetch doesn't work, but xhr does
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', imgUrl, true);
