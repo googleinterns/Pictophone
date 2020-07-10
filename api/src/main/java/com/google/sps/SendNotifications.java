@@ -78,8 +78,7 @@ public class SendNotifications {
 
         // Adds Start game message to the email object
         if(emails.isEmpty()) {
-          System.out.println("No emails to send!");
-          System.exit(0);
+          throw new IllegalArgumentException();
         } else {
           emails.get(emails.size()-1).playerTurn(gameID);
         }
