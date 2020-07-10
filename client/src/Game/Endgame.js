@@ -33,25 +33,27 @@ class Endgame extends Component {
     })
   }
 
-  async downloadAll() {
+  downloadAll() {
     // Use JSZip to put all drawings into a zip file
     const { gameId, players } = this.state;
     const folder = zip.folder('drawings');
-    await Promise.all(players.map(async (url, i) => {
+
+    // Every player in the game generates one image
+    const blobs = players.map(function (url, i) {
       const filename = gameId + players[i] + '.png';
 
-      // Send URL to backend to sign
-      // Using workaround because
-      var imgUrl = await fetch('/api/signUpload', {
+      // Send URL to backend to sign, get blob
+      return fetch('/api/signDownload', {
         method: 'POST',
         body: filename
       }).then((response) => response.text())
-      //then(brokenUrl => brokenUrl.replace("googleapis", "cloud.google"));
-      imgUrl = "\""+imgUrl+"\"";
+      .then(signedUrl => fetch(signedUrl))
+      .then(response => response.blob());
+    });
 
-      const imageBlob = await fetch(imgUrl).then(response => response.blob());
-      folder.file(filename, imageBlob, { binary: true });
-    }));
+    // Wait for blobs to finish fetching and add them to a zip folder
+    Promise.all(blobs);
+    blobs.forEach((blob, i) => folder.file(players[i] + '.png', blob, { binary: true }));
     zip.generateAsync({type : "blob"}).then(content => saveAs(content, 'drawings.zip'));
   }
 

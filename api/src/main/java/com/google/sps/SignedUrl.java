@@ -70,7 +70,8 @@ public class SignedUrl {
     BlobInfo blobInfo = defineResource(objectName);
 
     URL url =
-        storage.signUrl(blobInfo, 15, TimeUnit.MINUTES, Storage.SignUrlOption.withV4Signature());
+        storage.signUrl(blobInfo, 15, TimeUnit.MINUTES,
+        Storage.SignUrlOption.withV4Signature());
 
     return url.toString();
   }
