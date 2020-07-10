@@ -104,12 +104,12 @@ class Firebase {
       return gameRef;
     });
 
-  doAddUserToGame = (userId, gameId) =>
+  doAddUserToGame = (gameId) =>
     this.game(gameId).update({
-      players: this.fieldValue.arrayUnion(userId)
+      players: this.fieldValue.arrayUnion(this.auth.currentUser.uid)
     })
     .then(() => {
-      this.user(userId).update({
+      this.user(this.auth.currentUser.uid).update({
         games: this.fieldValue.arrayUnion(gameId)
       });
     });

@@ -13,6 +13,7 @@ import SignInPage from '../SignIn';
 import PasswordForgetPage from '../PasswordForget';
 import AccountPage from '../Account';
 import CreateGamePage from '../CreateGame';
+import JoinGamePage from '../JoinGame';
 import { withAuthentication, AuthUserContext } from '../Session';
 
 import * as ROUTES from '../../constants/routes';
@@ -49,11 +50,10 @@ const App = () => (
           <Game />
         </Route>
         <Route path={ROUTES.CREATE_GAME}>
-          <AuthUserContext.Consumer>
-            {authUser =>
-              <CreateGamePage authUser={authUser} />
-            }
-          </AuthUserContext.Consumer>
+          <CreateGamePage />
+        </Route>
+        <Route path={ROUTES.JOIN_GAME}>
+          <JoinGamePage />
         </Route>
       </Switch>
     </Router>
