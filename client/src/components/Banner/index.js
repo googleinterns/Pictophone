@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-import SignOutButton from './SignOut';
-import * as ROUTES from './constants/routes';
+import SignOutButton from '../SignOut';
+import * as ROUTES from '../../constants/routes';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './Banner.css';

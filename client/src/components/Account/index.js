@@ -1,5 +1,6 @@
 import React from 'react';
 import { compose } from 'recompose';
+import { Link } from 'react-router-dom';
 
 import PasswordChangeForm from '../PasswordChange';
 import {
@@ -14,6 +15,7 @@ const AccountPage = () => (
       <div>
         <h1>Account: {authUser.email}</h1>
         <PasswordChangeForm />
+        <button type="button"><Link to={`/dashboard/${authUser.uid}`}>Back to dashboard</Link></button>
       </div>
     )}
   </AuthUserContext.Consumer>

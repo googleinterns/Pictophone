@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import '../App.css';
+import '../App/App.css';
 import { withRouter } from 'react-router';
 import { saveAs } from 'file-saver';
 import { withAuthorization, withEmailVerification } from '../Session';
