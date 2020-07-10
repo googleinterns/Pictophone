@@ -21,7 +21,6 @@ class Game extends Component {
   }
 
   async componentDidMount() {
-    // TODO: Add error handling for invalid game/nonexistent ID
     const { id } = this.props.match.params;
     this.setState({ gameId: id });
     this.fetchGame(id);
@@ -30,11 +29,22 @@ class Game extends Component {
   fetchGame(gameId) {
     // Set up listener for game data change
     const game = this.props.firebase.game(gameId);
-    game.onSnapshot(snapshot => {
-      this.updateGame(snapshot.data());
-    }, err => {
-      console.log(`Encountered error: ${err}`);
+
+    game.get()
+      .then((docSnapshot) => {
+        if (docSnapshot.exists) {
+          game.onSnapshot(snapshot => {
+          this.updateGame(snapshot.data());
+          }, err => {
+            console.log(`Encountered error: ${err}`);
+          });
+          this.setState({ gameExists: true });
+        } else {
+          this.setState({ gameExists: false });
+        }
     });
+
+
 
   }
 
@@ -43,14 +53,17 @@ class Game extends Component {
   }
 
   render() {
-    const { gameId, inProgress } = this.state;
+    const { gameId, inProgress, gameExists } = this.state;
 
     return (
       <div className="Game">
         <Banner />
         <Link to={ROUTES.DASHBOARD}><button>Back to home</button></Link>
         <h3>GAME { gameId }</h3>
-        {inProgress ? <Canvas /> : <Endgame />}
+        {gameExists ?
+          (inProgress ? <Canvas /> : <Endgame />)
+          : <p>This game does not exist! Check your URL again.</p>
+        }
       </div>
     );
   }

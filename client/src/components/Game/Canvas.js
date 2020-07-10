@@ -88,7 +88,7 @@ class Canvas extends Component {
     xhr.onreadystatechange = () => {
        if (xhr.readyState === 4 && xhr.status === 200){
           // Advance the game if the image was uploaded successfully
-          const gameRef = this.props.firebase.db.collection('games').doc(gameId);
+          const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
             drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + user + '.png')
           })
