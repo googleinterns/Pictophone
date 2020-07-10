@@ -5,7 +5,6 @@ import { compose } from 'recompose';
 import { withFirebase } from '../Firebase';
 import { withAuthorization } from '../Session';
 import * as ROUTES from '../../constants/routes';
-import Dashboard from '../Dashboard';
 
 const CreateGamePage = () => (
   <div>
