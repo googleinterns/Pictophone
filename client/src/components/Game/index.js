@@ -23,16 +23,15 @@ class Game extends Component {
   async componentDidMount() {
     // TODO: Add error handling for invalid game/nonexistent ID
     const { id } = this.props.match.params;
-    console.log(id);
     this.setState({ gameId: id });
     this.fetchGame(id);
   }
 
   fetchGame(gameId) {
     // Set up listener for game data change
-    const doc = this.props.firebase.db.collection('games').doc(gameId);
-    doc.onSnapshot(docSnapshot => {
-      this.updateGame(docSnapshot.data());
+    const game = this.props.firebase.game(gameId);
+    game.onSnapshot(snapshot => {
+      this.updateGame(snapshot.data());
     }, err => {
       console.log(`Encountered error: ${err}`);
     });

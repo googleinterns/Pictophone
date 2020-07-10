@@ -31,8 +31,8 @@ class Canvas extends Component {
 
   fetchGame(gameId) {
     // Set up listener for game data change
-    const doc = this.props.firebase.db.collection('games').doc(gameId);
-    doc.onSnapshot(docSnapshot => {
+    const game = this.props.firebase.game(gameId);
+    game.onSnapshot(docSnapshot => {
       this.updateGame(docSnapshot.data());
     }, err => {
       console.log(`Encountered error: ${err}`);

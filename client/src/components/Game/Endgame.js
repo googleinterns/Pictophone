@@ -25,9 +25,9 @@ class Endgame extends Component {
   }
 
   fetchGame(gameId) {
-    // Get final game info
-    const doc = this.props.firebase.db.collection('games').doc(gameId);
-    doc.get().then((snapshot) => {
+    // Get game result, no need for listener since game is over
+    const game = this.props.firebase.game(gameId);
+    game.get().then((snapshot) => {
       this.setState({ drawings: snapshot.data().drawings,
         players: snapshot.data().players });
     })
