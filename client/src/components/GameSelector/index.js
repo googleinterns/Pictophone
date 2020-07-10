@@ -21,27 +21,39 @@ class GameSelector extends Component {
   componentDidMount() {
     this.setState({ loading: true });
 
-    this.unsubscribe = this.props.firebase
-      .user(this.props.uid)
-      .onSnapshot(snapshot => {
-        let gamesList = snapshot.data().games;
-        let games = [];
+    let user = this.props.firebase.user(this.props.uid);
 
-        gamesList.forEach(game =>
+    user.get().then(userDoc => {
+      let gamesList = userDoc.data().games;
+      let games = [];
+
+      gamesList.forEach(game => {
+        this.props.firebase.game(game).get().then(gameDoc => {
+          let gameData = { ...gameDoc.data(), gameId: gameDoc.id };
+
+          console.log(gameData.currentPlayerIndex);
+          console.log(gameData.players);
+          console.log(gameData.players[gameData.currentPlayerIndex]);
+
           this.props.firebase
-            .game(game)
-            .onSnapshot(snapshot => {
-              games.push({ ...snapshot.data(), gameId: snapshot.id });
-              this.setState({ games });
-            })
-        );
+            .user(gameData.players[gameData.currentPlayerIndex])
+            .get().then(currentPlayerDoc => {
+              gameData["currentPlayer"] = currentPlayerDoc.data().username;
 
-        this.setState({ loading: false, currentUser: snapshot.data().username });
+              this.props.firebase
+                .user(gameData.players[0]).get().then(startPlayerDoc => {
+                  gameData["startPlayer"] = startPlayerDoc.data().username;
+
+                  games.push(gameData);
+
+                  this.setState({ games });
+                });
+            });
+        });
       });
-  }
 
-  componentWillUnmount() {
-    this.unsubscribe();
+      this.setState({ loading: false, currentUser: userDoc.data().username });
+    })
   }
 
   render() {
@@ -63,11 +75,11 @@ const Game = (props) => (
     {props.game && (
       <Card border="dark" style={{ width: '97.5%'}}>
         <Link to={`/game/${props.game.gameId}`}>
-          <Card.Header>started by <b>{props.game.players[0]}</b> on <b>{props.game.startDate.toDate().toDateString()}</b></Card.Header>
+          <Card.Header>started by <b>{props.game.startPlayer}</b> on <b>{props.game.startDate.toDate().toDateString()}</b></Card.Header>
           <Card.Body>
             <Card.Title>{props.game.gameName.toUpperCase()}</Card.Title>
             <Card.Text>
-              currently <b>{props.game.players[props.game.currentPlayerIndex]}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
+              currently <b>{props.game.currentPlayer}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
             </Card.Text>
           </Card.Body>
         </Link>
