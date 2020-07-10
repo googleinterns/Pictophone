@@ -31,10 +31,6 @@ class GameSelector extends Component {
         this.props.firebase.game(game).get().then(gameDoc => {
           let gameData = { ...gameDoc.data(), gameId: gameDoc.id };
 
-          console.log(gameData.currentPlayerIndex);
-          console.log(gameData.players);
-          console.log(gameData.players[gameData.currentPlayerIndex]);
-
           this.props.firebase
             .user(gameData.players[gameData.currentPlayerIndex])
             .get().then(currentPlayerDoc => {
