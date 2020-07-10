@@ -4,11 +4,37 @@ import { compose } from 'recompose';
 
 import Banner from '../Banner';
 import GameSelector from '../GameSelector';
-import { withAuthorization, withEmailVerification } from '../Session';
-import { withFirebase } from '../Firebase';
+import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './Dashboard.css';
+
+class Dashboard extends Component {
+  render() {
+    return (
+      <div className="banner-wrapper">
+        <Banner />
+        <div>
+          <div className="greeting">
+            <p>Hi, {this.props.authUser.username}! Here are your games:</p>
+          </div>
+          <div className="dashboard-buttons">
+            <HostButton />{' '}
+            <JoinButton />{' '}
+            <RandomButton />
+          </div>
+          <div className="games-list">
+            <AuthUserContext.Consumer>
+              {authUser =>
+                <GameSelector uid={authUser.uid} />
+              }
+            </AuthUserContext.Consumer>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
 
 class HostButton extends Component {
   render() {
@@ -34,71 +60,9 @@ class RandomButton extends Component {
   }
 }
 
-class Dashboard extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      loading: false,
-      user: null,
-      ...props.location.state,
-    }
-  }
-
-  componentDidMount() {
-    if (this.state.user) {
-      return;
-    }
-
-    this.setState({ loading: true });
-
-    this.unsubscribe = this.props.firebase
-      .user(this.props.match.params.id)
-      .onSnapshot(snapshot => {
-        this.setState({
-          user: snapshot.data(),
-          loading: false,
-        });
-      });
-  }
-
-  componentWillUnmount() {
-    this.unsubscribe && this.unsubscribe();
-  }
-
-  render() {
-    // Hard coded for now, these games would be taken from the database
-    const games = ['oo0j05CCUJNqQxSFSNEI'];
-    const { user, loading } = this.state;
-
-    return (
-      <div className="banner-wrapper">
-        <Banner />
-        {loading && <div>Loading...</div>}
-        {user && (
-          <div>
-            <div className="greeting">
-              <p>Hi, {user.username}! Here are your games:</p>
-            </div>
-            <div className="dashboard-buttons">
-              <HostButton />{' '}
-              <JoinButton />{' '}
-              <RandomButton />
-            </div>
-            <div className="games-list">
-              <GameSelector id={games[0]}/>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-}
-
 const condition = authUser => !!authUser;
 
 export default compose(
   withEmailVerification,
   withAuthorization(condition),
-  withFirebase,
 )(Dashboard);
