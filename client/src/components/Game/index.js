@@ -8,7 +8,7 @@ import { compose } from 'recompose';
 import Canvas from './Canvas';
 import Endgame from './Endgame';
 import * as ROUTES from '../../constants/routes';
-import { withAuthorization, withEmailVerification } from '../Session';;
+import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';;
 
 class Game extends Component {
 
@@ -60,9 +60,20 @@ class Game extends Component {
         <Banner />
         <Link to={ROUTES.DASHBOARD}><button>Back to home</button></Link>
         <h3>GAME { gameId }</h3>
-        {gameExists ?
-          (inProgress ? <Canvas /> : <Endgame />)
-          : <p>This game does not exist! Check your URL again.</p>
+        { // Render according to game existence and status.
+          (() => {
+            if (!gameExists) {
+              return <p>This game does not exist! Check your URL again.</p>
+            } else if (inProgress) {
+              return <AuthUserContext.Consumer>
+                {authUser =>
+                  <Canvas uid={authUser.uid} />
+                }
+              </AuthUserContext.Consumer>
+            } else {
+              return <Endgame />
+            }
+          })()
         }
       </div>
     );

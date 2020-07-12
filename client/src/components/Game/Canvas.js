@@ -20,16 +20,17 @@ class Canvas extends Component {
     this.setLC = this.setLC.bind(this);
     this.fetchGame = this.fetchGame.bind(this);
     this.updateGame = this.updateGame.bind(this);
+    this.idToUsername = this.idToUsername.bind(this);
   }
 
   async componentDidMount() {
     const { id } = this.props.match.params;
-    // TODO fetch user from firebase auth
-    this.setState({ gameId: id, user: 'testuser1' });
+    this.setState({ gameId: id, userId: this.props.uid });
     this.fetchGame(id);
   }
 
   fetchGame(gameId) {
+    // Don't worry about private games for now
     // Set up listener for game data change
     const game = this.props.firebase.game(gameId);
     game.onSnapshot(docSnapshot => {
@@ -37,7 +38,17 @@ class Canvas extends Component {
     }, err => {
       console.log(`Encountered error: ${err}`);
     });
+  }
 
+  idToUsername(players) {
+    // For the MVP, we won't listen for username changes
+    // TODO add listener in Project Alpha
+    const usernames = players.map(id =>
+      this.props.firebase.user(id).get().then(snapshot =>
+        snapshot.data().username)
+    );
+    Promise.all(usernames);
+    this.setState({ usernames });
   }
 
   updateGame(game) {
@@ -54,6 +65,9 @@ class Canvas extends Component {
     if (game.currentPlayerIndex > index) {
       this.setState({ sent: true });
     }
+
+    // Convert player IDs to their usernames
+    this.idToUsername(game.players);
   }
 
   async send() {
@@ -113,7 +127,7 @@ class Canvas extends Component {
   }
 
   render() {
-    const { players, drawings, user,
+    const { players, drawings, user, usernames,
       currentPlayerIndex, display, sent } = this.state;
     const userIndex = players.indexOf(user);
 
@@ -125,9 +139,9 @@ class Canvas extends Component {
             indicates whether they are done with their turn.
             Renders an arrow after the name, if they are not the final player.
           */}
-          {players.map((name, index) => (<span className="player-list">
+          {usernames.map((name, index) => (<span className="player-list">
             <Player name={name} status={index - currentPlayerIndex} />
-            {(index !== players.length - 1) ? <span>&rarr;</span> : null}</span>
+            {(index !== usernames.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
         </div>
 

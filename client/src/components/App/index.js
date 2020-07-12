@@ -45,7 +45,11 @@ const App = () => (
           <PasswordForgetPage />
         </Route>
         <Route path='/game/:id'>
-          <Game />
+          <AuthUserContext.Consumer>
+            {authUser =>
+              <Game authUser={authUser} />
+            }
+          </AuthUserContext.Consumer>
         </Route>
       </Switch>
     </Router>
