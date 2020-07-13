@@ -5,3 +5,4 @@ export const DASHBOARD = '/dashboard';
 export const ACCOUNT = '/account';
 export const PASSWORD_FORGET = '/pw-forget';
 export const CREATE_GAME = '/create-game';
+export const JOIN_GAME = '/join-game';

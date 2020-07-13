@@ -54,7 +54,7 @@ class HostButton extends Component {
 class JoinButton extends Component {
   render() {
     return (
-      <Button variant="secondary">join</Button>
+      <Button variant="secondary" as={Link} to={ROUTES.JOIN_GAME}>join</Button>
     );
   }
 }
