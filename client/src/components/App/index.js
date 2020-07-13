@@ -47,7 +47,11 @@ const App = () => (
           <PasswordForgetPage />
         </Route>
         <Route path='/game/:id'>
-          <Game />
+          <AuthUserContext.Consumer>
+            {authUser =>
+              <Game authUser={authUser} />
+            }
+          </AuthUserContext.Consumer>
         </Route>
         <Route path={ROUTES.CREATE_GAME}>
           <CreateGamePage />
