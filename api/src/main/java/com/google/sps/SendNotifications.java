@@ -1,7 +1,5 @@
 package com.google.sps;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,6 +18,7 @@ import com.google.api.core.ApiFuture;
 import com.google.api.services.gmail.Gmail;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
@@ -31,6 +30,7 @@ import java.util.Map;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.activation.URLDataSource;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -133,7 +133,8 @@ public class SendNotifications {
     String emailType = request.getParameter("emailType");
     String gameID = request.getParameter("gameID");
     final String FROM = "pictophone.noreply@gmail.com";
-    URL url = new URL("https://s.yimg.com/uu/api/res/1.2/DdytqdFTgtQuxVrHLDdmjQ--~B/aD03MTY7dz0xMDgwO3NtPTE7YXBwaWQ9eXRhY2h5b24-/https://media-mbst-pub-ue1.s3.amazonaws.com/creatr-uploaded-images/2019-11/7b5b5330-112b-11ea-a77f-7c019be7ecae");
+    ImageStorage.downloadObject("kitten.png");
+
 
     DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
     int amtOfPlayers = ((List<String>) docSnap.get("players")).size();
@@ -145,9 +146,11 @@ public class SendNotifications {
       try {
         Gmail service = ServiceCreation.createService();
 
+
         if(emailType.equalsIgnoreCase("end") || emailType.equalsIgnoreCase("turn")) {
+          File file = new File("images/kitten.png");
           for (Email email : emails) {
-            MimeMessage encoded = createEmailWithAttachment(email.getEmail(), FROM, email.getSubject(), email.getBody(), url);
+            MimeMessage encoded = createEmailWithAttachment(email.getEmail(), FROM, email.getSubject(), email.getBody(), file);
             Message testMessage = sendMessage(service, FROM, encoded);
           }
         } else {
@@ -214,7 +217,7 @@ public class SendNotifications {
   }
 
   public static MimeMessage createEmailWithAttachment(String to, String from, String subject, String bodyText,
-      URL imgURL)
+      File file)
             throws MessagingException, IOException {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
@@ -233,7 +236,7 @@ public class SendNotifications {
         multipart.addBodyPart(mimeBodyPart);
 
         mimeBodyPart = new MimeBodyPart();
-        DataSource source = new URLDataSource(imgURL);
+        DataSource source = new FileDataSource(file);
 
         mimeBodyPart.setDataHandler(new DataHandler(source));
         mimeBodyPart.setFileName("Endgame Photo");
