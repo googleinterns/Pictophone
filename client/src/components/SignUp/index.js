@@ -30,10 +30,13 @@ class SignUpFormBase extends Component {
   onSubmit = event => {
     const { username, email, passwordOne } = this.state;
     const games = [];
+    let uid = '';
 
     this.props.firebase
       .doCreateUserWithEmailAndPassword(email, passwordOne)
       .then(authUser => {
+        uid = authUser.user.uid;
+
         // Create a user in Firestore
         return this.props.firebase
           .user(authUser.user.uid)
@@ -44,6 +47,13 @@ class SignUpFormBase extends Component {
           },
           { merge: true },
           );
+      })
+      .then(() => {
+        return this.props.firebase
+          .usernames().doc(username)
+          .set({
+            uid: uid
+          });
       })
       .then(() => {
         return this.props.firebase.doSendEmailVerification();
