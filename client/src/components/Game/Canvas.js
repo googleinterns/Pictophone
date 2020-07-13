@@ -13,7 +13,7 @@ class Canvas extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { players: [] };
+    this.state = { players: [], usernames: [] };
 
     this.send = this.send.bind(this);
     this.saveDrawing = this.saveDrawing.bind(this);
@@ -40,15 +40,15 @@ class Canvas extends Component {
     });
   }
 
-  idToUsername(players) {
+  async idToUsername(players) {
     // For the MVP, we won't listen for username changes
     // TODO add listener in Project Alpha
     const usernames = players.map(id =>
       this.props.firebase.user(id).get().then(snapshot =>
         snapshot.data().username)
     );
-    Promise.all(usernames);
-    this.setState({ usernames });
+    const names = await Promise.all(usernames);
+    this.setState({ usernames: names });
   }
 
   updateGame(game) {
@@ -58,7 +58,7 @@ class Canvas extends Component {
       timeLimit: game.timeLimit });
 
     // Determine whether to display drawing
-    var index = game.players.indexOf(this.state.user);
+    var index = game.players.indexOf(this.state.userId);
     if (game.currentPlayerIndex >= index) {
       this.setState({ display: true });
     }
@@ -71,10 +71,15 @@ class Canvas extends Component {
   }
 
   async send() {
-    const { players, currentPlayerIndex, user, gameId} = this.state;
+    const { players, currentPlayerIndex, userId, gameId, lc} = this.state;
     // Don't want player to send drawing when it's not their turn
-    if (players.indexOf(user) !== currentPlayerIndex) return;
-    const data = await new Promise(resolve => this.state.lc.getImage().toBlob(resolve));;
+    if (players.indexOf(userId) !== currentPlayerIndex) return;
+
+    // Make sure the canvas is not empty
+    const image = lc.getImage();
+    if (image === null) return;
+
+    const data = await new Promise(resolve => image.toBlob(resolve));;
     const url = 'https://storage.cloud.google.com/pictophone-drawings/';
 
     // Send image URL to backend to sign
@@ -85,11 +90,11 @@ class Canvas extends Component {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json'
       },
-      body: gameId + user + '.png',
+      body: gameId + userId + '.png',
     }).then((response) => response.text());
 
-    // Send information for email
-    fetch('/notifyTurn?gameID=' + gameId)
+    // Send information for email (comment out for now)
+    // fetch('/notifyTurn?gameID=' + gameId)
 
     // PUT data in bucket. For some reason fetch doesn't work, but xhr does
     const xhr = new XMLHttpRequest();
@@ -104,11 +109,10 @@ class Canvas extends Component {
           // Advance the game if the image was uploaded successfully
           const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
-            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + user + '.png')
+            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + userId + '.png')
           })
           gameRef.set({
             currentPlayerIndex: currentPlayerIndex + 1,
-            inProgress: (currentPlayerIndex + 1) === players.length
           }, { merge: true });
        }
     }
@@ -127,9 +131,9 @@ class Canvas extends Component {
   }
 
   render() {
-    const { players, drawings, user, usernames,
+    const { players, drawings, userId, usernames,
       currentPlayerIndex, display, sent } = this.state;
-    const userIndex = players.indexOf(user);
+    const userIndex = players.indexOf(userId);
 
     return (
       <div>
@@ -153,7 +157,7 @@ class Canvas extends Component {
                 if (userIndex === 0) {
                  return <p>Draw an image to send to the next person!</p>
                 } else if (display) {
-                  return <img src={drawings[players.indexOf(user) - 1]} alt="previous drawing" />
+                  return <img src={drawings[userIndex - 1]} alt="previous drawing" />
                 } else {
                   return <p>It is not your turn yet. Please sit tight to receive the image!</p>
               }})()

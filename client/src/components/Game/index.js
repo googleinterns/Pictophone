@@ -49,7 +49,7 @@ class Game extends Component {
   }
 
   updateGame(game) {
-    this.setState({ inProgress: game.inProgress });
+    this.setState({ inProgress: game.currentPlayerIndex < game.players.length });
   }
 
   render() {
