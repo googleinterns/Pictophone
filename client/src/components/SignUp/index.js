@@ -29,6 +29,7 @@ class SignUpFormBase extends Component {
 
   onSubmit = event => {
     const { username, email, passwordOne } = this.state;
+    const games = [];
 
     this.props.firebase
       .doCreateUserWithEmailAndPassword(email, passwordOne)
@@ -39,7 +40,7 @@ class SignUpFormBase extends Component {
           .set({
             username,
             email,
-            games: [],
+            games,
           },
           { merge: true },
           );
@@ -56,7 +57,7 @@ class SignUpFormBase extends Component {
       });
 
     event.preventDefault();
-  }
+  };
 
   onChange = event => {
     this.setState({ [event.target.name]: event.target.value });

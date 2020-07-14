@@ -84,6 +84,35 @@ class Firebase {
   game = gameId => this.db.doc(`games/${gameId}`);
 
   games = () => this.db.collection('games');
+
+  doCreateGame = (gameName) =>
+    this.games().add({
+      gameName: gameName,
+      players: [],
+      startDate: this.fieldValue.serverTimestamp(),
+      currentPlayerIndex: 0,
+    })
+    .then(gameRef => {
+      gameRef.update({
+        players: this.fieldValue.arrayUnion(this.auth.currentUser.uid)
+      })
+      .then(() => {
+        this.user(this.auth.currentUser.uid).update({
+          games: this.fieldValue.arrayUnion(gameRef.id)
+        });
+      });
+      return gameRef;
+    });
+
+  doAddUserToGame = (gameId) =>
+    this.game(gameId).update({
+      players: this.fieldValue.arrayUnion(this.auth.currentUser.uid)
+    })
+    .then(() => {
+      this.user(this.auth.currentUser.uid).update({
+        games: this.fieldValue.arrayUnion(gameId)
+      });
+    });
 }
 
 export default Firebase;
