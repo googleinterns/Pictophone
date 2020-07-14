@@ -13,7 +13,7 @@ class Canvas extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { players: [], usernames: [] };
+    this.state = { players: [], usernames: [], file: null };
 
     this.send = this.send.bind(this);
     this.saveDrawing = this.saveDrawing.bind(this);
@@ -21,6 +21,7 @@ class Canvas extends Component {
     this.fetchGame = this.fetchGame.bind(this);
     this.updateGame = this.updateGame.bind(this);
     this.idToUsername = this.idToUsername.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   async componentDidMount() {
@@ -75,11 +76,17 @@ class Canvas extends Component {
     // Don't want player to send drawing when it's not their turn
     if (players.indexOf(userId) !== currentPlayerIndex) return;
 
-    // Make sure the canvas is not empty
-    const image = lc.getImage();
-    if (image === null) return;
+    // Grab image from canvas or uploaded file
+    const data;
+    if (this.state.file != null) {
+      // Prioritize using the atached file if it exists
+      data = await fetch(this.state.file).then(r => r.blob());
+    } else {
+      const image = lc.getImage();
+      if (image === null) return; // Make sure canvas isn't empty
+      data = await new Promise(resolve => image.toBlob(resolve));
+    }
 
-    const data = await new Promise(resolve => image.toBlob(resolve));;
     const url = 'https://storage.cloud.google.com/pictophone-drawings/';
 
     // Send image URL to backend to sign
@@ -107,6 +114,7 @@ class Canvas extends Component {
     xhr.onreadystatechange = () => {
        if (xhr.readyState === 4 && xhr.status === 200){
           // Advance the game if the image was uploaded successfully
+          // TODO listen to main bucket?
           const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
             drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + userId + '.png')
@@ -128,6 +136,15 @@ class Canvas extends Component {
 
   setLC(lc) {
     this.setState({lc: lc});
+  }
+
+  handleChange(event) {
+    if (this.state.file !== null) {
+      URL.revokeObjectURL(this.state.file);
+    }
+    this.setState({
+      file: URL.createObjectURL(event.target.files[0])
+    });
   }
 
   render() {
@@ -166,6 +183,8 @@ class Canvas extends Component {
           <div className="lc-container">
             <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
             <button onClick={this.saveDrawing}>Download drawing</button>
+            <img src={this.state.file}/>
+            <input type="file" accept="image/*" onChange={this.handleChange} />
             {sent ? <p className="send-drawing">Drawing sent!</p>
               : <button className="send-drawing" onClick={this.send}>Send</button>}
           </div>
