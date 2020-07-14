@@ -133,7 +133,6 @@ public class SendNotifications {
     String emailType = request.getParameter("emailType");
     String gameID = request.getParameter("gameID");
     final String FROM = "pictophone.noreply@gmail.com";
-    ImageStorage.downloadObject("kitten.png");
 
 
     DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
@@ -146,18 +145,9 @@ public class SendNotifications {
       try {
         Gmail service = ServiceCreation.createService();
 
-
-        if(emailType.equalsIgnoreCase("end") || emailType.equalsIgnoreCase("turn")) {
-          File file = new File("images/kitten.png");
-          for (Email email : emails) {
-            MimeMessage encoded = createEmailWithAttachment(email.getEmail(), FROM, email.getSubject(), email.getBody(), file);
-            Message testMessage = sendMessage(service, FROM, encoded);
-          }
-        } else {
-          for (Email email : emails) {
-            MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
-            Message testMessage = sendMessage(service, FROM, encoded);
-          }
+        for (Email email : emails) {
+          MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
+          Message testMessage = sendMessage(service, FROM, encoded);
         }
       } catch (Exception e) {
         System.out.println("Method Exception: " + e);
@@ -215,35 +205,4 @@ public class SendNotifications {
     System.out.println(message.toPrettyString());
     return message;
   }
-
-  public static MimeMessage createEmailWithAttachment(String to, String from, String subject, String bodyText,
-      File file)
-            throws MessagingException, IOException {
-        Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
-
-        MimeMessage email = new MimeMessage(session);
-
-        email.setFrom(new InternetAddress(from));
-        email.addRecipient(javax.mail.Message.RecipientType.TO,
-                new InternetAddress(to));
-        email.setSubject(subject);
-
-        MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        mimeBodyPart.setContent(bodyText, "text/plain");
-
-        Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(mimeBodyPart);
-
-        mimeBodyPart = new MimeBodyPart();
-        DataSource source = new FileDataSource(file);
-
-        mimeBodyPart.setDataHandler(new DataHandler(source));
-        mimeBodyPart.setFileName("Endgame Photo");
-
-        multipart.addBodyPart(mimeBodyPart);
-        email.setContent(multipart);
-
-        return email;
-    }
 }

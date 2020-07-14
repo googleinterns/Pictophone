@@ -35,14 +35,13 @@ public class ImageStorage {
     }
   }
 
-  public static void downloadObject(String objectName) {
+  public static void downloadObject(String objectName, Path destFilePath) {
     try {
       Storage storage = initStorage();
 
       Blob blob = storage.get(BlobId.of(bucketName, objectName));
       System.out.println("Blob retrieved..");
-      Path path = Paths.get("./images/");
-      blob.downloadTo(path);
+      blob.downloadTo(destFilePath);
       System.out.println("image downloaded...");
     } catch(Exception e) {
       System.out.println(e);
