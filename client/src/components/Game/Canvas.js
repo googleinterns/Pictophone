@@ -93,8 +93,17 @@ class Canvas extends Component {
       body: gameId + userId + '.png',
     }).then((response) => response.text());
 
-    // Send information for email (comment out for now)
-    // fetch('/notifyTurn?gameID=' + gameId)
+    // Send information for email 
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'gameID=' + gameId + '&emailType=turn',
+    }).then((response) => {
+      console.log(response.text());
+    });
 
     // PUT data in bucket. For some reason fetch doesn't work, but xhr does
     const xhr = new XMLHttpRequest();
