@@ -63,7 +63,6 @@ public class ServiceCreation {
   private static final DataStoreFactory dataStoreFactory = new AbstractDataStoreFactory() {
     @Override
     protected <V extends Serializable> DataStore<V> createDataStore(final String id) {
-      System.out.println("here1");
       return new FireDataStore<>(this, id);
     }
   };
@@ -96,10 +95,6 @@ public class ServiceCreation {
     GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
     // Build flow and trigger user authorization request.
-    /* GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-        clientSecrets, SCOPES).setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-            .setAccessType("offline").build(); */
-
     GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
         clientSecrets, SCOPES).setDataStoreFactory(dataStoreFactory)
             .setAccessType("offline").build();
@@ -129,7 +124,6 @@ public class ServiceCreation {
 
     @Override
     public DataStore<V> set(String key, V value) throws IOException {
-      System.out.println("here4");
       final String encoded = Base64.getEncoder().encodeToString(SerializationUtils.serialize(value));
       Map<String, Object> data = new HashMap<>();
       data.put(key, encoded);
@@ -141,7 +135,6 @@ public class ServiceCreation {
     @Override
     public V get(String key) throws IOException {
       try {
-        System.out.println("here5");
         DocumentSnapshot document = docRef.get().get();
         if (!document.exists()) return null;
         final String encoded = document.getString(key);
