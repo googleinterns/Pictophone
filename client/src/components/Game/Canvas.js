@@ -93,8 +93,8 @@ class Canvas extends Component {
       body: gameId + userId + '.png',
     }).then((response) => response.text());
 
-    // Send information for email 
-    fetch('/api/notify', {
+    // Send information for email
+    await fetch('/api/notify', {
       method: 'POST',
       headers: {
         'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
