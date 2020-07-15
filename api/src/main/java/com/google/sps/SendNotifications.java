@@ -115,7 +115,7 @@ public class SendNotifications {
     return notification;
   }
 
-  @GetMapping("/api/notify")
+  @PostMapping("/api/notify")
   public void sendEmail(HttpServletRequest request, HttpServletResponse response)
       throws IOException, InterruptedException, ExecutionException {
 

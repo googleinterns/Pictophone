@@ -94,7 +94,7 @@ class Canvas extends Component {
     }).then((response) => response.text());
 
     // Send information for email (comment out for now)
-    // fetch('/notifyTurn?gameID=' + gameId)
+   fetch('/api/notify?gameID=' + gameId + '&emailType=end')
 
     // PUT data in bucket. For some reason fetch doesn't work, but xhr does
     const xhr = new XMLHttpRequest();
