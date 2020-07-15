@@ -34,9 +34,9 @@ build/
 
 # dependencies
 client/node_modules/*
+functions/node_modules/*
 /.pnp
 .pnp.js
-package-lock.json
 
 # testing
 /coverage
