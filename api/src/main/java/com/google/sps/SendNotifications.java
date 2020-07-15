@@ -133,7 +133,7 @@ public class SendNotifications {
     String emailType = request.getParameter("emailType");
     String gameID = request.getParameter("gameID");
     final String FROM = "pictophone.noreply@gmail.com";
-    ImageStorage.downloadObject("kitten.png");
+    // ImageStorage.downloadObject("kitten.png");
 
 
     DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
@@ -148,9 +148,11 @@ public class SendNotifications {
 
 
         if(emailType.equalsIgnoreCase("end") || emailType.equalsIgnoreCase("turn")) {
-          File file = new File("images/kitten.png");
+          // File file = new File("images/kitten.png");
           for (Email email : emails) {
-            MimeMessage encoded = createEmailWithAttachment(email.getEmail(), FROM, email.getSubject(), email.getBody(), file);
+            // do not worry about attachment
+            // MimeMessage encoded = createEmailWithAttachment(email.getEmail(), FROM, email.getSubject(), email.getBody(), file);
+            MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
             Message testMessage = sendMessage(service, FROM, encoded);
           }
         } else {
