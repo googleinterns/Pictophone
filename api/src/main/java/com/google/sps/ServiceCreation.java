@@ -33,18 +33,15 @@ import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.AbstractDataStore;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.AbstractDataStoreFactory;
-// import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
+
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
+import com.google.sps.Firebase;
 
 import org.springframework.util.ResourceUtils;
 import org.apache.commons.io.IOUtils;
@@ -55,29 +52,21 @@ public class ServiceCreation {
   private static final String APPLICATION_NAME = "Notifications";
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static final String TOKENS_DIRECTORY_PATH = "tokens123";
-  private static final DataStoreFactory dataStoreFactory = new AbstractDataStoreFactory() {
-    @Override
-    protected <V extends Serializable> DataStore<V> createDataStore(final String id) {
-      return new FireDataStore<>(this, id);
-    }
-  };
 
-
-  // Use ADC for Firestore
   static {
-    try {
-      FirebaseOptions options = new FirebaseOptions.Builder()
-          .setCredentials(GoogleCredentials.getApplicationDefault())
-          .setProjectId("phoebeliang-step")
-          .build();
-      FirebaseApp.initializeApp(options);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    Firebase.init();
   }
 
   static Firestore db = FirestoreClient.getFirestore();
   static DocumentReference docRef = db.collection("credentials").document("credential");
+
+  private static final DataStoreFactory dataStoreFactory = new AbstractDataStoreFactory() {
+    @Override
+    protected <V extends Serializable> DataStore<V> createDataStore(final String id) {
+      System.out.println("here1");
+      return new FireDataStore<>(this, id);
+    }
+  };
 
   /**
    * Global instance of the scopes required by this quickstart. If modifying these
@@ -140,6 +129,7 @@ public class ServiceCreation {
 
     @Override
     public DataStore<V> set(String key, V value) throws IOException {
+      System.out.println("here4");
       final String encoded = Base64.getEncoder().encodeToString(SerializationUtils.serialize(value));
       Map<String, Object> data = new HashMap<>();
       data.put(key, encoded);
@@ -151,6 +141,7 @@ public class ServiceCreation {
     @Override
     public V get(String key) throws IOException {
       try {
+        System.out.println("here5");
         DocumentSnapshot document = docRef.get().get();
         if (!document.exists()) return null;
         final String encoded = document.getString(key);

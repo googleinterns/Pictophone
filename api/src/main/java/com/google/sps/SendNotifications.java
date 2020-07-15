@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class SendNotifications {
-  boolean firebaseInitialized = false;
+  public static boolean firebaseInitialized = false;
 
   public List<Email> gatherRecipients(HttpServletRequest request, HttpServletResponse response, Firestore db)
       throws IOException {
@@ -115,7 +115,7 @@ public class SendNotifications {
     return notification;
   }
 
-  @GetMapping("/notify")
+  @GetMapping("/api/notify")
   public void sendEmail(HttpServletRequest request, HttpServletResponse response)
       throws IOException, InterruptedException, ExecutionException {
 
@@ -133,7 +133,6 @@ public class SendNotifications {
     String emailType = request.getParameter("emailType");
     String gameID = request.getParameter("gameID");
     final String FROM = "pictophone.noreply@gmail.com";
-    // ImageStorage.downloadObject("kitten.png");
 
 
     DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
