@@ -13,15 +13,15 @@ public class Application {
     SpringApplication.run(Application.class, args);
 
     try {
-			ServiceCreation.createService();
-		} catch(Exception e) {
-			System.out.println("Working Directory = " + System.getProperty("user.dir"));
-			System.out.println("Exception Caught Here: " + e);
-		}
-	}
+      ServiceCreation.createService();
+    } catch(Exception e) {
+      System.out.println("Working Directory = " + System.getProperty("user.dir"));
+      System.out.println("Exception Caught Here: " + e);
+    }
+  }
 
-	@GetMapping("/")
-	public String hello() {
-		return "Hello world!";
-	}
+  @GetMapping("/")
+  public String hello() {
+    return "Hello world!";
+  }
 }
