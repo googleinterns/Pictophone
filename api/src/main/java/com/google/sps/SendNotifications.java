@@ -3,33 +3,23 @@ package com.google.sps;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.api.services.gmail.model.Message;
-import com.google.api.core.ApiFuture;
 import com.google.api.services.gmail.Gmail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.*;
 
 import org.apache.commons.codec.binary.Base64;
@@ -38,20 +28,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class SendNotifications {
-  boolean firebaseInitialized = false;
+  static boolean firebaseInitialized = false;
 
-  public List<EmailCreation> gatherRecipients(HttpServletRequest request, HttpServletResponse response, Firestore db)
-      throws IOException {
+  public List<EmailCreation> gatherRecipients(HttpServletRequest request, HttpServletResponse response)
+    throws IOException {
 
+    Firestore db = FirestoreClient.getFirestore();
     String gameID = request.getParameter("gameID");
-    String emailType = request.getParameter("emailType");
+    EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
     List<EmailCreation> emails = new ArrayList<>();
 
     DocumentReference game = db.collection("games").document(gameID);
     CollectionReference players = db.collection("users");
     try {
       DocumentSnapshot gameDocSnap = game.get().get();
-      List<String> playerNames = (List<String>) gameDocSnap.get("players");
+
+      List<String> playerNames = ((List<String>) gameDocSnap.get("players"));
 
       for (String player : playerNames) {
         DocumentSnapshot usersDocSnap = players.document(player).get().get();
@@ -61,9 +53,9 @@ public class SendNotifications {
         String playerName = usersDocSnap.getString("username");
 
         // Adding player to Email object
-        if (emailType.equalsIgnoreCase("start")) {
+        if (emailType == EmailType.START) {
           emails.add(EmailCreation.startGameEmail(gameID, new User(playerEmail, playerName)));
-        } else if (emailType.equalsIgnoreCase("end") || emailType.equalsIgnoreCase("turn")) {
+        } else if (emailType == EmailType.TURN) {
           emails.add(EmailCreation.endGameEmail(gameID, new User(playerEmail, playerName)));
         }
 
@@ -79,8 +71,10 @@ public class SendNotifications {
     return emails;
   }
 
-  public EmailCreation getNextPlayer(HttpServletRequest request, HttpServletResponse response, Firestore db)
-      throws IOException {
+  public EmailCreation getNextPlayer(HttpServletRequest request, HttpServletResponse response)
+    throws IOException {
+
+    Firestore db = FirestoreClient.getFirestore();
     String gameID = request.getParameter("gameID");
     DocumentReference game = db.collection("games").document(gameID);
     CollectionReference players = db.collection("users");
@@ -112,18 +106,10 @@ public class SendNotifications {
   public void sendEmail(HttpServletRequest request, HttpServletResponse response)
       throws IOException, InterruptedException, ExecutionException {
 
-    if (!firebaseInitialized) {
-      GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-      String projectId = "phoebeliang-step";
-      FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).setProjectId(projectId)
-          .build();
-      FirebaseApp.initializeApp(options);
-      firebaseInitialized = true;
-    }
-
+    Firebase.init();
     Firestore db = FirestoreClient.getFirestore();
 
-    String emailType = request.getParameter("emailType");
+    EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
     String gameID = request.getParameter("gameID");
     final String FROM = "pictophone.noreply@gmail.com";
 
@@ -131,30 +117,32 @@ public class SendNotifications {
     int amtOfPlayers = ((List<String>) docSnap.get("players")).size();
     int currentPlayer = (int) ((long) docSnap.get("currentPlayerIndex"));
 
-    System.out.println(currentPlayer);
-
-    if (emailType.equalsIgnoreCase("start") || emailType.equalsIgnoreCase("end") || (currentPlayer+1) > amtOfPlayers) {
-      List<EmailCreation> emails = gatherRecipients(request, response, db);
+    if (emailType == EmailType.START || (currentPlayer+1) > amtOfPlayers) {
+      List<EmailCreation> emails = gatherRecipients(request, response);
 
       try {
         Gmail service = ServiceCreation.createService();
 
         for (EmailCreation email : emails) {
-          MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());	      List<EmailCreation> emails = gatherRecipients(request, response, db);
+          MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
           Message testMessage = sendMessage(service, FROM, encoded);
+
+          System.out.println("Email: " + testMessage.toPrettyString());
         }
       } catch (Exception e) {
         System.out.println("Sending Email Exception: " + e);
         System.err.println(e);
       }
-    } else if (emailType.equalsIgnoreCase("turn")) {
-      EmailCreation player = getNextPlayer(request, response, db);
+    } else if (emailType == EmailType.TURN) {
+      EmailCreation player = getNextPlayer(request, response);
 
       try {
         Gmail service = ServiceCreation.createService();
 
         MimeMessage encoded = createEmail(player.getEmail(), FROM, player.getSubject(), player.getBody());
         Message testMessage = sendMessage(service, FROM, encoded);
+
+        System.out.println("Email: " + testMessage.toPrettyString());
       } catch (Exception e) {
         System.out.println("Exception with service: " + e);
       }
@@ -195,7 +183,6 @@ public class SendNotifications {
     message = service.users().messages().send(userId, message).execute();
 
     System.out.println("Message id: " + message.getId());
-    System.out.println(message.toPrettyString());
     return message;
   }
 }
