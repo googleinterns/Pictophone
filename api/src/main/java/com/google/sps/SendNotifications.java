@@ -50,15 +50,11 @@ public class SendNotifications {
 
         // Retrieves player information
         String playerEmail = usersDocSnap.getString("email");
-        String playerName = usersDocSnap.getString("username");
+        String hostName = players.document(playerNames.get(0)).get().get().getString("username");
 
         // Adding player to Email object
-        if (emailType == EmailType.START) {
-          emails.add(EmailCreation.startGameEmail(gameID, new User(playerEmail, playerName)));
-        } else if (emailType == EmailType.TURN) {
-          emails.add(EmailCreation.endGameEmail(gameID, new User(playerEmail, playerName)));
-        }
-
+        emails.add(emailType.createEmail(gameID, playerEmail, hostName));
+        
         // Checks if there are any players
         if (emails.isEmpty()) {
           throw new IllegalArgumentException();
