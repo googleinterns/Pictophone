@@ -26,11 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.sendgrid.*;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
-
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
@@ -117,8 +112,6 @@ public class SendNotifications {
   public void sendEmail(HttpServletRequest request, HttpServletResponse response)
       throws IOException, InterruptedException, ExecutionException {
 
-    System.out.println("function called");
-
     if (!firebaseInitialized) {
       GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
       String projectId = "phoebeliang-step";
@@ -130,13 +123,10 @@ public class SendNotifications {
 
     Firestore db = FirestoreClient.getFirestore();
 
-    System.out.println("Firestore initialized");
-
     String emailType = request.getParameter("emailType");
     String gameID = request.getParameter("gameID");
     final String FROM = "pictophone.noreply@gmail.com";
 
-    System.out.println(gameID);
     DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
     int amtOfPlayers = ((List<String>) docSnap.get("players")).size();
     int currentPlayer = (int) ((long) docSnap.get("currentPlayerIndex"));
@@ -146,25 +136,25 @@ public class SendNotifications {
     if (emailType.equalsIgnoreCase("start") || emailType.equalsIgnoreCase("end") || (currentPlayer+1) > amtOfPlayers) {
       List<EmailCreation> emails = gatherRecipients(request, response, db);
 
-      System.out.println("gathered recipients..");
-
       try {
+        Gmail service = ServiceCreation.createService();
+
         for (EmailCreation email : emails) {
-          createAndSendEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
+          MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());	      List<EmailCreation> emails = gatherRecipients(request, response, db);
+          Message testMessage = sendMessage(service, FROM, encoded);
         }
       } catch (Exception e) {
-        System.out.println("Method Exception: " + e);
+        System.out.println("Sending Email Exception: " + e);
         System.err.println(e);
       }
     } else if (emailType.equalsIgnoreCase("turn")) {
       EmailCreation player = getNextPlayer(request, response, db);
 
-      System.out.println("got next player...");
-
-      System.out.println(player.getEmail());
-
       try {
-        createAndSendEmail(player.getEmail(), FROM, player.getSubject(), player.getBody());
+        Gmail service = ServiceCreation.createService();
+
+        MimeMessage encoded = createEmail(player.getEmail(), FROM, player.getSubject(), player.getBody());
+        Message testMessage = sendMessage(service, FROM, encoded);
       } catch (Exception e) {
         System.out.println("Exception with service: " + e);
       }
@@ -174,29 +164,19 @@ public class SendNotifications {
 
   // ***********************HELPER METHODS**********************************
 
-  private static void createAndSendEmail(String to, String from, String subject, String bodyText)
+  private static MimeMessage createEmail(String to, String from, String subject, String bodyText)
       throws MessagingException {
     Properties props = new Properties();
+    Session session = Session.getDefaultInstance(props, null);
 
-    Content content = new Content("text/plain", bodyText);
-    Email eFrom = new Email(from);
-    Email eTo = new Email(to);
-    Mail mail = new Mail(eFrom, subject, eTo, content);
+    MimeMessage email = new MimeMessage(session);
 
-    SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
-    Request request = new Request();
+    email.setFrom(new InternetAddress(from));
+    email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
+    email.setSubject(subject);
+    email.setText(bodyText);
 
-    try {
-      request.setMethod(Method.POST);
-      request.setEndpoint("mail/send");
-      request.setBody(mail.build());
-      Response response = sg.api(request);
-      System.out.println(response.getStatusCode());
-      System.out.println(response.getBody());
-      System.out.println(response.getHeaders());
-    } catch(Exception e) {
-      System.out.println(e);
-    }
+    return email;
   }
 
   private static Message createMessageWithEmail(MimeMessage emailContent) throws MessagingException, IOException {

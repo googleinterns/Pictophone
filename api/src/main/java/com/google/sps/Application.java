@@ -10,7 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 public class Application {
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+    SpringApplication.run(Application.class, args);
+
+    try {
+			ServiceCreation.createService();
+		} catch(Exception e) {
+			System.out.println("Working Directory = " + System.getProperty("user.dir"));
+			System.out.println("Exception Caught Here: " + e);
+		}
 	}
 
 	@GetMapping("/")

@@ -51,7 +51,6 @@ import org.apache.commons.lang3.SerializationUtils;
 public class ServiceCreation {
   private static final String APPLICATION_NAME = "Notifications";
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  private static final String TOKENS_DIRECTORY_PATH = "tokens123";
 
   static {
     Firebase.init();
