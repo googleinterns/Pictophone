@@ -93,6 +93,7 @@ class Firebase {
       players: [],
       startDate: this.fieldValue.serverTimestamp(),
       currentPlayerIndex: 0,
+      hasStarted: false,
     })
     .then(gameRef => {
       gameRef.update({
