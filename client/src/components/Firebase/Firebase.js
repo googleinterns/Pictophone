@@ -107,15 +107,21 @@ class Firebase {
       return gameRef;
     });
 
-  doAddUserToGame = (gameId) =>
-    this.game(gameId).update({
+  doAddUserToGame = async (gameId) => {
+    const gameDoc = await this.game(gameId).get();
+
+    if (gameDoc.data().players.includes(this.auth.currentUser.uid)) {
+      throw new Error('You\'re already in this game!');
+    }
+
+    await this.game(gameId).update({
       players: this.fieldValue.arrayUnion(this.auth.currentUser.uid)
-    })
-    .then(() => {
-      this.user(this.auth.currentUser.uid).update({
-        games: this.fieldValue.arrayUnion(gameId)
-      });
     });
+
+    await this.user(this.auth.currentUser.uid).update({
+      games: this.fieldValue.arrayUnion(gameId)
+    });
+  }
 }
 
 export default Firebase;
