@@ -109,9 +109,14 @@ class Firebase {
 
   doAddUserToGame = async (gameId) => {
     const gameDoc = await this.game(gameId).get();
+    const game = gameDoc.data();
 
-    if (gameDoc.data().players.includes(this.auth.currentUser.uid)) {
+    if (game.players.includes(this.auth.currentUser.uid)) {
       throw new Error('You\'re already in this game!');
+    }
+
+    if (game.currentPlayerIndex >= game.players.length) {
+      throw new Error('This game has already ended!');
     }
 
     await this.game(gameId).update({
