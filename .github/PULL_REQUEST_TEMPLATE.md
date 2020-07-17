@@ -6,7 +6,7 @@
 
 {Enter issue ID or 'none'}
 
-### Are there more details that are relevant?
+### Screenshots
 
 {Fill in here or 'none'}
 
