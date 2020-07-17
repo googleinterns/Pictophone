@@ -3,23 +3,36 @@ package com.google.sps;
 public class Email {
 
  private final User player;
- private String subject;
- private String body;
+ private final String subject;
+ private final String body;
+ static String tempSubject;
+ static String tempBody;
 
-  public Email(User player) {
+  public Email(User player, String subject, String body) {
     this.player = player;
-    subject = "Subject";
-    body = "body";
+    this.subject = subject;
+    this.body = body;
   }
 
-  public void startGame(String gameID) {
-    subject = "You have an invitation!";
-    body = "Welcome to Pictophone!\n\n" + player.getName() + " has invited you to a game! Join here: http://phoebeliang-step.appspot.com/game/" + gameID;
+  public static Email startGameEmail(String gameID, User player) {
+    tempSubject = "You have an invitation!";
+    tempBody = "Welcome to Pictophone!\n\n" + player.getName() + " has invited you to a game! Join here: http://phoebeliang-step.appspot.com/game/" + gameID;
+
+    return new Email(player, tempSubject, tempBody);
   }
 
-  public void playerTurn(String gameID) {
-    subject = "Your turn to draw!";
-    body = "It's time to draw!\n\n Click here to play: http://phoebeliang-step.appspot.com/game/" + gameID;
+  public static Email playerTurnEmail(String gameID, User player) {
+    tempSubject = "Your turn to draw!";
+    tempBody = "It's time to draw!\n\n Click here to play: http://phoebeliang-step.appspot.com/game/" + gameID;
+
+    return new Email(player, tempSubject, tempBody);
+  }
+
+  public static Email endGameEmail(String gameID, User player) {
+    tempSubject = "The game has ended!";
+    tempBody = "Thanks for playing! Find all the images from the game attached below. Come play again sometime:\n\nhttp://phoebeliang-step.appspot.com/game/" + gameID;
+
+    return new Email(player, tempSubject, tempBody);
   }
 
   public String getBody(){
@@ -31,7 +44,6 @@ public class Email {
   }
 
   public String getEmail(){
-
     return player.getEmail();
   }
 }
