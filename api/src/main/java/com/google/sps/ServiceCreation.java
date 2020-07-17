@@ -41,10 +41,8 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.sps.Firebase;
 
 import org.springframework.util.ResourceUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
 
@@ -142,9 +140,8 @@ public class ServiceCreation {
         }
         return SerializationUtils.deserialize(Base64.getDecoder().decode(encoded));
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new IOException(e);
       }
-      return null;
     }
 
     @Override
@@ -176,7 +173,7 @@ public class ServiceCreation {
           result.add(deserialized);
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new IOException(e);
       }
       return result;
     }
@@ -194,7 +191,7 @@ public class ServiceCreation {
           result.add(entry.getKey().toString());
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new IOException(e);
       }
 
       return result;

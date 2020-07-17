@@ -30,13 +30,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class SendNotifications {
   static boolean firebaseInitialized = false;
 
-  public List<EmailCreation> gatherRecipients(HttpServletRequest request, HttpServletResponse response)
+  public List<Email> gatherRecipients(HttpServletRequest request, HttpServletResponse response)
     throws IOException {
 
     Firestore db = FirestoreClient.getFirestore();
     String gameID = request.getParameter("gameID");
     EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
-    List<EmailCreation> emails = new ArrayList<>();
+    List<Email> emails = new ArrayList<>();
 
     DocumentReference game = db.collection("games").document(gameID);
     CollectionReference players = db.collection("users");
@@ -54,27 +54,26 @@ public class SendNotifications {
 
         // Adding player to Email object
         emails.add(emailType.createEmail(gameID, playerEmail, hostName));
-        
+
         // Checks if there are any players
         if (emails.isEmpty()) {
           throw new IllegalArgumentException();
         }
       }
     } catch (Exception e) {
-      System.out.println("Exception in gatherRecipients" + e);
+      throw new IOException(e);
     }
 
     return emails;
   }
 
-  public EmailCreation getNextPlayer(HttpServletRequest request, HttpServletResponse response)
+  public Email getNextRecipient(HttpServletRequest request, HttpServletResponse response)
     throws IOException {
 
     Firestore db = FirestoreClient.getFirestore();
     String gameID = request.getParameter("gameID");
     DocumentReference game = db.collection("games").document(gameID);
     CollectionReference players = db.collection("users");
-    EmailCreation notification = null;
 
     try {
       DocumentSnapshot gameDocSnap = game.get().get();
@@ -86,16 +85,10 @@ public class SendNotifications {
       // Retrieves player information
       String playerEmail = usersDocSnap.getString("email");
 
-      notification = EmailCreation.playerTurnEmail(gameID, new User(playerEmail, playerName));
+      return Email.playerTurnEmail(gameID, new User(playerEmail, playerName));
     } catch (Exception e) {
-      System.out.println("Exception with DocumentSnapshot" + e);
+      throw new IOException(e);
     }
-
-    if (notification == null) {
-      throw new IllegalArgumentException();
-    }
-
-    return notification;
   }
 
   @PostMapping("/api/notify")
@@ -110,16 +103,14 @@ public class SendNotifications {
     final String FROM = "pictophone.noreply@gmail.com";
 
     DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
-    int amtOfPlayers = ((List<String>) docSnap.get("players")).size();
-    int currentPlayer = (int) ((long) docSnap.get("currentPlayerIndex"));
 
-    if (emailType == EmailType.START || (currentPlayer+1) > amtOfPlayers) {
-      List<EmailCreation> emails = gatherRecipients(request, response);
+    if (emailType == EmailType.START || emailType == EmailType.END) {
+      List<Email> emails = gatherRecipients(request, response);
 
       try {
         Gmail service = ServiceCreation.createService();
 
-        for (EmailCreation email : emails) {
+        for (Email email : emails) {
           MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
           Message testMessage = sendMessage(service, FROM, encoded);
 
@@ -130,7 +121,7 @@ public class SendNotifications {
         System.err.println(e);
       }
     } else if (emailType == EmailType.TURN) {
-      EmailCreation player = getNextPlayer(request, response);
+      Email player = getNextRecipient(request, response);
 
       try {
         Gmail service = ServiceCreation.createService();
