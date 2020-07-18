@@ -79,8 +79,6 @@ class Firebase {
 
   users = () => this.db.collection('users');
 
-  usernames = () => this.db.collection('usernames');
-
   // *** Game API ***
 
   game = gameId => this.db.doc(`games/${gameId}`);
