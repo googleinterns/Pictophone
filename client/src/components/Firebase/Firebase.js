@@ -85,13 +85,15 @@ class Firebase {
 
   games = () => this.db.collection('games');
 
-  doCreateGame = (gameName) =>
+  doCreateGame = (gameName, timeLimit, maxNumPlayers) =>
     this.games().add({
       gameName: gameName,
       players: [],
       startDate: this.fieldValue.serverTimestamp(),
       currentPlayerIndex: 0,
       hasStarted: false,
+      timeLimit: timeLimit,
+      maxNumPlayers: maxNumPlayers,
     })
     .then(gameRef => {
       gameRef.update({
