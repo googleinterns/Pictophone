@@ -31,8 +31,17 @@ class SignUpFormBase extends Component {
     const { username, email, passwordOne } = this.state;
     const games = [];
 
-    this.props.firebase
-      .doCreateUserWithEmailAndPassword(email, passwordOne)
+    let usersRef = this.props.firebase.users();
+
+    usersRef.where('username', '==', username).get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          return this.props.firebase
+            .doCreateUserWithEmailAndPassword(email,passwordOne);
+        } else {
+          throw new Error('username already taken');
+        }
+      })
       .then(authUser => {
         // Create a user in Firestore
         return this.props.firebase

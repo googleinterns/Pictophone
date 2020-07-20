@@ -16,6 +16,8 @@ const CreateGamePage = () => (
 
 const INITIAL_STATE = {
   gameName: '',
+  timeLimit: null,
+  maxNumPlayers: null,
   createdGameId: '',
   error: null,
 };
@@ -28,10 +30,10 @@ class CreateGameFormBase extends Component {
   }
 
   onSubmit = event => {
-    const { gameName } = this.state;
+    const { gameName, timeLimit, maxNumPlayers } = this.state;
 
     this.props.firebase
-      .doCreateGame(gameName)
+      .doCreateGame(gameName, timeLimit, maxNumPlayers)
       .then(gameRef => {
         this.setState({ ...INITIAL_STATE });
         this.setState({ createdGameId: gameRef.id });
@@ -50,11 +52,16 @@ class CreateGameFormBase extends Component {
   render() {
     const {
       gameName,
+      timeLimit,
+      maxNumPlayers,
       createdGameId,
       error,
     } = this.state;
 
-    const isInvalid = gameName === '';
+    const isInvalid =
+      gameName === '' ||
+      timeLimit === null ||
+      maxNumPlayers === null;
 
     return (
       <form onSubmit={this.onSubmit}>
@@ -64,6 +71,22 @@ class CreateGameFormBase extends Component {
           onChange={this.onChange}
           type="text"
           placeholder="Game Name"
+        />
+
+        <input
+          name="timeLimit"
+          value={timeLimit}
+          onChange={this.onChange}
+          type="number"
+          placeholder="Time Limit Per Turn (minutes)"
+        />
+
+        <input
+          name="maxNumPlayers"
+          value={maxNumPlayers}
+          onChange={this.onChange}
+          type="number"
+          placeholder="Maximum Number of Players"
         />
 
         <button disabled={isInvalid} type="submit">Create Game</button>
