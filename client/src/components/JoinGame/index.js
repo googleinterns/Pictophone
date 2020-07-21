@@ -33,7 +33,7 @@ class JoinGameFormBase extends Component {
       .doAddUserToGame(gameId)
       .then(() => {
         this.setState({ ...INITIAL_STATE });
-        this.props.history.push(ROUTES.DASHBOARD);
+        this.props.history.push(`/game/${gameId}`);
       })
       .catch(error => {
         this.setState({ error });

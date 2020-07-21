@@ -1,117 +1,146 @@
 package com.google.sps;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.QuerySnapshot;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.api.services.gmail.model.Message;
-import com.google.api.core.ApiFuture;
 import com.google.api.services.gmail.Gmail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.*;
 
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class SendNotifications {
+  static boolean firebaseInitialized = false;
 
-  public List<Email> gatherRecipients() throws IOException {
-    GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-
-    System.out.println("Google Credentials created...");
-
-    String projectId = "phoebeliang-step";
-    FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).setProjectId(projectId).build();
-    FirebaseApp.initializeApp(options);
-
-    System.out.println("App Initialized...");
+  public List<Email> gatherRecipients(HttpServletRequest request, HttpServletResponse response)
+    throws IOException {
 
     Firestore db = FirestoreClient.getFirestore();
-
-    String gameID = "dT6U1wQKR1rGJcEncyMS";
+    String gameID = request.getParameter("gameID");
+    EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
     List<Email> emails = new ArrayList<>();
 
     DocumentReference game = db.collection("games").document(gameID);
-
+    CollectionReference players = db.collection("users");
     try {
       DocumentSnapshot gameDocSnap = game.get().get();
-      List<String> playerNames = (List<String>) gameDocSnap.get("players");
 
-      for(String player: playerNames) {
-        ApiFuture<QuerySnapshot> futurePlayers = db.collection("users").whereEqualTo("username", player).get();
-        List<QueryDocumentSnapshot> usersDocSnap = futurePlayers.get().getDocuments();
+      List<String> playerNames = ((List<String>) gameDocSnap.get("players"));
+
+      for (String player : playerNames) {
+        DocumentSnapshot usersDocSnap = players.document(player).get().get();
 
         // Retrieves player information
-        Map<String,Object> playerInfo = usersDocSnap.get(0).getData();
-        String playerEmail = (String) playerInfo.get("email");
-        String playerName = (String) playerInfo.get("username");
-
-        System.out.println(playerEmail);
+        String playerEmail = usersDocSnap.getString("email");
+        String hostName = players.document(playerNames.get(0)).get().get().getString("username");
 
         // Adding player to Email object
-        emails.add(new Email(new User(playerEmail, playerName)));
+        emails.add(emailType.createEmail(gameID, playerEmail, hostName));
 
-        // Adds Start game message to the email object
-        if(emails.isEmpty()) {
+        // Checks if there are any players
+        if (emails.isEmpty()) {
           throw new IllegalArgumentException();
-        } else {
-          emails.get(emails.size()-1).playerTurn(gameID);
         }
       }
     } catch (Exception e) {
-      System.out.println(e);
+      throw new IOException(e);
     }
 
     return emails;
   }
 
-  @GetMapping("/notifyTurn")
-  public void playerTurnEmail() throws IOException {
-    List<Email> emails = gatherRecipients();
-    final String FROM = "pictophone.noreply@gmail.com";
+  public Email getNextRecipient(HttpServletRequest request, HttpServletResponse response)
+    throws IOException {
 
-    try{
-      Gmail service = ServiceCreation.createService();
+    Firestore db = FirestoreClient.getFirestore();
+    String gameID = request.getParameter("gameID");
+    DocumentReference game = db.collection("games").document(gameID);
+    CollectionReference players = db.collection("users");
 
-      for(Email email: emails) {
-        MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
-        Message testMessage = sendMessage(service, FROM, encoded);
-      }
-    } catch(Exception e) {
-      System.out.println("Method Exception: " + e);
-      System.err.println(e);
+    try {
+      DocumentSnapshot gameDocSnap = game.get().get();
+      int currentPlayerIndex = (int) ((long) gameDocSnap.get("currentPlayerIndex"));
+      String playerName = ((List<String>) gameDocSnap.get("players")).get(currentPlayerIndex);
+
+      DocumentSnapshot usersDocSnap = players.document(playerName).get().get();
+
+      // Retrieves player information
+      String playerEmail = usersDocSnap.getString("email");
+
+      return Email.playerTurnEmail(gameID, new User(playerEmail, playerName));
+    } catch (Exception e) {
+      throw new IOException(e);
     }
   }
 
-  //***********************HELPER METHODS**********************************
+  @PostMapping("/api/notify")
+  public void sendEmail(HttpServletRequest request, HttpServletResponse response)
+      throws IOException, InterruptedException, ExecutionException {
+
+    Firebase.init();
+    Firestore db = FirestoreClient.getFirestore();
+
+    EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
+    String gameID = request.getParameter("gameID");
+    final String FROM = "pictophone.noreply@gmail.com";
+
+    DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
+
+    if (emailType == EmailType.START || emailType == EmailType.END) {
+      List<Email> emails = gatherRecipients(request, response);
+
+      try {
+        Gmail service = ServiceCreation.createService();
+
+        for (Email email : emails) {
+          MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
+          Message testMessage = sendMessage(service, FROM, encoded);
+
+          System.out.println("Email: " + testMessage.toPrettyString());
+        }
+      } catch (Exception e) {
+        System.out.println("Sending Email Exception: " + e);
+        System.err.println(e);
+      }
+    } else if (emailType == EmailType.TURN) {
+      Email player = getNextRecipient(request, response);
+
+      try {
+        Gmail service = ServiceCreation.createService();
+
+        MimeMessage encoded = createEmail(player.getEmail(), FROM, player.getSubject(), player.getBody());
+        Message testMessage = sendMessage(service, FROM, encoded);
+
+        System.out.println("Email: " + testMessage.toPrettyString());
+      } catch (Exception e) {
+        System.out.println("Exception with service: " + e);
+      }
+    }
+
+  }
+
+  // ***********************HELPER METHODS**********************************
 
   private static MimeMessage createEmail(String to, String from, String subject, String bodyText)
-    throws MessagingException {
+      throws MessagingException {
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
 
@@ -136,12 +165,11 @@ public class SendNotifications {
   }
 
   private static Message sendMessage(Gmail service, String userId, MimeMessage emailContent)
-    throws MessagingException, IOException {
-  Message message = createMessageWithEmail(emailContent);
-  message = service.users().messages().send(userId, message).execute();
+      throws MessagingException, IOException {
+    Message message = createMessageWithEmail(emailContent);
+    message = service.users().messages().send(userId, message).execute();
 
-  System.out.println("Message id: " + message.getId());
-  System.out.println(message.toPrettyString());
-      return message;
+    System.out.println("Message id: " + message.getId());
+    return message;
   }
 }
