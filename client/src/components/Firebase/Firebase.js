@@ -111,6 +111,10 @@ class Firebase {
     const gameDoc = await this.game(gameId).get();
     const game = gameDoc.data();
 
+    if (!gameDoc.exists) {
+      throw new Error('Invalid game ID');
+    }
+
     if (game.players.includes(this.auth.currentUser.uid)) {
       throw new Error('You\'re already in this game!');
     }
