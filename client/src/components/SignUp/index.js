@@ -85,38 +85,6 @@ class SignUpFormBase extends Component {
         this.setState({ error });
       });
 
-    // usersRef.where('username', '==', username).get()
-    //   .then(snapshot => {
-    //     if (snapshot.empty) {
-    //       return this.props.firebase
-    //         .doCreateUserWithEmailAndPassword(email,passwordOne);
-    //     } else {
-    //       throw new Error('username already taken');
-    //     }
-    //   })
-    //   .then(authUser => {
-    //     // Create a user in Firestore
-    //     return this.props.firebase
-    //       .user(authUser.user.uid)
-    //       .set({
-    //         username,
-    //         email,
-    //         games,
-    //       },
-    //       { merge: true },
-    //       );
-    //   })
-    //   .then(() => {
-    //     return this.props.firebase.doSendEmailVerification();
-    //   })
-    //   .then(() => {
-    //     this.setState({ ...INITIAL_STATE });
-    //     this.props.history.push(ROUTES.LANDING);
-    //   })
-    //   .catch(error => {
-    //     this.setState({ error });
-    //   });
-
     event.preventDefault();
   };
 
