@@ -27,12 +27,7 @@ public class ValidateUsername {
   }
 
   private static String isUniqueUsername(String username) throws IOException {
-    String projectId = "phoebeliang-step";
-    GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-
-    FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).setProjectId(projectId).build();
-    FirebaseApp.initializeApp(options);
-
+    Firebase.init();
     Firestore db = FirestoreClient.getFirestore();
 
     CollectionReference users = db.collection("users");
