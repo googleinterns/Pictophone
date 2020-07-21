@@ -1,7 +1,5 @@
 package com.google.sps;
 
-import com.google.api.gax.rpc.InvalidArgumentException;
-
 enum EmailType {
   START, TURN, END;
 
