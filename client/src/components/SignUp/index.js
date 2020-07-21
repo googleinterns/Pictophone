@@ -53,15 +53,36 @@ class SignUpFormBase extends Component {
     const { username, email, passwordOne } = this.state;
     const games = [];
 
-    let usersRef = this.props.firebase.users();
-
     this.isUsernameUnique(username)
       .then(() => {
-        console.log(this.state.isUnique);
-        console.log(typeof this.state.isUnique);
+        if (this.state.isUnique) {
+          return this.props.firebase
+            .doCreateUserWithEmailAndPassword(email, passwordOne);
+        } else {
+          throw new Error('username already taken');
+        }
+      })
+      .then(authUser => {
+        return this.props.firebase
+          .user(authUser.user.uid)
+          .set({
+            username,
+            email,
+            games,
+          },
+          { merge: true },
+          );
+      })
+      .then(() => {
+        return this.props.firebase.doSendEmailVerification();
+      })
+      .then(() => {
+        this.setState({ ...INITIAL_STATE });
+        this.props.history.push(ROUTES.LANDING);
       })
       .catch(error => {
         console.log(error);
+        this.setState({ error });
       });
 
     // usersRef.where('username', '==', username).get()
