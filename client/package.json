@@ -12,7 +12,6 @@
     "create-react-class": "^15.6.3",
     "file-saver": "^2.0.2",
     "firebase": "^7.15.5",
-    "firebase-admin": "^8.12.1",
     "jquery": "^3.5.1",
     "jszip": "^3.5.0",
     "literallycanvas": "^0.5.2",
