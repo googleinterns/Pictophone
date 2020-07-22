@@ -6,6 +6,7 @@ import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
 import JSZip from "jszip";
+import FabricCanvas from './FabricCanvas';
 const zip = new JSZip();
 
 class Endgame extends Component {
@@ -63,6 +64,7 @@ class Endgame extends Component {
     return (
       <div className="Endgame">
         <h4>The game is finished! Here are the drawings:</h4>
+        <FabricCanvas />
         <div className="drawing-list">
           {drawings.map((url) => <img class="thumb" src={url} alt="result" />)}
         </div>

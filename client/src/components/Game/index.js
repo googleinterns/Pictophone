@@ -6,9 +6,10 @@ import { withRouter } from 'react-router';
 import Banner from '../Banner';
 import { compose } from 'recompose';
 import Canvas from './Canvas';
-import Endgame from './Endgame';
+import { FabricContextProvider } from './FabricContextProvider';
 import * as ROUTES from '../../constants/routes';
-import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';;
+import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
+;
 
 class Game extends Component {
 
@@ -71,7 +72,7 @@ class Game extends Component {
                 }
               </AuthUserContext.Consumer>
             } else {
-              return <Endgame />
+              return <FabricContextProvider />
             }
           })()
         }
