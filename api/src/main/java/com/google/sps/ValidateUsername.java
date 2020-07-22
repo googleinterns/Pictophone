@@ -26,7 +26,7 @@ public class ValidateUsername {
     return isUniqueUsername(username);
   }
 
-  private static Boolean isUniqueUsername(String username) throws IOException {
+  private static Boolean isUniqueUsername(String username) throws Exception {
     Firebase.init();
     Firestore db = FirestoreClient.getFirestore();
 
@@ -34,15 +34,11 @@ public class ValidateUsername {
 
     Query query = users.whereEqualTo("username", username);
 
-    try {
-      ApiFuture<QuerySnapshot> querySnapshot = query.get();
-      List<QueryDocumentSnapshot> queryDocuments = querySnapshot.get().getDocuments();
+    ApiFuture<QuerySnapshot> querySnapshot = query.get();
+    List<QueryDocumentSnapshot> queryDocuments = querySnapshot.get().getDocuments();
 
-      if (queryDocuments.isEmpty()) {
-        return true;
-      }
-    } catch (Exception e) {
-      System.out.println(e);
+    if (queryDocuments.isEmpty()) {
+      return true;
     }
 
     return false;
