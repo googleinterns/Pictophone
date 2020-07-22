@@ -37,6 +37,7 @@ class CreateGameFormBase extends Component {
       .then(gameRef => {
         this.setState({ ...INITIAL_STATE });
         this.setState({ createdGameId: gameRef.id });
+        this.props.history.push(`/game/${gameRef.id}`);
       })
       .catch(error => {
         this.setState({ error });
