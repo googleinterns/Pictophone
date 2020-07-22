@@ -59,15 +59,13 @@ class Endgame extends Component {
   }
 
   render() {
-    const { drawings } = this.state;
+    const { drawings, players } = this.state;
 
     return (
       <div className="Endgame">
         <h4>The game is finished! Here are the drawings:</h4>
-        <FabricCanvas />
-        <div className="drawing-list">
-          {drawings.map((url) => <img class="thumb" src={url} alt="result" />)}
-        </div>
+        <p>Feel free to arrange the canvas however you like!</p>
+        { drawings.length ? <FabricCanvas drawings={drawings} players={players} /> : null }
         <button onClick={this.downloadAll}>download all</button>
       </div>
     );
