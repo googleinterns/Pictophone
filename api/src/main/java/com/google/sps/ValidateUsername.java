@@ -22,11 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ValidateUsername {
   @PostMapping("/validateUsername")
-  String checkUsername(@RequestBody String username) throws Exception {
+  Boolean checkUsername(@RequestBody String username) throws Exception {
     return isUniqueUsername(username);
   }
 
-  private static String isUniqueUsername(String username) throws IOException {
+  private static Boolean isUniqueUsername(String username) throws IOException {
     Firebase.init();
     Firestore db = FirestoreClient.getFirestore();
 
@@ -39,12 +39,12 @@ public class ValidateUsername {
       List<QueryDocumentSnapshot> queryDocuments = querySnapshot.get().getDocuments();
 
       if (queryDocuments.isEmpty()) {
-        return "true";
+        return true;
       }
     } catch (Exception e) {
       System.out.println(e);
     }
 
-    return "false";
+    return false;
   }
 }

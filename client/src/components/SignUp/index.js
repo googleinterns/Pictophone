@@ -40,13 +40,9 @@ class SignUpFormBase extends Component {
     const url = '/validateUsername';
 
     const response = await fetch(url, options)
-    const isUnique = await response.text();
+    const isUnique = await response.json();
 
-    if (isUnique === 'true') {
-      this.setState({ isUnique: true });
-    } else {
-      this.setState({ isUnique: false });
-    }
+    this.setState({ isUnique: isUnique });
   }
 
   onSubmit = event => {
