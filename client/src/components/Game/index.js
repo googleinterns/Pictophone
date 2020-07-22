@@ -9,7 +9,7 @@ import Canvas from './Canvas';
 import { FabricContextProvider } from './FabricContextProvider';
 import * as ROUTES from '../../constants/routes';
 import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
-;
+const url = 'phoebeliang-step.appspot.com/game/';
 
 class Game extends Component {
 
@@ -19,6 +19,7 @@ class Game extends Component {
 
     this.fetchGame = this.fetchGame.bind(this);
     this.updateGame = this.updateGame.bind(this);
+    this.copyGameId = this.copyGameId.bind(this);
   }
 
   async componentDidMount() {
@@ -50,17 +51,32 @@ class Game extends Component {
   }
 
   updateGame(game) {
-    this.setState({ inProgress: game.currentPlayerIndex < game.players.length });
+    this.setState({
+      inProgress: game.currentPlayerIndex < game.players.length,
+      gameName: game.gameName
+     });
+  }
+
+  copyGameId() {
+    navigator.clipboard.writeText(url + this.state.gameId);
+    this.setState({
+      copied: true
+    });
+    setTimeout(() => {this.setState({copied: false})}, 700);
   }
 
   render() {
-    const { gameId, inProgress, gameExists } = this.state;
+    const { inProgress, gameExists, gameName, copied, gameId } = this.state;
 
     return (
       <div className="Game">
         <Banner />
         <Link to={ROUTES.DASHBOARD}><button>Back to home</button></Link>
-        <h3>GAME { gameId }</h3>
+        <h3>{ gameName }</h3>
+        <p>Game ID: { gameId }</p>
+        <button onClick={this.copyGameId}>
+          {copied ? 'Copied!' : 'Copy Game Link'}
+        </button>
         { // Render according to game existence and status.
           (() => {
             if (!gameExists) {
