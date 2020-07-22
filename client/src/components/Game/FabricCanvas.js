@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { FabricContext } from './FabricContextProvider';
-import fabric from 'fabric';
+import { fabric } from 'fabric';
 
 const FabricCanvas = () => {
     const [canvas, initCanvas] = useContext(FabricContext);
