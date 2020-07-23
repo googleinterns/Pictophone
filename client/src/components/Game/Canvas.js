@@ -160,7 +160,6 @@ class Canvas extends Component {
       method: 'POST',
       body: filename
     }).then((response) => response.text());
-    console.log(url);
     this.setState({ prevImg: url });
   }
 

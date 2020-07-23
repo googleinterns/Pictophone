@@ -53,17 +53,14 @@ class Endgame extends Component {
 
   downloadAll() {
     // Use JSZip to put all drawings into a zip file
-    const { gameId, players, usernames } = this.state;
+    const { drawings, usernames } = this.state;
     const folder = zip.folder('drawings');
 
     // Every player in the game generates one image
-    const blobs = players.map(function (url, i) {
-      const filename = gameId + players[i] + '.png';
-
-      // Send URL to backend to sign, get blob
+    const blobs = drawings.map(function (url, i) {
       return fetch('/api/signDownload', {
         method: 'POST',
-        body: filename
+        body: drawings[i]
       }).then((response) => response.text())
       .then(signedUrl => fetch(signedUrl))
       .then(response => response.blob());

@@ -16,6 +16,7 @@ const FabricCanvas = props => {
 
     useEffect(() => {
         const canvas = new fabric.Canvas('c');
+        canvas.backgroundColor="white";
         initCanvas(canvas);
 
         const title = new fabric.Textbox(props.title, {
@@ -34,21 +35,29 @@ const FabricCanvas = props => {
             fontSize: 20,
           });
 
-          fabric.Image.fromURL(drawing, function(img) {
-            // Make sure images are a maximum of 400px per dimension
-            const maxDim = Math.max(img.height, img.width);
-            if (maxDim > 400) {
-              const scale = 400 / maxDim;
-              img.scale(scale);
-            }
-            img.top = 40;
-            const group = new fabric.Group([ img, player ], {
-              // Offset subsequent images a little bit, but not enough to
-              // go off-canvas
-              left: Math.min(50 + i*75, 800),
-              top: 100,
+          fetch('/api/signDownload', {
+            method: 'POST',
+            body: drawing
+          }).then((response) => response.text())
+          .then((url) => {
+            fabric.Image.fromURL(url, function(img) {
+              // Make sure images are a maximum of 400px per dimension
+              const maxDim = Math.max(img.height, img.width);
+              if (maxDim > 400) {
+                const scale = 400 / maxDim;
+                img.scale(scale);
+              }
+              img.top = 40;
+              const group = new fabric.Group([ img, player ], {
+                // Offset subsequent images a little bit, but not enough to
+                // go off-canvas
+                left: Math.min(50 + i*75, 800),
+                top: 100,
+              });
+              canvas.add(group);
+            },{
+              crossOrigin: 'anonymous'
             });
-            canvas.add(group);
           });
         });
 
@@ -56,6 +65,7 @@ const FabricCanvas = props => {
         return () => {
           canvas.dispose();
         };
+    // eslint-disable-next-line
     }, []);
 
   return (
@@ -64,7 +74,7 @@ const FabricCanvas = props => {
         id='c'
         width={canvasX}
         height={canvasY}
-        style={{'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'}}
+        style={{'boxShadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'}}
       />
       <button onClick={saveCollage}>download collage</button>
     </div>
