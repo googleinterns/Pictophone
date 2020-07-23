@@ -22,19 +22,27 @@ class WaitingRoomBase extends Component {
 
     // Listens for changes in the database for player list & status of whether the game has started
 
-    gameInstance.get()
-    .then(docSnapshot => {
-      if(docSnapshot.exists) {
-        gameInstance.onSnapshot((snapshot) => {
-          this.setState({
-            players: snapshot.data().players,
-            started: snapshot.data().hasStarted,
-            gameId: id,
-            timeLimit: snapshot.data().timeLimit,
-          })
-        })
-      }
-    });
+    const unsubscribe = gameInstance.get()
+      .then(docSnapshot => {
+        if(docSnapshot.exists) {
+          gameInstance.onSnapshot((snapshot) => {
+            this.setState({
+              players: snapshot.data().players,
+              started: snapshot.data().hasStarted,
+              gameId: id,
+              timeLimit: snapshot.data().timeLimit,
+            })
+          });
+        }
+      });
+  }
+
+  async componentWillUnmount() {
+    const gameInstance = await this.props.firebase.game(id).get();
+
+    if(gameInstance.data().players >= gameInstance.data().maxNumPlayers) {
+      unsubscribe();
+    }
   }
 
   async enterGame(gameId){
