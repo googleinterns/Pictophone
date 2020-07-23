@@ -13,10 +13,11 @@ class Endgame extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { drawings: [], players: [] };
+    this.state = { drawings: [], players: [], usernames: [] };
 
     this.downloadAll = this.downloadAll.bind(this);
     this.fetchGame = this.fetchGame.bind(this);
+    this.idToUsername = this.idToUsername.bind(this);
   }
 
   async componentDidMount() {
@@ -25,18 +26,31 @@ class Endgame extends Component {
     this.fetchGame(id);
   }
 
+   async idToUsername(players) {
+    // For the MVP, we won't listen for username changes
+    // TODO add listener in Project Alpha
+    const usernames = players.map(id =>
+      this.props.firebase.user(id).get().then(snapshot =>
+        snapshot.data().username)
+    );
+    const names = await Promise.all(usernames);
+    this.setState({ usernames: names });
+  }
+
   fetchGame(gameId) {
     // Get game result, no need for listener since game is over
     const game = this.props.firebase.game(gameId);
     game.get().then((snapshot) => {
-      this.setState({ drawings: snapshot.data().drawings,
-        players: snapshot.data().players });
-    })
+      const data = snapshot.data();
+      this.setState({ drawings: data.drawings,
+        players: data.players });
+      this.idToUsername(data.players);
+    });
   }
 
   downloadAll() {
     // Use JSZip to put all drawings into a zip file
-    const { gameId, players } = this.state;
+    const { gameId, players, usernames } = this.state;
     const folder = zip.folder('drawings');
 
     // Every player in the game generates one image
@@ -54,18 +68,18 @@ class Endgame extends Component {
 
     // Wait for blobs to finish fetching and add them to a zip folder
     Promise.all(blobs);
-    blobs.forEach((blob, i) => folder.file(players[i] + '.png', blob, { binary: true }));
+    blobs.forEach((blob, i) => folder.file(usernames[i] + '.png', blob, { binary: true }));
     zip.generateAsync({type : "blob"}).then(content => saveAs(content, 'drawings.zip'));
   }
 
   render() {
-    const { drawings, players } = this.state;
+    const { drawings, usernames } = this.state;
 
     return (
       <div className="Endgame">
         <h4>The game is finished! Here are the drawings:</h4>
         <p>Feel free to arrange the canvas however you like!</p>
-        { drawings.length ? <FabricCanvas drawings={drawings} players={players} /> : null }
+        { usernames.length ? <FabricCanvas drawings={drawings} players={usernames} /> : null }
         <button onClick={this.downloadAll}>download all</button>
       </div>
     );
