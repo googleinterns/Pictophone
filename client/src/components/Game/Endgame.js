@@ -42,8 +42,11 @@ class Endgame extends Component {
     const game = this.props.firebase.game(gameId);
     game.get().then((snapshot) => {
       const data = snapshot.data();
-      this.setState({ drawings: data.drawings,
-        players: data.players });
+      this.setState({
+        drawings: data.drawings,
+        players: data.players,
+        gameName: data.gameName
+      });
       this.idToUsername(data.players);
     });
   }
@@ -73,13 +76,17 @@ class Endgame extends Component {
   }
 
   render() {
-    const { drawings, usernames } = this.state;
+    const { drawings, usernames, gameName } = this.state;
 
     return (
       <div className="Endgame">
         <h4>The game is finished! Here are the drawings:</h4>
-        <p>Feel free to arrange the canvas however you like!</p>
-        { usernames.length ? <FabricCanvas drawings={drawings} players={usernames} /> : null }
+        <p>The artwork may be overlapped.
+          Feel free to arrange the canvas however you like!</p>
+        { usernames.length ?
+          <FabricCanvas drawings={drawings} players={usernames} title={gameName} />
+          : null
+        }
         <button onClick={this.downloadAll}>download all</button>
       </div>
     );
