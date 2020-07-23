@@ -7,7 +7,7 @@ import Banner from '../Banner';
 import { compose } from 'recompose';
 import Canvas from './Canvas';
 import Endgame from './Endgame';
-import { WaitingRoom } from '../WaitingRoom';
+import WaitingRoom from '../WaitingRoom';
 import * as ROUTES from '../../constants/routes';
 import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
 const url = 'phoebeliang-step.appspot.com/game/';
@@ -20,8 +20,6 @@ class Game extends Component {
 
     this.fetchGame = this.fetchGame.bind(this);
     this.updateGame = this.updateGame.bind(this);
-    this.playerInGame = this.playerInGame.bind(this);
-    this.gameStarted = this.gameStarted.bind(this);
     this.copyGameId = this.copyGameId.bind(this);
   }
 
@@ -40,8 +38,6 @@ class Game extends Component {
         if (docSnapshot.exists) {
           game.onSnapshot(snapshot => {
             this.updateGame(snapshot.data());
-            this.playerInGame(snapshot.data());
-            this.gameStarted(snapshot.data());
           }, err => {
             console.log(`Encountered error: ${err}`);
           });
@@ -55,18 +51,8 @@ class Game extends Component {
   updateGame(game) {
     this.setState({
       inProgress: game.currentPlayerIndex < game.players.length,
-      gameName: game.gameName
-    });
-  }
-
-  playerInGame(game) {
-    this.setState({
-      playerInGame: game.players.includes(this.props.authUser.uid)
-    });
-  }
-
-  gameStarted(game) {
-    this.setState({
+      gameName: game.gameName,
+      playerInGame: game.players.includes(this.props.authUser.uid),
       gameStarted: game.hasStarted
     });
   }

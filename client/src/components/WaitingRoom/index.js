@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { withFirebase } from '../Firebase';
+import { withFirebase } from '../Firebase'
 import { compose } from 'recompose';
 import { withAuthorization } from '../Session';
 
@@ -10,64 +10,54 @@ class WaitingRoomBase extends Component {
     this.state = {
       players: [],
       gameId: '',
-      timeLimit: 10,
       started: false
     };
 
-    this.onPlayerListUpdate = this.onPlayerListUpdate.bind(this);
-    this.onGameStart = this.onGameStart.bind(this);
-    this.startGame = this.startGame.bind(this);
+    this.enterGame = this.enterGame.bind(this);
   }
 
-  async componentDidMount() {
-    //Grab gameId & timeLimit to set those as well as gameName
+  componentDidMount() {
     const { id } = this.props.match.params;
-    const gameInstance = await this.props.firebase.game(id).get();
-    this.setState({
-      gameId: id,
-      timeLimit: gameInstance.data().timeLimit,
-      started: gameInstance.data().hasStarted,
-      players: gameInstance.data().players
+    const gameInstance = this.props.firebase.game(id);
+
+    // Listens for changes in the database for player list & status of whether the game has started
+
+    gameInstance.get()
+    .then(docSnapshot => {
+      if(docSnapshot.exists) {
+        gameInstance.onSnapshot((snapshot) => {
+          this.setState({
+            players: snapshot.data().players,
+            started: snapshot.data().hasStarted,
+            gameId: id,
+            timeLimit: snapshot.data().timeLimit,
+          })
+        })
+      }
     });
   }
 
-
-
-  //Listens for an update to players
-  async onPlayerListUpdate(gameId) {
-    const game = this.props.firebase.game(gameId).get();
-    game.on('child_added', async function(snapshot)
-    {
-      this.setState({
-        players: snapshot.data().players
-      })
-    });
-  }
-
-  async onGameStart(gameId) {
-    const game = await this.props.firebase.game(gameId).get();
-
-    console.log('started');
-    game.on('value', (snapshot) => {
-      this.setState({
-        started: snapshot.data().hasStarted
-      })
-    })
-  }
-
-  async startGame(gameId){
+  async enterGame(gameId){
     const game = this.props.firebase.db.doc(`games/${gameId}`);
-    game.update({
-      hasStarted: true
-    });
+    if(this.state.started) {
+      this.props.firebase
+        .doAddUserToGame(gameId)
+        .then(() => {
+          this.props.history.push(`/game/${gameId}`);
+        })
+    } else {
+      game.update({
+        hasStarted: true
+      });
+    }
   }
-
-
 
   render() {
     const { gameId, players, timeLimit, started } = this.state
-    console.log(players)
-    return(
+
+    const isInvalid = (players.indexOf(this.props.uid) === 0 && started === false);
+
+    return (
       <div>
         <h3>Time Limit Per Turn: {timeLimit}</h3>
         <nav>
@@ -80,8 +70,8 @@ class WaitingRoomBase extends Component {
             }
           </ul>
         </nav>
-        <button type="button" onClick={() =>
-          this.startGame(gameId)}>
+        <button disabled= {isInvalid} type="button" onClick={() =>
+          this.enterGame(gameId)}>
           {started ? 'Join' : 'Start'}
         </button>
       </div>
@@ -96,4 +86,4 @@ const WaitingRoom = compose(
   withAuthorization(condition),
 )(WaitingRoomBase)
 
-export { WaitingRoom };
+export default WaitingRoom;
