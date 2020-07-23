@@ -10,6 +10,7 @@ import Endgame from './Endgame';
 import { WaitingRoom } from '../WaitingRoom';
 import * as ROUTES from '../../constants/routes';
 import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
+const url = 'phoebeliang-step.appspot.com/game/';
 
 class Game extends Component {
 
@@ -21,6 +22,7 @@ class Game extends Component {
     this.updateGame = this.updateGame.bind(this);
     this.playerInGame = this.playerInGame.bind(this);
     this.gameStarted = this.gameStarted.bind(this);
+    this.copyGameId = this.copyGameId.bind(this);
   }
 
   async componentDidMount() {
@@ -37,7 +39,9 @@ class Game extends Component {
       .then((docSnapshot) => {
         if (docSnapshot.exists) {
           game.onSnapshot(snapshot => {
-          this.updateGame(snapshot.data());
+            this.updateGame(snapshot.data());
+            this.playerInGame(snapshot.data());
+            this.gameStarted(snapshot.data());
           }, err => {
             console.log(`Encountered error: ${err}`);
           });
@@ -49,60 +53,64 @@ class Game extends Component {
   }
 
   updateGame(game) {
-    this.setState({ inProgress: game.currentPlayerIndex < game.players.length });
-  }
-
-  playerInGame(players) {
-    if(players.includes(this.props.authUser.uid)) {
-      console.log(1)
-      this.setState({
-        playerInGame: true
-      });
-    }
-    console.log(2)
     this.setState({
-      playerInGame: false
+      inProgress: game.currentPlayerIndex < game.players.length,
+      gameName: game.gameName
     });
   }
 
-  gameStarted(started) {
-    console.log(started)
+  playerInGame(game) {
     this.setState({
-      gameStarted: started
+      playerInGame: game.players.includes(this.props.authUser.uid)
+    });
+  }
+
+  gameStarted(game) {
+    this.setState({
+      gameStarted: game.hasStarted
     });
   }
 
   pageReturned(inProgress, gameExists, gameStarted, playerInGame) {
-    console.log('method run')
     if (!gameExists) {
       return <p>This game does not exist! Check your URL again.</p>
     } else if(!gameStarted || !playerInGame) {
-      console.log('waiting room')
       return <AuthUserContext.Consumer>
         {authUser =>
           <WaitingRoom uid={authUser.uid} />
         }
       </AuthUserContext.Consumer>
     } else if (inProgress) {
-      console.log('canvas')
       return <AuthUserContext.Consumer>
         {authUser =>
           <Canvas uid={authUser.uid} />
         }
       </AuthUserContext.Consumer>
     } else {
-      console.log('endgame')
       return <Endgame />
     }
   }
 
+  copyGameId() {
+    navigator.clipboard.writeText(url + this.state.gameId);
+    this.setState({
+      copied: true
+    });
+    setTimeout(() => {this.setState({copied: false})}, 700);
+  }
+
   render() {
-    const { gameId, inProgress, gameExists, gameStarted, playerInGame } = this.state
+    const { inProgress, gameExists, gameName, copied, gameId, gameStarted, playerInGame} = this.state;
+
     return (
       <div className="Game">
         <Banner />
         <Link to={ROUTES.DASHBOARD}><button>Back to home</button></Link>
-        <h3>GAME { gameId }</h3>
+        <h3>{ gameName }</h3>
+        <p>Game ID: { gameId }</p>
+        <button onClick={this.copyGameId}>
+          {copied ? 'Copied!' : 'Copy Game Link'}
+        </button>
         { // Render according to game existence and status.
           this.pageReturned(inProgress, gameExists, gameStarted, playerInGame)
         }
