@@ -40,7 +40,7 @@ class Canvas extends Component {
     });
   }
 
-  async idToUsername(players) {
+   async idToUsername(players) {
     // For the MVP, we won't listen for username changes
     // TODO add listener in Project Alpha
     const usernames = players.map(id =>

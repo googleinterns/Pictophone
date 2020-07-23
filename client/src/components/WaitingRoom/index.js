@@ -10,10 +10,13 @@ class WaitingRoomBase extends Component {
     this.state = {
       players: [],
       gameId: '',
-      gameName: '',
       timeLimit: 10,
       started: false
     };
+
+    this.onPlayerListUpdate = this.onPlayerListUpdate.bind(this);
+    this.onGameStart = this.onGameStart.bind(this);
+    this.startGame = this.startGame.bind(this);
   }
 
   async componentDidMount() {
@@ -22,48 +25,54 @@ class WaitingRoomBase extends Component {
     const gameInstance = await this.props.firebase.game(id).get();
     this.setState({
       gameId: id,
-      gameName: gameInstance.data().gameName,
-      timeLimit: gameInstance.data().timeLimit
+      timeLimit: gameInstance.data().timeLimit,
+      started: gameInstance.data().hasStarted,
+      players: gameInstance.data().players
     });
   }
 
+
+
+  //Listens for an update to players
   async onPlayerListUpdate(gameId) {
-    const game = await this.props.firebase.game(gameId).get();
-    //console.log(this.state.players)
-    game.onSnapshot((snapshot) =>
+    const game = this.props.firebase.game(gameId).get();
+    game.on('child_added', async function(snapshot)
     {
       this.setState({
         players: snapshot.data().players
-      });
-    })
+      })
+    });
   }
 
-  onGameStart(gameId) {
-    let game = this.props.firebase.game(gameId);
+  async onGameStart(gameId) {
+    const game = await this.props.firebase.game(gameId).get();
+
     console.log('started');
-    game.onSnapshot((snapshot) => {
+    game.on('value', (snapshot) => {
       this.setState({
         started: snapshot.data().hasStarted
-      });
+      })
     })
   }
 
-  startGame = async (gameId) => {
-     await this.props.firebase
-      .game(gameId).get().hasStarted.update({
-        hasStarted: true
-      });
-    }
+  async startGame(gameId){
+    const game = this.props.firebase.db.doc(`games/${gameId}`);
+    game.update({
+      hasStarted: true
+    });
+  }
+
+
 
   render() {
-    const { players, timeLimit, started, gameName } = this.state
+    const { gameId, players, timeLimit, started } = this.state
     console.log(players)
     return(
       <div>
-        <h1>{gameName}</h1>
         <h3>Time Limit Per Turn: {timeLimit}</h3>
         <nav>
           <header>Host: {players[0]}</header>
+          <header>Players:</header>
           <ul style={{'listStyle': 'none'}}>
             {
               players.slice(1,players.length)
@@ -71,7 +80,10 @@ class WaitingRoomBase extends Component {
             }
           </ul>
         </nav>
-        <button type="button" onClick={this.startGame}>{started ? 'Join' : 'Start'}</button>
+        <button type="button" onClick={() =>
+          this.startGame(gameId)}>
+          {started ? 'Join' : 'Start'}
+        </button>
       </div>
     );
   }
