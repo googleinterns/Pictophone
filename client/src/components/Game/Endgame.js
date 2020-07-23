@@ -87,7 +87,7 @@ class Endgame extends Component {
           <FabricCanvas drawings={drawings} players={usernames} title={gameName} />
           : null
         }
-        <button onClick={this.downloadAll}>download all</button>
+        <button onClick={this.downloadAll}>download images in .zip</button>
       </div>
     );
   }
