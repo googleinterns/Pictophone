@@ -166,7 +166,7 @@ class Canvas extends Component {
 
   render() {
     const { players, drawings, userId, usernames,
-      currentPlayerIndex, display, sent } = this.state;
+      currentPlayerIndex, display, sent, file } = this.state;
     const userIndex = players.indexOf(userId);
 
     return (
@@ -199,9 +199,13 @@ class Canvas extends Component {
           </div>
           <div className="lc-container">
             <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
-            <button onClick={this.saveDrawing}>Download drawing</button>
-            <img src={this.state.file} alt="upload preview" />
+            <button onClick={this.saveDrawing}>Download canvas drawing</button>
+            <p>To send your own file instead of the canvas, upload something below!</p>
+            {file && <img src={file} width="100" alt="upload preview" />}
+            <form>
             <input type="file" accept="image/*" onChange={this.handleChange} />
+            <input type="reset" value="Clear selection" onClick={() => this.setState({ file: null })} />
+            </form>
             {sent ? <p className="send-drawing">Drawing sent!</p>
               : <button className="send-drawing" onClick={this.send}>Send</button>}
           </div>
