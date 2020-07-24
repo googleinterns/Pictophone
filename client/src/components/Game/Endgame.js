@@ -71,7 +71,7 @@ class Endgame extends Component {
 
     // Wait for blobs to finish fetching and add them to a zip folder
     Promise.all(blobs);
-    blobs.forEach((blob, i) => folder.file(i+1 + ' - ' + usernames[i] + '.png', blob, { binary: true }));
+    blobs.forEach((blob, i) => folder.file(`${i+1} - ${usernames[i]}.png`, blob, { binary: true }));
     zip.generateAsync({type : "blob"}).then(content => saveAs(content, 'drawings.zip'));
   }
 
