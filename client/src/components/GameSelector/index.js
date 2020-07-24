@@ -30,8 +30,7 @@ class GameSelector extends Component {
       let gameData = { ...gameDoc.data(), gameId: gameDoc.id, hasEnded: true };
 
       // get username of first player
-      const startPlayerDoc = await this.props.firebase.user(gameData.players[0]).get();
-      gameData["startPlayer"] = startPlayerDoc.data().username;
+      gameData["startPlayer"] = await this.getUsername(gameData.players[0]);
 
       // check if current player is the host
       gameData["isHost"] = gameData.startPlayer === userDoc.data().username;
@@ -50,10 +49,8 @@ class GameSelector extends Component {
         gameData["hasEnded"] = false;
 
         // get username of current player if game is not over
-        const currentPlayerDoc = await this.props.firebase
-          .user(gameData.players[gameData.currentPlayerIndex])
-          .get();
-        gameData["currentPlayer"] = currentPlayerDoc.data().username;
+        const currentPlayerIndex = gameData.currentPlayerIndex;
+        gameData["currentPlayer"] = await this.getUsername(gameData.players[currentPlayerIndex]);
       }
 
       games.push(gameData);
@@ -61,6 +58,24 @@ class GameSelector extends Component {
     })
 
     this.setState({ loading: false });
+  }
+
+  getUsername = async uid => {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: uid
+    };
+
+    const url = '/getUsername';
+
+    const response = await fetch(url, options);
+    const username = await response.text();
+
+    return username;
   }
 
   render() {
