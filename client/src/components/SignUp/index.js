@@ -31,23 +31,38 @@ class SignUpFormBase extends Component {
     this.state = { ...INITIAL_STATE };
   }
 
+  isUsernameUnique = async username => {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: username
+    };
+
+    const url = '/validateUsername';
+
+    const response = await fetch(url, options)
+    const isUnique = await response.json();
+
+    this.setState({ isUnique: isUnique });
+  }
+
   onSubmit = event => {
     const { username, email, passwordOne } = this.state;
     const games = [];
 
-    let usersRef = this.props.firebase.users();
-
-    usersRef.where('username', '==', username).get()
-      .then(snapshot => {
-        if (snapshot.empty) {
+    this.isUsernameUnique(username)
+      .then(() => {
+        if (this.state.isUnique) {
           return this.props.firebase
-            .doCreateUserWithEmailAndPassword(email,passwordOne);
+            .doCreateUserWithEmailAndPassword(email, passwordOne);
         } else {
           throw new Error('username already taken');
         }
       })
       .then(authUser => {
-        // Create a user in Firestore
         return this.props.firebase
           .user(authUser.user.uid)
           .set({
@@ -66,6 +81,7 @@ class SignUpFormBase extends Component {
         this.props.history.push(ROUTES.LANDING);
       })
       .catch(error => {
+        console.log(error);
         this.setState({ error });
       });
 
