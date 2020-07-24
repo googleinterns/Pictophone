@@ -26,6 +26,10 @@ class Game extends Component {
     this.fetchGame(id);
   }
 
+  componentWillUnmount() {
+    this.unsubscribe && this.unsubscribe();
+  }
+
   fetchGame(gameId) {
     // Set up listener for game data change
     const game = this.props.firebase.game(gameId);
@@ -33,7 +37,7 @@ class Game extends Component {
     game.get()
       .then((docSnapshot) => {
         if (docSnapshot.exists) {
-          game.onSnapshot(snapshot => {
+          this.unsubscribe = game.onSnapshot(snapshot => {
           this.updateGame(snapshot.data());
           }, err => {
             console.log(`Encountered error: ${err}`);

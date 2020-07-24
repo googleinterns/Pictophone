@@ -30,11 +30,15 @@ class Canvas extends Component {
     this.fetchGame(id);
   }
 
+  componentWillUnmount() {
+    this.unsubscribe && this.unsubscribe();
+  }
+
   fetchGame(gameId) {
     // Don't worry about private games for now
     // Set up listener for game data change
     const game = this.props.firebase.game(gameId);
-    game.onSnapshot(docSnapshot => {
+    this.unsubscribe = game.onSnapshot(docSnapshot => {
       this.updateGame(docSnapshot.data());
     }, err => {
       console.log(`Encountered error: ${err}`);
@@ -77,7 +81,7 @@ class Canvas extends Component {
     if (players.indexOf(userId) !== currentPlayerIndex) return;
 
     // Grab image from canvas or uploaded file
-    const data;
+    let data = null;
     if (this.state.file != null) {
       // Prioritize using the atached file if it exists
       data = await fetch(this.state.file).then(r => r.blob());
@@ -183,7 +187,7 @@ class Canvas extends Component {
           <div className="lc-container">
             <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
             <button onClick={this.saveDrawing}>Download drawing</button>
-            <img src={this.state.file}/>
+            <img src={this.state.file} alt="upload preview" />
             <input type="file" accept="image/*" onChange={this.handleChange} />
             {sent ? <p className="send-drawing">Drawing sent!</p>
               : <button className="send-drawing" onClick={this.send}>Send</button>}
