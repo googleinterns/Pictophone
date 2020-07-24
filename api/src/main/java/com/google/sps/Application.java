@@ -10,6 +10,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 public class Application {
   public static void main(String[] args) {
+    try {
+      Firebase.init();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
     SpringApplication.run(Application.class, args);
   }
+
+  @GetMapping("/")
+	public String pulseCheck() {
+		return "Server is alive!";
+	}
 }

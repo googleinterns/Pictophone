@@ -50,10 +50,6 @@ public class ServiceCreation {
   private static final String APPLICATION_NAME = "Notifications";
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
-  static {
-    Firebase.init();
-  }
-
   static Firestore db = FirestoreClient.getFirestore();
   static DocumentReference docRef = db.collection("credentials").document("credential");
 

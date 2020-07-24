@@ -94,8 +94,7 @@ public class SendNotifications {
   @PostMapping("/api/notify")
   public void sendEmail(HttpServletRequest request, HttpServletResponse response)
       throws IOException, InterruptedException, ExecutionException {
-
-    Firebase.init();
+        
     Firestore db = FirestoreClient.getFirestore();
 
     EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
