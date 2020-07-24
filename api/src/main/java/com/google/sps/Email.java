@@ -1,12 +1,18 @@
 package com.google.sps;
 
+enum EmailType {
+  TURN, END;
+}
+
 public class Email {
 
  private final User player;
  private final String subject;
  private final String body;
- static String tempSubject;
- static String tempBody;
+ private static final String turnEmailSubject = "Your turn to draw!";
+ private static final String endEmailSubject = "The game has ended!";
+ private static final StringBuffer turnEmailBody = new StringBuffer("It's time to draw!\n\n Click here to play: http://phoebeliang-step.appspot.com/game/");
+ private static final StringBuffer endEmailBody = new StringBuffer("Thanks for playing! Find all the images from the game attached below. Come play again sometime:\n\nhttp://phoebeliang-step.appspot.com/game/");
 
   public Email(User player, String subject, String body) {
     this.player = player;
@@ -14,25 +20,16 @@ public class Email {
     this.body = body;
   }
 
-  public static Email startGameEmail(String gameID, User player) {
-    tempSubject = "You have an invitation!";
-    tempBody = "Welcome to Pictophone!\n\n" + player.getName() + " has invited you to a game! Join here: http://phoebeliang-step.appspot.com/game/" + gameID;
-
-    return new Email(player, tempSubject, tempBody);
-  }
-
   public static Email playerTurnEmail(String gameID, User player) {
-    tempSubject = "Your turn to draw!";
-    tempBody = "It's time to draw!\n\n Click here to play: http://phoebeliang-step.appspot.com/game/" + gameID;
+    String turnBody = turnEmailBody.append(gameID).toString();
 
-    return new Email(player, tempSubject, tempBody);
+    return new Email(player, turnEmailSubject, turnBody);
   }
 
   public static Email endGameEmail(String gameID, User player) {
-    tempSubject = "The game has ended!";
-    tempBody = "Thanks for playing! Find all the images from the game attached below. Come play again sometime:\n\nhttp://phoebeliang-step.appspot.com/game/" + gameID;
+    String endBody = endEmailBody.append(gameID).toString();
 
-    return new Email(player, tempSubject, tempBody);
+    return new Email(player, endEmailSubject, endBody);
   }
 
   public String getBody(){
@@ -46,4 +43,17 @@ public class Email {
   public String getEmail(){
     return player.getEmail();
   }
+
+  static Email populateEmail(String gameID, String playerEmail, String playerName, EmailType emailType)
+    throws RuntimeException {
+
+    switch(emailType) {
+      case END:
+        return endGameEmail(gameID, new User(playerEmail, playerName));
+      default:
+        System.out.println("Invalid email type");
+        throw new RuntimeException();
+    }
+  }
+
 }
