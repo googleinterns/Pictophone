@@ -18,11 +18,11 @@ class WaitingRoomBase extends Component {
 
   componentDidMount() {
     const { id } = this.props.match.params;
-    const gameInstance = this.props.firebase.game(id);
+    let gameInstance = this.props.firebase.game(id);
 
     // Listens for changes in the database for player list & status of whether the game has started
 
-    const unsubscribe = gameInstance.get()
+    this.unsubscribe = gameInstance.get()
       .then(docSnapshot => {
         if(docSnapshot.exists) {
           gameInstance.onSnapshot((snapshot) => {
@@ -38,11 +38,7 @@ class WaitingRoomBase extends Component {
   }
 
   async componentWillUnmount() {
-    const gameInstance = await this.props.firebase.game(id).get();
-
-    if(gameInstance.data().players >= gameInstance.data().maxNumPlayers) {
-      unsubscribe();
-    }
+    this.unsubcribe && this.unsubscribe();
   }
 
   async enterGame(gameId){
@@ -63,7 +59,7 @@ class WaitingRoomBase extends Component {
   render() {
     const { gameId, players, timeLimit, started } = this.state
 
-    const isInvalid = (players.indexOf(this.props.uid) === 0 && started === false);
+    const isInvalid = (players.indexOf(this.props.uid) !== 0 && started === false);
 
     return (
       <div>
