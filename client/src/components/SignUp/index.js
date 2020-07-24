@@ -10,8 +10,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './SignUp.css'
 
 const SignUpPage = () => (
-  <Container className="signup-form">
-    <h2 class="form-heading">Sign Up</h2>
+  <Container className="signup-form-wrapper">
+    <h2 class="signup-form-heading">Sign Up</h2>
     <SignUpForm />
   </Container>
 );
@@ -108,7 +108,7 @@ class SignUpFormBase extends Component {
       username === '';
 
     return (
-      <Form className="form" onSubmit={this.onSubmit}>
+      <Form className="signup-form" onSubmit={this.onSubmit}>
         <Col>
         <Form.Group>
           <Form.Label>Username</Form.Label>
@@ -161,7 +161,9 @@ class SignUpFormBase extends Component {
           </Form.Group>
         </Col>
 
+        <div class="signup-button">
         <Button disabled={isInvalid} type="submit">Sign Up</Button>
+        </div>
 
         {error && <p>{error.message}</p>}
       </Form>

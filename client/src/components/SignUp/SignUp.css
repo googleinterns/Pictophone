@@ -1,4 +1,4 @@
-.signup-form {
+.signup-form-wrapper {
   text-align: left;
   padding: 1em;
   margin: 1em;
@@ -11,27 +11,14 @@
   margin-top: 100px;
 }
 
-.form {
+.signup-form {
   padding: 1em;
 }
 
-.form-heading {
+.signup-form-heading {
   text-align: center;
 }
 
-label {
-  display: flex;
-  font-weight: 600;
-}
-
-button {
-  justify-content: flex-end;
-}
-
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
+.signup-button {
+  text-align: center;
 }
