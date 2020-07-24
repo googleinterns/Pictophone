@@ -24,6 +24,13 @@ class Endgame extends Component {
     this.fetchGame(id);
   }
 
+  componentWillUnmount() {
+    // Clear state updates upon unmounting
+    this.setState = () => {
+      return;
+    }
+  }
+
   fetchGame(gameId) {
     // Get game result, no need for listener since game is over
     const game = this.props.firebase.game(gameId);
@@ -64,7 +71,7 @@ class Endgame extends Component {
       <div className="Endgame">
         <h4>The game is finished! Here are the drawings:</h4>
         <div className="drawing-list">
-          {drawings.map((url) => <img class="thumb" src={url} alt="result" />)}
+          {drawings.map((url) => <img className="thumb" src={url} alt="result" />)}
         </div>
         <button onClick={this.downloadAll}>download all</button>
       </div>

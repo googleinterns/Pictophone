@@ -177,7 +177,7 @@ class Canvas extends Component {
             indicates whether they are done with their turn.
             Renders an arrow after the name, if they are not the final player.
           */}
-          {usernames.map((name, index) => (<span className="player-list">
+          {usernames.map((name, index) => (<span key={name} className="player-list">
             <Player name={name} status={index - currentPlayerIndex} />
             {(index !== usernames.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
@@ -200,7 +200,7 @@ class Canvas extends Component {
           <div className="lc-container">
             <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
             <button onClick={this.saveDrawing}>Download canvas drawing</button>
-            <p>To send your own file instead of the canvas, upload something below!</p>
+            <p>To send your own image instead of the canvas, upload something below!</p>
             {file && <img src={file} width="100" alt="upload preview" />}
             <form>
             <input type="file" accept="image/*" onChange={this.handleChange} />
