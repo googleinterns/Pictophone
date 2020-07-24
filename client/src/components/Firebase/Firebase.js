@@ -45,7 +45,7 @@ class Firebase {
 
   doSendEmailVerification = () =>
     this.auth.currentUser.sendEmailVerification({
-      url: 'http://localhost:3000',
+      url: 'http://phoebeliang-step.appspot.com',
     });
 
   // *** Merge Auth and DB User API *** //
@@ -85,12 +85,15 @@ class Firebase {
 
   games = () => this.db.collection('games');
 
-  doCreateGame = (gameName) =>
+  doCreateGame = (gameName, timeLimit, maxNumPlayers) =>
     this.games().add({
       gameName: gameName,
       players: [],
       startDate: this.fieldValue.serverTimestamp(),
       currentPlayerIndex: 0,
+      hasStarted: false,
+      timeLimit: timeLimit,
+      maxNumPlayers: maxNumPlayers,
     })
     .then(gameRef => {
       gameRef.update({
@@ -104,15 +107,30 @@ class Firebase {
       return gameRef;
     });
 
-  doAddUserToGame = (gameId) =>
-    this.game(gameId).update({
+  doAddUserToGame = async (gameId) => {
+    const gameDoc = await this.game(gameId).get();
+    const game = gameDoc.data();
+
+    if (!gameDoc.exists) {
+      throw new Error('Invalid game ID');
+    }
+
+    if (game.players.includes(this.auth.currentUser.uid)) {
+      throw new Error('You\'re already in this game!');
+    }
+
+    if (game.currentPlayerIndex >= game.players.length) {
+      throw new Error('This game has already ended!');
+    }
+
+    await this.game(gameId).update({
       players: this.fieldValue.arrayUnion(this.auth.currentUser.uid)
-    })
-    .then(() => {
-      this.user(this.auth.currentUser.uid).update({
-        games: this.fieldValue.arrayUnion(gameId)
-      });
     });
+
+    await this.user(this.auth.currentUser.uid).update({
+      games: this.fieldValue.arrayUnion(gameId)
+    });
+  }
 }
 
 export default Firebase;

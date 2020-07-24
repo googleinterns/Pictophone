@@ -14,42 +14,53 @@ class GameSelector extends Component {
     this.state = {
       loading: false,
       games: [],
-      currentUser: '',
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.setState({ loading: true });
 
-    let user = this.props.firebase.user(this.props.uid);
+    const userDoc = await this.props.firebase.user(this.props.uid).get();
 
-    user.get().then(userDoc => {
-      let gamesList = userDoc.data().games;
-      let games = [];
+    const gamesList = userDoc.data().games;
+    let games = [];
 
-      gamesList.forEach(game => {
-        this.props.firebase.game(game).get().then(gameDoc => {
-          let gameData = { ...gameDoc.data(), gameId: gameDoc.id };
+    gamesList.forEach(async game => {
+      const gameDoc = await this.props.firebase.game(game).get();
+      let gameData = { ...gameDoc.data(), gameId: gameDoc.id, hasEnded: true };
 
-          this.props.firebase
-            .user(gameData.players[gameData.currentPlayerIndex])
-            .get().then(currentPlayerDoc => {
-              gameData["currentPlayer"] = currentPlayerDoc.data().username;
+      // get username of first player
+      const startPlayerDoc = await this.props.firebase.user(gameData.players[0]).get();
+      gameData["startPlayer"] = startPlayerDoc.data().username;
 
-              this.props.firebase
-                .user(gameData.players[0]).get().then(startPlayerDoc => {
-                  gameData["startPlayer"] = startPlayerDoc.data().username;
+      // check if current player is the host
+      gameData["isHost"] = gameData.startPlayer === userDoc.data().username;
 
-                  games.push(gameData);
+      // calculate position of current user
+      const userIndex = gameData.players.indexOf(this.props.uid);
+      gameData["hasPlayed"] = true;
 
-                  this.setState({ games });
-                });
-            });
-        });
-      });
+      if (userIndex >= gameData.currentPlayerIndex) {
+        gameData["hasPlayed"] = false;
+        gameData["turnsToWait"] = userIndex - gameData.currentPlayerIndex;
+      }
 
-      this.setState({ loading: false, currentUser: userDoc.data().username });
+      // Determine whether game is over
+      if (gameData.currentPlayerIndex < gameData.players.length) {
+        gameData["hasEnded"] = false;
+
+        // get username of current player if game is not over
+        const currentPlayerDoc = await this.props.firebase
+          .user(gameData.players[gameData.currentPlayerIndex])
+          .get();
+        gameData["currentPlayer"] = currentPlayerDoc.data().username;
+      }
+
+      games.push(gameData);
+      this.setState({ games });
     })
+
+    this.setState({ loading: false });
   }
 
   render() {
@@ -66,21 +77,80 @@ class GameSelector extends Component {
   }
 }
 
-const Game = (props) => (
-  <div className="game-card">
-    {props.game && (
-      <Card border="dark" style={{ width: '97.5%'}}>
-        <Link to={`/game/${props.game.gameId}`}>
-          <Card.Header>started by <b>{props.game.startPlayer}</b> on <b>{props.game.startDate.toDate().toDateString()}</b></Card.Header>
-          <Card.Body>
-            <Card.Title>{props.game.gameName.toUpperCase()}</Card.Title>
-            <Card.Text>
-              currently <b>{props.game.currentPlayer}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
-            </Card.Text>
-          </Card.Body>
-        </Link>
-      </Card>
-    )}
+class Game extends Component {
+  render() {
+    const hasPlayed = this.props.game.hasPlayed;
+    const hasEnded = this.props.game.hasEnded;
+    const hasStarted = this.props.game.hasStarted;
+
+    let turnIndicator;
+
+    if (hasEnded) {
+      turnIndicator = <GameEnded />;
+    }
+    else if (!hasStarted) {
+      turnIndicator = <GameStart game={this.props.game} />;
+    }
+    else {
+      if (hasPlayed) {
+        turnIndicator = <PlayedTurn game={this.props.game} />;
+      } else {
+        turnIndicator = <ToPlayTurn game={this.props.game} />;
+      }
+    }
+
+    return (
+      <div className="game-card">
+        {this.props.game && (
+          <Card border="dark" style={{ width: '97.5%'}}>
+            <Link to={`/game/${this.props.game.gameId}`}>
+              <Card.Header>started by <b>{this.props.game.startPlayer}</b> on <b>{this.props.game.startDate.toDate().toDateString()}</b></Card.Header>
+              <Card.Body>
+                <Card.Title>{this.props.game.gameName.toUpperCase()}</Card.Title>
+                {turnIndicator}
+              </Card.Body>
+            </Link>
+          </Card>
+        )}
+      </div>
+    );
+  }
+}
+
+
+const GameEnded = () => (
+  <Card.Text>
+    Game has ended! Click to see everyone's drawings!
+  </Card.Text>
+)
+
+const PlayedTurn = (props) => (
+  <div>
+    <Card.Text>
+      currently <b>{props.game.currentPlayer}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
+    </Card.Text>
+    <Card.Text>
+      You've already played! Please wait for the game to end.
+    </Card.Text>
+  </div>
+)
+
+const ToPlayTurn = (props) => (
+  <div>
+    <Card.Text>
+      currently <b>{props.game.currentPlayer}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
+    </Card.Text>
+    <Card.Text>
+      {props.game.turnsToWait} {props.game.turnsToWait > 1 ? "players" : "player"} to go before your turn!
+    </Card.Text>
+  </div>
+)
+
+const GameStart = (props) => (
+  <div>
+    <Card.Text>
+      {props.game.isHost ? "Please navigate to the game page to start the game!" : "Please wait for the host to start the game."}
+    </Card.Text>
   </div>
 )
 
