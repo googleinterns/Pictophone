@@ -11,7 +11,7 @@ import './SignUp.css'
 
 const SignUpPage = () => (
   <Container className="signup-form">
-    <h2>Sign Up</h2>
+    <h2 class="form-heading">Sign Up</h2>
     <SignUpForm />
   </Container>
 );
