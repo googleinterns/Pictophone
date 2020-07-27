@@ -139,7 +139,7 @@ const ToPlayTurn = (props) => (
       currently <b>{props.game.currentPlayer}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
     </Card.Text>
     <Card.Text>
-      {props.game.turnsToWait} {props.game.turnsToWait > 1 ? "players" : "player"} to go before your turn!
+      {props.game.turnsToWait} player(s) to go before your turn!
     </Card.Text>
   </div>
 )
