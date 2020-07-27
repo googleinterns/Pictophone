@@ -64,13 +64,14 @@ const FabricCanvas = props => {
           crossOrigin: 'anonymous'
         });
       });
+    });
 
-      // UseEffect's cleanup function
-      return () => {
-        canvas.dispose();
-      };
-    // eslint-disable-next-line
-    }, []);
+    // UseEffect's cleanup function
+    return () => {
+      canvas.dispose();
+    };
+  // eslint-disable-next-line
+  }, []);
 
   return (
     <div className='FabricCanvas'>
