@@ -48,9 +48,10 @@ public class SignedUrl {
   public static String generateV4GPutObjectSignedUrl(String objectName) throws Exception {
     Storage storage = initStorage();
     BlobInfo blobInfo = defineResource("pictophone-images", objectName);
+    String mimeType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(objectName);
 
     Map<String, String> extensionHeaders = new HashMap<>();
-    extensionHeaders.put("Content-Type", "image/png");
+    extensionHeaders.put("Content-Type", mimeType);
 
     URL url =
       storage.signUrl(

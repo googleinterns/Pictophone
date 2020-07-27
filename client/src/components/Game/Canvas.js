@@ -22,6 +22,7 @@ class Canvas extends Component {
     this.updateGame = this.updateGame.bind(this);
     this.idToUsername = this.idToUsername.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.getMIMEType = this.getMIMEType.bind(this);
   }
 
   async componentDidMount() {
@@ -54,6 +55,58 @@ class Canvas extends Component {
     );
     const names = await Promise.all(usernames);
     this.setState({ usernames: names });
+  }
+
+  /*
+   * Inspects file header for its true MIME type.
+   * From https://stackoverflow.com/a/29672957
+   *
+   * @param blob file to be inspected
+   * @return Promise to get file extension for image files, or unknown if other
+   */
+  getMIMEType(blob) {
+    var fileReader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+
+      fileReader.onerror = () => {
+        fileReader.abort();
+        reject(new DOMException("Problem parsing input file."));
+      };
+
+      fileReader.onloadend = function(e) {
+        var arr = (new Uint8Array(e.target.result)).subarray(0, 4);
+        var header = "";
+        for(var i = 0; i < arr.length; i++) {
+          header += arr[i].toString(16);
+        }
+        console.log(header);
+
+        // Check file signature against accepted image types
+        switch (header) {
+          case "89504e47":
+              type = "png";
+              break;
+          case "47494638":
+              type = "gif";
+              break;
+          case "ffd8ffe0":
+          case "ffd8ffe1":
+          case "ffd8ffe2":
+          case "ffd8ffe3":
+          case "ffd8ffe8":
+              type = "jpeg";
+              break;
+          default:
+              type = "unknown";
+              break;
+          }
+
+        resolve(type);
+      };
+      fileReader.readAsArrayBuffer(blob);
+    });
+
   }
 
   updateGame(game) {
@@ -91,6 +144,12 @@ class Canvas extends Component {
       data = await new Promise(resolve => image.toBlob(resolve));
     }
 
+    const MIMEType = this.getMIMEType(data);
+    if (MIMEType === "unknown") {
+      alert('This is not a jpeg, png, or gif!');
+      return;
+    }
+
     const url = 'https://storage.cloud.google.com/pictophone-drawings/';
 
     // Send image URL to backend to sign
@@ -101,7 +160,7 @@ class Canvas extends Component {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json'
       },
-      body: gameId + userId + '.png',
+      body: `${gameId}${userId}.${MIMEType}`,
     }).then((response) => response.text());
 
     // Send information for email
@@ -126,7 +185,7 @@ class Canvas extends Component {
     xhr.onerror = () => {
       alert('There was an error uploading your image :(')
     };
-    xhr.setRequestHeader('Content-Type', 'image/png');
+    xhr.setRequestHeader('Content-Type', `image/${MIMEType}`);
     xhr.send(data);
     xhr.onreadystatechange = () => {
        if (xhr.readyState === 4 && xhr.status === 200){
@@ -134,7 +193,7 @@ class Canvas extends Component {
           // TODO listen to main bucket?
           const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
-            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + userId + '.png')
+            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(gameId + userId + `.${MIMETYPE}`)
           })
           gameRef.set({
             currentPlayerIndex: currentPlayerIndex + 1,
@@ -156,12 +215,17 @@ class Canvas extends Component {
   }
 
   handleChange(event) {
-    if (this.state.file !== null) {
-      URL.revokeObjectURL(this.state.file);
+    var file = event.target.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Your file is too large. Please upload something under 5MB!');
+    } else {
+      if (this.state.file !== null) {
+        URL.revokeObjectURL(this.state.file);
+      }
+      this.setState({
+        file: URL.createObjectURL(file)
+      });
     }
-    this.setState({
-      file: URL.createObjectURL(event.target.files[0])
-    });
   }
 
   render() {
@@ -200,7 +264,10 @@ class Canvas extends Component {
           <div className="lc-container">
             <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
             <button onClick={this.saveDrawing}>Download canvas drawing</button>
-            <p>To send your own image instead of the canvas, upload something below!</p>
+            <p>
+              To send your own image instead of the canvas, upload something below!
+              Please choose a jpeg, png, or gif under 5MB.
+            </p>
             {file && <img src={file} width="100" alt="upload preview" />}
             <form>
             <input type="file" accept="image/*" onChange={this.handleChange} />
