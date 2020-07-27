@@ -40,21 +40,29 @@ const FabricCanvas = props => {
         fontSize: PLAYER_FONTSIZE,
       });
 
-      fabric.Image.fromURL(drawing, function(img) {
-        // Make sure images are a maximum of 400px per dimension
-        const maxDim = Math.max(img.height, img.width);
-        if (maxDim > MAX_SIZE) {
-          const scale = MAX_SIZE / maxDim;
-          img.scale(scale);
-        }
-        // Provide spacing between text and image
-        img.top = 2 * PLAYER_FONTSIZE;
-        const group = new fabric.Group([ img, player ], {
-          // Offset subsequent images
-          left: Math.min(MARGIN_SIZE + i*X_OFFSET, RIGHT_BOUND),
-          top: IMG_TOP,
+      fetch('/api/signDownload', {
+        method: 'POST',
+        body: drawing
+      }).then((response) => response.text())
+      .then((url) => {
+        fabric.Image.fromURL(url, function(img) {
+          // Make sure images are a maximum of 400px per dimension
+          const maxDim = Math.max(img.height, img.width);
+          if (maxDim > MAX_SIZE) {
+            const scale = MAX_SIZE / maxDim;
+            img.scale(scale);
+          }
+          img.top = 2 * PLAYER_FONTSIZE;
+          const group = new fabric.Group([ img, player ], {
+            // Offset subsequent images a little bit, but not enough to
+            // go off-canvas
+            left: Math.min(MARGIN_SIZE + i*X_OFFSET, RIGHT_BOUND),
+            top: IMG_TOP,
+          });
+          canvas.add(group);
+        },{
+          crossOrigin: 'anonymous'
         });
-        canvas.add(group);
       });
     });
 
@@ -62,6 +70,7 @@ const FabricCanvas = props => {
     return () => {
       canvas.dispose();
     };
+  // eslint-disable-next-line
   }, []);
 
   return (
