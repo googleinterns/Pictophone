@@ -184,7 +184,7 @@ class Canvas extends Component {
         'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: 'gameID=' + gameId + '&emailType=' + emailType,
+      body: `gameID=${gameId}&emailType=${emailType}`,
     }).then((response) => {
       console.log(response.text());
     });
@@ -203,7 +203,7 @@ class Canvas extends Component {
           // TODO listen to main bucket?
           const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
-            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(gameId + userId + `.${MIMETYPE}`)
+            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(`${gameId}${userId}.${MIMETYPE}`)
           })
           gameRef.set({
             currentPlayerIndex: currentPlayerIndex + 1,
