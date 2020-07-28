@@ -91,9 +91,9 @@ class Canvas extends Component {
         for(var i = 0; i < arr.length; i++) {
           header += arr[i].toString(16);
         }
-        console.log(header);
 
         // Check file signature against accepted image types
+        var type = "";
         switch (header) {
           case "89504e47":
               type = "png";
@@ -156,7 +156,8 @@ class Canvas extends Component {
       data = await new Promise(resolve => image.toBlob(resolve));
     }
 
-    const MIMEType = this.getMIMEType(data);
+    const MIMEType = await this.getMIMEType(data);
+    console.log(MIMEType);
     if (MIMEType === "unknown") {
       alert('This is not a jpeg, png, or gif!');
       return;
@@ -203,7 +204,7 @@ class Canvas extends Component {
           // TODO listen to main bucket?
           const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
-            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(`${gameId}${userId}.${MIMETYPE}`)
+            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(`${gameId}${userId}.${MIMEType}`)
           })
           gameRef.set({
             currentPlayerIndex: currentPlayerIndex + 1,
@@ -247,8 +248,9 @@ class Canvas extends Component {
   }
 
   render() {
-    const { prevImg, usernames,
+    const { prevImg, usernames, players,
       currentPlayerIndex, display, sent, file } = this.state;
+    const userIndex = players.indexOf(this.props.uid);
 
     return (
       <div>

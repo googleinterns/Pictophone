@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.activation.MimetypesFileTypeMap;
 
 @RestController
 public class SignedUrl {
