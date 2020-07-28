@@ -14,7 +14,7 @@ public class Application {
       Firebase.init();
       GmailService.init();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      e.printStackTrace();
     }
 
     SpringApplication.run(Application.class, args);
