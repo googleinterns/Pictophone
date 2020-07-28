@@ -56,7 +56,7 @@ public class SignedUrl {
     URL url =
       storage.signUrl(
         blobInfo,
-        15,
+        5,
         TimeUnit.MINUTES,
         Storage.SignUrlOption.httpMethod(HttpMethod.PUT),
         Storage.SignUrlOption.withExtHeaders(extensionHeaders),
@@ -70,7 +70,7 @@ public class SignedUrl {
     BlobInfo blobInfo = defineResource("pictophone-drawings", objectName);
 
     URL url =
-        storage.signUrl(blobInfo, 15, TimeUnit.MINUTES,
+        storage.signUrl(blobInfo, 5, TimeUnit.MINUTES,
         Storage.SignUrlOption.withV4Signature());
 
     return url.toString();
