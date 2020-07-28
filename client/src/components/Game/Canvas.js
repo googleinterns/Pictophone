@@ -7,7 +7,7 @@ import './literallycanvas.css';
 import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
-import { getUsername } from '../Helpers';
+import { getUsername, getMIMEType } from '../Helpers';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
@@ -23,7 +23,6 @@ class Canvas extends Component {
     this.updateGame = this.updateGame.bind(this);
     this.idToUsername = this.idToUsername.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.getMIMEType = this.getMIMEType.bind(this);
     this.getImage = this.getImage.bind(this);
   }
 
@@ -68,58 +67,6 @@ class Canvas extends Component {
     this.setState({ usernames: names });
   }
 
-  /*
-   * Inspects file header for its true MIME type.
-   * From https://stackoverflow.com/a/29672957
-   *
-   * @param blob file to be inspected
-   * @return Promise to get file extension for image files, or unknown if other
-   */
-  getMIMEType(blob) {
-    var fileReader = new FileReader();
-
-    return new Promise((resolve, reject) => {
-
-      fileReader.onerror = () => {
-        fileReader.abort();
-        reject(new DOMException("Problem parsing input file."));
-      };
-
-      fileReader.onloadend = function(e) {
-        var arr = (new Uint8Array(e.target.result)).subarray(0, 4);
-        var header = "";
-        for(var i = 0; i < arr.length; i++) {
-          header += arr[i].toString(16);
-        }
-
-        // Check file signature against accepted image types
-        var type = "";
-        switch (header) {
-          case "89504e47":
-              type = "png";
-              break;
-          case "47494638":
-              type = "gif";
-              break;
-          case "ffd8ffe0":
-          case "ffd8ffe1":
-          case "ffd8ffe2":
-          case "ffd8ffe3":
-          case "ffd8ffe8":
-              type = "jpeg";
-              break;
-          default:
-              type = "unknown";
-              break;
-          }
-
-        resolve(type);
-      };
-      fileReader.readAsArrayBuffer(blob);
-    });
-
-  }
-
   updateGame(game) {
     // Set state to new game object's state
     this.setState({ currentPlayerIndex: game.currentPlayerIndex,
@@ -156,7 +103,7 @@ class Canvas extends Component {
       data = await new Promise(resolve => image.toBlob(resolve));
     }
 
-    const MIMEType = await this.getMIMEType(data);
+    const MIMEType = await getMIMEType(data);
     console.log(MIMEType);
     if (MIMEType === "unknown") {
       alert('This is not a jpeg, png, or gif!');
@@ -274,7 +221,7 @@ class Canvas extends Component {
                 if (userIndex === 0) {
                  return <p>Draw an image to send to the next person!</p>
                 } else if (display && prevImg) {
-                  return <img src={prevImg} alt="previous drawing" />
+                  return <img src={prevImg} style={{ maxWidth: 400 }} alt="previous drawing" />
                 } else {
                   return <p>It is not your turn yet. Please sit tight to receive the image!</p>
               }})()

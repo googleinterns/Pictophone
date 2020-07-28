@@ -5,7 +5,7 @@ import { saveAs } from 'file-saver';
 import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
-import { getUsername } from '../Helpers';
+import { getUsername, getMIMEType } from '../Helpers';
 import JSZip from "jszip";
 import FabricCanvas from './FabricCanvas';
 const zip = new JSZip();
@@ -19,7 +19,6 @@ class Endgame extends Component {
     this.downloadAll = this.downloadAll.bind(this);
     this.fetchGame = this.fetchGame.bind(this);
     this.idToUsername = this.idToUsername.bind(this);
-    this.getMIMEType = this.getMIMEType.bind(this);
   }
 
   async componentDidMount() {
@@ -59,52 +58,6 @@ class Endgame extends Component {
     });
   }
 
-  // TODO export to utility file
-  getMIMEType(blob) {
-    var fileReader = new FileReader();
-
-    return new Promise((resolve, reject) => {
-
-      fileReader.onerror = () => {
-        fileReader.abort();
-        reject(new DOMException("Problem parsing input file."));
-      };
-
-      fileReader.onloadend = function(e) {
-        var arr = (new Uint8Array(e.target.result)).subarray(0, 4);
-        var header = "";
-        for(var i = 0; i < arr.length; i++) {
-          header += arr[i].toString(16);
-        }
-
-        // Check file signature against accepted image types
-        var type = "";
-        switch (header) {
-          case "89504e47":
-              type = "png";
-              break;
-          case "47494638":
-              type = "gif";
-              break;
-          case "ffd8ffe0":
-          case "ffd8ffe1":
-          case "ffd8ffe2":
-          case "ffd8ffe3":
-          case "ffd8ffe8":
-              type = "jpeg";
-              break;
-          default:
-              type = "unknown";
-              break;
-          }
-
-        resolve(type);
-      };
-      fileReader.readAsArrayBuffer(blob);
-    });
-
-  }
-
   downloadAll() {
     // Use JSZip to put all drawings into a zip file
     const { drawings, usernames } = this.state;
@@ -122,7 +75,7 @@ class Endgame extends Component {
 
     // Wait for blobs to finish fetching and add them to a zip folder
     Promise.all(blobs).then(blobs =>
-      Promise.all(blobs.map((blob, i) => this.getMIMEType(blob)))
+      Promise.all(blobs.map((blob, i) => getMIMEType(blob)))
     ).then(types => {
       blobs.forEach((blob, i) => folder.file(`${i+1} - ${usernames[i]}.${types[i]}`, blob, { binary: true }));
       zip.generateAsync({type : "blob"}).then(content => saveAs(content, 'drawings.zip'));
