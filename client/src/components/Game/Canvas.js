@@ -7,6 +7,7 @@ import './literallycanvas.css';
 import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
+import { getUsername } from '../Helpers';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
@@ -61,8 +62,7 @@ class Canvas extends Component {
     // For the MVP, we won't listen for username changes
     // TODO add listener in Project Alpha
     const usernames = players.map(id =>
-      this.props.firebase.user(id).get().then(snapshot =>
-        snapshot.data().username)
+      getUsername(id)
     );
     const names = await Promise.all(usernames);
     this.setState({ usernames: names });
