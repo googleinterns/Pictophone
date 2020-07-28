@@ -6,8 +6,8 @@ import { withRouter } from 'react-router';
 import Banner from '../Banner';
 import { compose } from 'recompose';
 import Canvas from './Canvas';
-import Endgame from './Endgame';
 import WaitingRoom from '../WaitingRoom';
+import { FabricContextProvider } from './FabricContextProvider';
 import * as ROUTES from '../../constants/routes';
 import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
 const url = 'phoebeliang-step.appspot.com/game/';
@@ -73,7 +73,7 @@ class Game extends Component {
         }
       </AuthUserContext.Consumer>
     } else {
-      return <Endgame />
+      return <FabricContextProvider />
     }
   }
 
