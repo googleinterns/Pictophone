@@ -74,6 +74,7 @@ public class SendNotifications {
     String gameID = request.getParameter("gameID");
     DocumentReference game = db.collection("games").document(gameID);
     CollectionReference players = db.collection("users");
+    EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
 
     try {
       DocumentSnapshot gameDocSnap = game.get().get();
@@ -85,7 +86,7 @@ public class SendNotifications {
       // Retrieves player information
       String playerEmail = usersDocSnap.getString("email");
 
-      return Email.playerTurnEmail(gameID, new User(playerEmail, playerName));
+      return Email.populateEmail(gameID, playerEmail, playerName, emailType);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -103,31 +104,28 @@ public class SendNotifications {
         List<Email> emails = gatherRecipients(request, response);
 
         try {
-          Gmail service = ServiceCreation.createService();
-
           for (Email email : emails) {
             MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
-            Message testMessage = sendMessage(service, FROM, encoded);
+            Message testMessage = sendMessage(GmailService.service, FROM, encoded);
 
             System.out.println("Email: " + testMessage.toPrettyString());
           }
         } catch (Exception e) {
-          System.out.println("Sending Email Exception: " + e);
-          System.err.println(e);
+          System.out.println("Exception in End Email: " + e);
+          e.printStackTrace();
         }
         break;
       case TURN:
         Email player = getNextRecipient(request, response);
 
         try {
-          Gmail service = ServiceCreation.createService();
-
           MimeMessage encoded = createEmail(player.getEmail(), FROM, player.getSubject(), player.getBody());
-          Message testMessage = sendMessage(service, FROM, encoded);
+          Message testMessage = sendMessage(GmailService.service, FROM, encoded);
 
           System.out.println("Email: " + testMessage.toPrettyString());
         } catch (Exception e) {
-          System.out.println("Exception with service: " + e);
+          System.out.println("Exception in Turn Email: " + e);
+          e.printStackTrace();
         }
         break;
       default:

@@ -48,6 +48,8 @@ public class Email {
     throws RuntimeException {
 
     switch(emailType) {
+      case TURN:
+        return playerTurnEmail(gameID, new User(playerEmail, playerName));
       case END:
         return endGameEmail(gameID, new User(playerEmail, playerName));
       default:

@@ -12,6 +12,7 @@ public class Application {
   public static void main(String[] args) {
     try {
       Firebase.init();
+      GmailService.init();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -20,7 +21,7 @@ public class Application {
   }
 
   @GetMapping("/")
-	public String pulseCheck() {
-		return "Server is alive!";
-	}
+  public String pulseCheck() {
+    return "Server is alive!";
+  }
 }
