@@ -7,6 +7,7 @@ import './literallycanvas.css';
 import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
+import Timer from './Timer';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
@@ -181,7 +182,7 @@ class Canvas extends Component {
             {(index !== usernames.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
         </div>
-
+        <Timer />
         <h4>Draw something based on the left image!</h4>
         <div className="img-displays">
           <div className="prev-img">
