@@ -1,23 +1,26 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
+import { Container, Col, Form, Button } from 'react-bootstrap';
 
 import { withFirebase } from '../Firebase';
 import { withAuthorization } from '../Session';
 import * as ROUTES from '../../constants/routes';
 
+import './CreateGame.css';
+
 const CreateGamePage = () => (
-  <div>
-    <h1>Create Game</h1>
+  <Container className="create-game-wrapper">
+    <h1 className="create-game-heading">Create Game</h1>
     <CreateGameForm />
-    <button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></button>
-  </div>
+    <Button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></Button>
+  </Container>
 );
 
 const INITIAL_STATE = {
   gameName: '',
-  timeLimit: null,
-  maxNumPlayers: null,
+  timeLimit: '',
+  maxNumPlayers: '',
   createdGameId: '',
   error: null,
 };
@@ -61,43 +64,59 @@ class CreateGameFormBase extends Component {
 
     const isInvalid =
       gameName === '' ||
-      timeLimit === null ||
-      maxNumPlayers === null;
+      maxNumPlayers === '';
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="gameName"
-          value={gameName}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Game Name"
-        />
+      <Form className="create-game-form" onSubmit={this.onSubmit}>
+        <Col>
+          <Form.Group>
+            <Form.Label>Game name</Form.Label>
+            <Form.Control
+              name="gameName"
+              value={gameName}
+              onChange={this.onChange}
+              type="text"
+              placeholder="Game Name"
+            />
+          </Form.Group>
+        </Col>
 
-        <input
-          name="timeLimit"
-          value={timeLimit}
-          onChange={this.onChange}
-          type="number"
-          placeholder="Time Limit Per Turn (minutes)"
-        />
+        <Col>
+          <Form.Group>
+            <Form.Label>Time limit per turn (leave blank for untimed games)</Form.Label>
+            <Form.Control
+              name="timeLimit"
+              value={timeLimit}
+              onChange={this.onChange}
+              type="number"
+              placeholder="Time Limit Per Turn (minutes)"
+            />
+          </Form.Group>
+        </Col>
 
-        <input
-          name="maxNumPlayers"
-          value={maxNumPlayers}
-          onChange={this.onChange}
-          type="number"
-          placeholder="Maximum Number of Players"
-        />
+        <Col>
+          <Form.Group>
+            <Form.Label>Maximum number of players</Form.Label>
+            <Form.Control
+              name="maxNumPlayers"
+              value={maxNumPlayers}
+              onChange={this.onChange}
+              type="number"
+              placeholder="Maximum Number of Players"
+            />
+          </Form.Group>
+        </Col>
 
-        <button disabled={isInvalid} type="submit">Create Game</button>
+        <div className="create-game-button">
+          <Button disabled={isInvalid} type="submit">Create Game</Button>
+        </div>
 
         {createdGameId !== '' && (
           <p>Your game ID is {createdGameId}. Share this with your friends to add them to the game!</p>
         )}
 
         {error && <p>{error.message}</p>}
-      </form>
+      </Form>
     );
   }
 }
