@@ -1,19 +1,23 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
+import { Container, Col, Form, Button } from 'react-bootstrap';
 
 import { SignUpLink } from '../SignUp';
 import { PasswordForgetLink } from '../PasswordForget';
 import { withFirebase } from '../Firebase';
 import * as ROUTES from '../../constants/routes';
 
+import 'bootstrap/dist/css/bootstrap.css';
+import './SignIn.css';
+
 const SignInPage = () => (
-  <div>
-    <h1>SignIn</h1>
+  <Container className="signin-form-wrapper">
+    <h1 className="signin-form-heading">Sign In</h1>
     <SignInForm />
     <PasswordForgetLink />
     <SignUpLink />
-  </div>
+  </Container>
 );
 
 const INITIAL_STATE = {
@@ -55,29 +59,41 @@ class SignInFormBase extends Component {
     const isInvalid = password === '' || email === '';
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="email"
-          value={email}
-          autoComplete="username"
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          name="password"
-          value={password}
-          autoComplete="current-password"
-          onChange={this.onChange}
-          type="password"
-          placeholder="Password"
-        />
-        <button disabled={isInvalid} type="submit">
-          Sign In
-        </button>
+      <Form className="signin-form" onSubmit={this.onSubmit}>
+        <Col>
+          <Form.Group>
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              name="email"
+              value={email}
+              autoComplete="username"
+              onChange={this.onChange}
+              type="text"
+              placeholder="Email Address"
+            />
+          </Form.Group>
+        </Col>
+
+        <Col>
+          <Form.Group>
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              name="password"
+              value={password}
+              autoComplete="current-password"
+              onChange={this.onChange}
+              type="password"
+              placeholder="Password"
+            />
+          </Form.Group>
+        </Col>
+
+        <div className="signin-button">
+          <Button disabled={isInvalid} type="submit">Sign In</Button>
+        </div>
 
         {error && <p>{error.message}</p>}
-      </form>
+      </Form>
     );
   }
 }
