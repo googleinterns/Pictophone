@@ -85,6 +85,8 @@ class Canvas extends Component {
     }
     if (game.currentPlayerIndex !== index) {
       this.setState({ sendable: false });
+    } else {
+      this.setState({ sendable: true });
     }
     if (game.currentPlayerIndex > index) {
       this.setState({sent: true});
@@ -116,6 +118,7 @@ class Canvas extends Component {
       return;
     }
     const filename = `${gameId}${userId}.${MIMEType}`;
+    this.setState({ sendable: false, sending: true });
 
     // Send image URL to backend to sign
     // TODO add error handling
@@ -143,6 +146,7 @@ class Canvas extends Component {
       const data = doc.data();
       // Ignore first occurence
       if (data.status === "incomplete") return;
+      this.setState({ sendable: true, sending: false });
       if (data.ok) {
         this.sendEmail();
         // Advance the game if the image was uploaded successfully
@@ -224,7 +228,7 @@ class Canvas extends Component {
   }
 
   render() {
-    const { prevImg, usernames, players, sent,
+    const { prevImg, usernames, players, sent, sending,
       currentPlayerIndex, display, sendable, file } = this.state;
     const userIndex = players.indexOf(this.props.uid);
 
@@ -271,8 +275,14 @@ class Canvas extends Component {
             <button
               className="send-drawing"
               onClick={this.send}
-              disabled={sendable}>
-                {sent ? <span>Sent!</span> : <span>Send</span> }
+              disabled={!sendable}>
+                {
+                  (() => {
+                    if (sent) return (<span>Sent!</span>);
+                    if (sending) return (<span>Sending...</span>);
+                    return (<span>Send</span>);
+                  })()
+                }
              </button>
           </div>
         </div>
