@@ -1,14 +1,18 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { Container, Col, Form, Button } from 'react-bootstrap';
 
 import { withFirebase } from '../Firebase';
 import * as ROUTES from '../../constants/routes';
 
+import 'bootstrap/dist/css/bootstrap.css';
+import './PasswordForget.css';
+
 const PasswordForgetPage = () => (
-  <div>
-    <h1>PasswordForget</h1>
+  <Container className="pwforget-form-wrapper">
+    <h1 className="pwforget-form-heading">Forgot your password?</h1>
     <PasswordForgetForm />
-  </div>
+  </Container>
 );
 
 const INITIAL_STATE = {
@@ -48,20 +52,29 @@ class PasswordForgetFormBase extends Component {
     const isInvalid = email === '';
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="email"
-          value={this.state.email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <button disabled={isInvalid} type="submit">
-          Reset My Password
-        </button>
+      <Form className="pwforget-form" onSubmit={this.onSubmit}>
+        <Col>
+          <Form.Group>
+            <Form.Label>Enter your email to reset your password</Form.Label>
+            <Form.Control
+              name="email"
+              value={this.state.email}
+              autoComplete="email"
+              onChange={this.onChange}
+              type="text"
+              placeholder="Email Address"
+            />
+          </Form.Group>
+        </Col>
+
+        <div className="pwforget-button">
+          <Button disabled={isInvalid} type="submit">
+            Reset My Password
+          </Button>
+        </div>
 
         {error && <p>{error.message}</p>}
-      </form>
+      </Form>
     );
   }
 }

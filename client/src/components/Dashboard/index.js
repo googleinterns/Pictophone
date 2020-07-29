@@ -28,7 +28,6 @@ class Dashboard extends Component {
           <div className="dashboard-buttons">
             <HostButton />{' '}
             <JoinButton />{' '}
-            <RandomButton />
           </div>
           <div className="games-list">
             <AuthUserContext.Consumer>
@@ -55,14 +54,6 @@ class JoinButton extends Component {
   render() {
     return (
       <Button variant="secondary" as={Link} to={ROUTES.JOIN_GAME}>join</Button>
-    );
-  }
-}
-
-class RandomButton extends Component {
-  render() {
-    return (
-      <Button variant="secondary">random</Button>
     );
   }
 }
