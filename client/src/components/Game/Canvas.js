@@ -26,6 +26,7 @@ class Canvas extends Component {
     this.getImage = this.getImage.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.putImageInBucket = this.putImageInBucket.bind(this);
+    this.setUpBucketListener = this.setUpBucketListener.bind(this);
   }
 
   async componentDidMount() {
@@ -127,7 +128,12 @@ class Canvas extends Component {
       body: filename,
     }).then((response) => response.text());
 
-    // set up status listener
+    this.setUpBucketListener(filename);
+    this.putImageInBucket(imgUrl, data, MIMEType);
+
+  }
+
+  setUpBucketListener(filename) {
     const statusRef = this.props.firebase.db
       .collection("upload-progress").doc(filename);
     statusRef.set({
@@ -140,21 +146,18 @@ class Canvas extends Component {
       if (data.ok) {
         this.sendEmail();
         // Advance the game if the image was uploaded successfully
-        const gameRef = this.props.firebase.game(gameId);
+        const gameRef = this.props.firebase.game(this.state.gameId);
         gameRef.update({
           drawings: this.props.firebase.firestore.FieldValue.arrayUnion(filename)
         })
         gameRef.set({
-          currentPlayerIndex: currentPlayerIndex + 1,
+          currentPlayerIndex: this.state.currentPlayerIndex + 1,
         }, { merge: true });
       } else {
         alert(`Please try again. ${data.status}`);
       }
       statusRef.delete(); // Is this allowed
     });
-
-    this.putImageInBucket(imgUrl, data, MIMEType);
-
   }
 
   putImageInBucket(imgUrl, data, MIMEType) {
