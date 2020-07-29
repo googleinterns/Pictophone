@@ -21,6 +21,7 @@ public class ValidateUsername {
     return isUniqueUsername(username);
   }
 
+  // Takes a username and checks for its existence in the database
   private static Boolean isUniqueUsername(String username) throws Exception {
     Firestore db = FirestoreClient.getFirestore();
 
