@@ -5,7 +5,7 @@ import { saveAs } from 'file-saver';
 import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
-import { getUsername } from '../Helpers';
+import { getUsername, getMIMEType } from '../Helpers';
 import JSZip from "jszip";
 import FabricCanvas from './FabricCanvas';
 const zip = new JSZip();
@@ -27,7 +27,14 @@ class Endgame extends Component {
     this.fetchGame(id);
   }
 
-   async idToUsername(players) {
+  componentWillUnmount() {
+    // Clear state updates upon unmounting
+    this.setState = () => {
+      return;
+    }
+  }
+
+  async idToUsername(players) {
     // For the MVP, we won't listen for username changes
     // TODO add listener in Project Alpha
     const usernames = players.map(id =>
@@ -67,9 +74,12 @@ class Endgame extends Component {
     });
 
     // Wait for blobs to finish fetching and add them to a zip folder
-    Promise.all(blobs);
-    blobs.forEach((blob, i) => folder.file(`${i+1} - ${usernames[i]}.png`, blob, { binary: true }));
-    zip.generateAsync({type : "blob"}).then(content => saveAs(content, 'drawings.zip'));
+    Promise.all(blobs).then(blobs =>
+      Promise.all(blobs.map((blob, i) => getMIMEType(blob)))
+    ).then(types => {
+      blobs.forEach((blob, i) => folder.file(`${i+1} - ${usernames[i]}.${types[i]}`, blob, { binary: true }));
+      zip.generateAsync({type : "blob"}).then(content => saveAs(content, 'drawings.zip'));
+    });
   }
 
   render() {
