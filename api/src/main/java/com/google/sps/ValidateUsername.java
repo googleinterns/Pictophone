@@ -22,7 +22,6 @@ public class ValidateUsername {
   }
 
   private static Boolean isUniqueUsername(String username) throws Exception {
-    Firebase.init();
     Firestore db = FirestoreClient.getFirestore();
 
     CollectionReference users = db.collection("users");

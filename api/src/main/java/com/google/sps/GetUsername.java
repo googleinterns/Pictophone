@@ -14,7 +14,6 @@ import com.google.api.core.ApiFuture;
 public class GetUsername {
   @PostMapping("/getUsername")
   String getUsername(@RequestBody String uid) throws Exception {
-    Firebase.init();
     Firestore db = FirestoreClient.getFirestore();
 
     DocumentReference userRef = db.collection("users").document(uid);
