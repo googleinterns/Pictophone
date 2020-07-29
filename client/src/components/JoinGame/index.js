@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
+import { Container, Col, Form, Button } from 'react-bootstrap';
 
 import { withFirebase } from '../Firebase';
 import { withAuthorization } from '../Session';
 import * as ROUTES from '../../constants/routes';
 
+import './JoinGame.css';
+
 const JoinGamePage = () => (
-  <div>
-    <h1>Join Game</h1>
+  <Container className="join-game-wrapper">
+    <h2 className="join-game-heading">Join a game</h2>
     <JoinGameForm />
-    <button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></button>
-  </div>
+    <Button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></Button>
+  </Container>
 );
 
 const INITIAL_STATE = {
@@ -55,19 +58,26 @@ class JoinGameFormBase extends Component {
     const isInvalid = gameId === '';
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="gameId"
-          value={gameId}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Enter the ID of the game you want to join."
-        />
+      <Form className="join-game-form" onSubmit={this.onSubmit}>
+        <Col>
+          <Form.Group>
+            <Form.Label>Game ID</Form.Label>
+            <Form.Control
+              name="gameId"
+              value={gameId}
+              onChange={this.onChange}
+              type="text"
+              placeholder="Enter the ID of the game you want to join."
+            />
+          </Form.Group>
+        </Col>
 
-        <button disabled={isInvalid} type="submit">Join Game!</button>
+        <div className="join-game-button">
+          <Button disabled={isInvalid} type="submit">Join Game!</Button>
+        </div>
 
         {error && <p>{error.message}</p>}
-      </form>
+      </Form>
     );
   }
 }
