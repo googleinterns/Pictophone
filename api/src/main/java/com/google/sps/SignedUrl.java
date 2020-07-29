@@ -18,11 +18,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.activation.MimetypesFileTypeMap;
 
 @RestController
 public class SignedUrl {
   private static final String projectId = "phoebeliang-step";
-  private static final String bucketName = "pictophone-drawings";
 
   @PostMapping("/api/signUpload")
   String signUpload(@RequestBody String url) throws Exception {
@@ -41,17 +41,18 @@ public class SignedUrl {
       .setProjectId(projectId).build().getService();
   }
 
-  private static BlobInfo defineResource(String objectName) {
+  private static BlobInfo defineResource(String bucketName, String objectName) {
     return BlobInfo.newBuilder(BlobId.of(bucketName, objectName)).build();
   }
 
   // Taken from https://cloud.google.com/storage/docs/access-control/signing-urls-with-helpers
   public static String generateV4GPutObjectSignedUrl(String objectName) throws Exception {
     Storage storage = initStorage();
-    BlobInfo blobInfo = defineResource(objectName);
+    BlobInfo blobInfo = defineResource("pictophone-images", objectName);
+    String mimeType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(objectName);
 
     Map<String, String> extensionHeaders = new HashMap<>();
-    extensionHeaders.put("Content-Type", "image/png");
+    extensionHeaders.put("Content-Type", mimeType);
 
     URL url =
       storage.signUrl(
@@ -67,7 +68,7 @@ public class SignedUrl {
 
   public static String generateV4GetObjectSignedUrl(String objectName) throws Exception {
     Storage storage = initStorage();
-    BlobInfo blobInfo = defineResource(objectName);
+    BlobInfo blobInfo = defineResource("pictophone-drawings", objectName);
 
     URL url =
         storage.signUrl(blobInfo, 5, TimeUnit.MINUTES,

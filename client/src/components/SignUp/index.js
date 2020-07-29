@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
+import { Container, Col, Form, Button } from 'react-bootstrap';
 import { compose } from 'recompose';
 
 import { withFirebase } from '../Firebase';
 import * as ROUTES from '../../constants/routes';
 
+import 'bootstrap/dist/css/bootstrap.css';
+import './SignUp.css'
+
 const SignUpPage = () => (
-  <div>
-    <h1>SignUp</h1>
+  <Container className="signup-form-wrapper">
+    <h2 class="signup-form-heading">Sign Up</h2>
     <SignUpForm />
-  </div>
+  </Container>
 );
 
 const INITIAL_STATE = {
@@ -39,7 +43,7 @@ class SignUpFormBase extends Component {
 
     const url = '/validateUsername';
 
-    const response = await fetch(url, options)
+    const response = await fetch(url, options);
     const isUnique = await response.json();
 
     this.setState({ isUnique: isUnique });
@@ -104,39 +108,65 @@ class SignUpFormBase extends Component {
       username === '';
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="username"
-          value={username}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Username"
-        />
-        <input
-          name="email"
-          value={email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          name="passwordOne"
-          value={passwordOne}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Password"
-        />
-        <input
-          name="passwordTwo"
-          value={passwordTwo}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Confirm Password"
-        />
-        <button disabled={isInvalid} type="submit">Sign Up</button>
+      <Form className="signup-form" onSubmit={this.onSubmit}>
+        <Col>
+        <Form.Group>
+          <Form.Label>Username</Form.Label>
+          <Form.Control
+            name="username"
+            value={username}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Enter username"
+          />
+        </Form.Group>
+        </Col>
+
+        <Col>
+          <Form.Group>
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              name="email"
+              value={email}
+              onChange={this.onChange}
+              type="email"
+              placeholder="Enter email"
+            />
+          </Form.Group>
+        </Col>
+
+        <Col>
+          <Form.Group>
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              name="passwordOne"
+              value={passwordOne}
+              onChange={this.onChange}
+              type="password"
+              placeholder="Enter password"
+            />
+          </Form.Group>
+        </Col>
+
+        <Col>
+          <Form.Group>
+            <Form.Label>Confirm Password</Form.Label>
+            <Form.Control
+              name="passwordTwo"
+              value={passwordTwo}
+              onChange={this.onChange}
+              type="password"
+              placeholder="Confirm password"
+            />
+          </Form.Group>
+        </Col>
+
+        <div className="signup-button">
+        <Button disabled={isInvalid} type="submit">Sign Up</Button>
+        </div>
 
         {error && <p>{error.message}</p>}
-      </form>
+      </Form>
     );
   }
 }

@@ -7,7 +7,7 @@ const FabricCanvas = props => {
   const [canvas, initCanvas] = useContext(FabricContext);
   const CANVAS_X = 1000;
   const CANVAS_Y = 800;
-  const MAX_SIZE = 400;
+  const MAX_SIZE = 300;
   const RIGHT_BOUND = CANVAS_X - (MAX_SIZE / 2);
   const MARGIN_SIZE = 50;
   const X_OFFSET = 75;

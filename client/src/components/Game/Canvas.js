@@ -8,13 +8,14 @@ import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
 import Timer from './Timer';
+import { getUsername, getMIMEType } from '../Helpers';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { players: [], usernames: [] };
+    this.state = { players: [], usernames: [], file: null };
 
     this.send = this.send.bind(this);
     this.saveDrawing = this.saveDrawing.bind(this);
@@ -22,6 +23,7 @@ class Canvas extends Component {
     this.fetchGame = this.fetchGame.bind(this);
     this.updateGame = this.updateGame.bind(this);
     this.idToUsername = this.idToUsername.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.getImage = this.getImage.bind(this);
   }
 
@@ -31,11 +33,15 @@ class Canvas extends Component {
     this.fetchGame(id);
   }
 
+  componentWillUnmount() {
+    this.unsubscribe && this.unsubscribe();
+  }
+
   fetchGame(gameId) {
     // Don't worry about private games for now
     // Set up listener for game data change
     const game = this.props.firebase.game(gameId);
-    game.onSnapshot(docSnapshot => {
+    this.unsubscribe = game.onSnapshot(docSnapshot => {
       this.updateGame(docSnapshot.data());
     }, err => {
       console.log(`Encountered error: ${err}`);
@@ -56,8 +62,7 @@ class Canvas extends Component {
     // For the MVP, we won't listen for username changes
     // TODO add listener in Project Alpha
     const usernames = players.map(id =>
-      this.props.firebase.user(id).get().then(snapshot =>
-        snapshot.data().username)
+      getUsername(id)
     );
     const names = await Promise.all(usernames);
     this.setState({ usernames: names });
@@ -88,12 +93,23 @@ class Canvas extends Component {
     // Don't want player to send drawing when it's not their turn
     if (players.indexOf(userId) !== currentPlayerIndex) return;
 
-    // Make sure the canvas is not empty
-    const image = lc.getImage();
-    if (image === null) return;
+    // Grab image from canvas or uploaded file
+    let data = null;
+    if (this.state.file != null) {
+      // Prioritize using the atached file if it exists
+      data = await fetch(this.state.file).then(r => r.blob());
+    } else {
+      const image = lc.getImage();
+      if (image === null) return; // Make sure canvas isn't empty
+      data = await new Promise(resolve => image.toBlob(resolve));
+    }
 
-    const data = await new Promise(resolve => image.toBlob(resolve));
-    const url = gameId + userId + '.png';
+    const MIMEType = await getMIMEType(data);
+    console.log(MIMEType);
+    if (MIMEType === "unknown") {
+      alert('This is not a jpeg, png, or gif!');
+      return;
+    }
 
     // Send image URL to backend to sign
     // TODO add error handling
@@ -103,7 +119,7 @@ class Canvas extends Component {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json'
       },
-      body: url,
+      body: `${gameId}${userId}.${MIMEType}`,
     }).then((response) => response.text());
 
     // Send information for email
@@ -117,7 +133,7 @@ class Canvas extends Component {
         'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: 'gameID=' + gameId + '&emailType=' + emailType,
+      body: `gameID=${gameId}&emailType=${emailType}`,
     }).then((response) => {
       console.log(response.text());
     });
@@ -128,14 +144,15 @@ class Canvas extends Component {
     xhr.onerror = () => {
       alert('There was an error uploading your image :(')
     };
-    xhr.setRequestHeader('Content-Type', 'image/png');
+    xhr.setRequestHeader('Content-Type', `image/${MIMEType}`);
     xhr.send(data);
     xhr.onreadystatechange = () => {
        if (xhr.readyState === 4 && xhr.status === 200){
           // Advance the game if the image was uploaded successfully
+          // TODO listen to main bucket?
           const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
-            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url)
+            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(`${gameId}${userId}.${MIMEType}`)
           })
           gameRef.set({
             currentPlayerIndex: currentPlayerIndex + 1,
@@ -156,6 +173,20 @@ class Canvas extends Component {
     this.setState({lc: lc});
   }
 
+  handleChange(event) {
+    var file = event.target.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Your file is too large. Please upload something under 5MB!');
+    } else {
+      if (this.state.file !== null) {
+        URL.revokeObjectURL(this.state.file);
+      }
+      this.setState({
+        file: URL.createObjectURL(file)
+      });
+    }
+  }
+
   async getImage(filename) {
     const url = await fetch('/api/signDownload', {
       method: 'POST',
@@ -165,9 +196,9 @@ class Canvas extends Component {
   }
 
   render() {
-    const { players, prevImg, userId, usernames,
-      currentPlayerIndex, display, sent } = this.state;
-    const userIndex = players.indexOf(userId);
+    const { prevImg, usernames, players,
+      currentPlayerIndex, display, sent, file } = this.state;
+    const userIndex = players.indexOf(this.props.uid);
 
     return (
       <div>
@@ -177,7 +208,7 @@ class Canvas extends Component {
             indicates whether they are done with their turn.
             Renders an arrow after the name, if they are not the final player.
           */}
-          {usernames.map((name, index) => (<span className="player-list">
+          {usernames.map((name, index) => (<span key={name} className="player-list">
             <Player name={name} status={index - currentPlayerIndex} />
             {(index !== usernames.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
@@ -191,7 +222,7 @@ class Canvas extends Component {
                 if (userIndex === 0) {
                  return <p>Draw an image to send to the next person!</p>
                 } else if (display && prevImg) {
-                  return <img src={prevImg} alt="previous drawing" />
+                  return <img src={prevImg} style={{ maxWidth: 400 }} alt="previous drawing" />
                 } else {
                   return <p>It is not your turn yet. Please sit tight to receive the image!</p>
               }})()
@@ -199,7 +230,16 @@ class Canvas extends Component {
           </div>
           <div className="lc-container">
             <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
-            <button onClick={this.saveDrawing}>Download drawing</button>
+            <button onClick={this.saveDrawing}>Download canvas drawing</button>
+            <p>
+              To send your own image instead of the canvas, upload something below!
+              Please choose a jpeg, png, or gif under 5MB.
+            </p>
+            {file && <img src={file} width="100" alt="upload preview" />}
+            <form>
+            <input type="file" accept="image/*" onChange={this.handleChange} />
+            <input type="reset" value="Clear selection" onClick={() => this.setState({ file: null })} />
+            </form>
             {sent ? <p className="send-drawing">Drawing sent!</p>
               : <button className="send-drawing" onClick={this.send}>Send</button>}
           </div>

@@ -3,6 +3,7 @@ import { Card } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 
 import { withFirebase } from '../Firebase';
+import { getUsername } from '../Helpers';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './GameSelector.css';
@@ -30,8 +31,7 @@ class GameSelector extends Component {
       let gameData = { ...gameDoc.data(), gameId: gameDoc.id, hasEnded: true };
 
       // get username of first player
-      const startPlayerDoc = await this.props.firebase.user(gameData.players[0]).get();
-      gameData["startPlayer"] = startPlayerDoc.data().username;
+      gameData["startPlayer"] = await getUsername(gameData.players[0]);
 
       // check if current player is the host
       gameData["isHost"] = gameData.startPlayer === userDoc.data().username;
@@ -50,10 +50,8 @@ class GameSelector extends Component {
         gameData["hasEnded"] = false;
 
         // get username of current player if game is not over
-        const currentPlayerDoc = await this.props.firebase
-          .user(gameData.players[gameData.currentPlayerIndex])
-          .get();
-        gameData["currentPlayer"] = currentPlayerDoc.data().username;
+        const currentPlayerIndex = gameData.currentPlayerIndex;
+        gameData["currentPlayer"] = await getUsername(gameData.players[currentPlayerIndex]);
       }
 
       games.push(gameData);
@@ -135,14 +133,39 @@ const PlayedTurn = (props) => (
   </div>
 )
 
-const ToPlayTurn = (props) => (
+class ToPlayTurn extends Component {
+  render() {
+    let status;
+
+    if (this.props.game.turnsToWait === 0) {
+      status = <YourTurn />
+    }
+    else {
+      status = <NotYourTurn game={this.props.game} />
+    }
+
+    return (
+      <div>
+        {status}
+      </div>
+    )
+  }
+}
+
+const NotYourTurn = (props) => (
   <div>
     <Card.Text>
-      currently <b>{props.game.currentPlayer}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
+      currently <b>{this.props.game.currentPlayer}'s</b> turn ({this.props.game.currentPlayerIndex + 1}/{this.props.game.players.length})
     </Card.Text>
     <Card.Text>
-      {props.game.turnsToWait} player(s) to go before your turn!
+      {this.props.game.turnsToWait} {this.props.game.turnsToWait > 1 ? "players" : "player"} to go before your turn!
     </Card.Text>
+  </div>
+)
+
+const YourTurn = () => (
+  <div>
+    It's your turn to play!
   </div>
 )
 
