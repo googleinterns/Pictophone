@@ -11,7 +11,7 @@ import './CreateGame.css';
 
 const CreateGamePage = () => (
   <Container className="create-game-wrapper">
-    <h1 className="create-game-heading">Create Game</h1>
+    <h2 className="create-game-heading">Create a game</h2>
     <CreateGameForm />
     <Button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></Button>
   </Container>
