@@ -79,8 +79,11 @@ class Canvas extends Component {
     if (game.currentPlayerIndex >= index) {
       this.setState({ display: true });
     }
+    if (game.currentPlayerIndex != index) {
+      this.setState({ sendable: false });
+    }
     if (game.currentPlayerIndex > index) {
-      this.setState({ sent: true });
+      this.setState({sent: true});
     }
 
     // Convert player IDs to their usernames
@@ -195,8 +198,8 @@ class Canvas extends Component {
   }
 
   render() {
-    const { prevImg, usernames, players,
-      currentPlayerIndex, display, sent, file } = this.state;
+    const { prevImg, usernames, players, sent,
+      currentPlayerIndex, display, sendable, file } = this.state;
     const userIndex = players.indexOf(this.props.uid);
 
     return (
@@ -239,8 +242,12 @@ class Canvas extends Component {
             <input type="file" accept="image/*" onChange={this.handleChange} />
             <input type="reset" value="Clear selection" onClick={() => this.setState({ file: null })} />
             </form>
-            {sent ? <p className="send-drawing">Drawing sent!</p>
-              : <button className="send-drawing" onClick={this.send}>Send</button>}
+            <button
+              className="send-drawing"
+              onClick={this.send}
+              disabled={sendable}>
+                {sent ? <span>Sent!</span> : <span>Send</span> }
+             </button>
           </div>
         </div>
       </div>

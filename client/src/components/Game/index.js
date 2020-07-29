@@ -6,6 +6,7 @@ import { withRouter } from 'react-router';
 import Banner from '../Banner';
 import { compose } from 'recompose';
 import Canvas from './Canvas';
+import WaitingRoom from '../WaitingRoom';
 import { FabricContextProvider } from './FabricContextProvider';
 import * as ROUTES from '../../constants/routes';
 import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
@@ -49,16 +50,35 @@ class Game extends Component {
           this.setState({ gameExists: false });
         }
     });
-
-
-
   }
 
   updateGame(game) {
     this.setState({
       inProgress: game.currentPlayerIndex < game.players.length,
-      gameName: game.gameName
-     });
+      gameName: game.gameName,
+      playerInGame: game.players.includes(this.props.authUser.uid),
+      gameStarted: game.hasStarted
+    });
+  }
+
+  pageReturned(inProgress, gameExists, gameStarted, playerInGame) {
+    if (!gameExists) {
+      return <p>This game does not exist! Check your URL again.</p>
+    } else if(!gameStarted || !playerInGame) {
+      return <AuthUserContext.Consumer>
+        {authUser =>
+          <WaitingRoom uid={authUser.uid} />
+        }
+      </AuthUserContext.Consumer>
+    } else if (inProgress) {
+      return <AuthUserContext.Consumer>
+        {authUser =>
+          <Canvas uid={authUser.uid} />
+        }
+      </AuthUserContext.Consumer>
+    } else {
+      return <FabricContextProvider />
+    }
   }
 
   copyGameId() {
@@ -70,7 +90,7 @@ class Game extends Component {
   }
 
   render() {
-    const { inProgress, gameExists, gameName, copied, gameId } = this.state;
+    const { inProgress, gameExists, gameName, copied, gameId, gameStarted, playerInGame} = this.state;
 
     return (
       <div className="Game">
@@ -82,19 +102,7 @@ class Game extends Component {
           {copied ? 'Copied!' : 'Copy Game Link'}
         </button>
         { // Render according to game existence and status.
-          (() => {
-            if (!gameExists) {
-              return <p>This game does not exist! Check your URL again.</p>
-            } else if (inProgress) {
-              return <AuthUserContext.Consumer>
-                {authUser =>
-                  <Canvas uid={authUser.uid} />
-                }
-              </AuthUserContext.Consumer>
-            } else {
-              return <FabricContextProvider />
-            }
-          })()
+          this.pageReturned(inProgress, gameExists, gameStarted, playerInGame)
         }
       </div>
     );
