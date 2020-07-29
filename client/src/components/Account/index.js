@@ -32,7 +32,7 @@ const AccountPageBanner = (props) => (
     <Navbar.Toggle />
     <Navbar.Collapse className="justify-content-end">
       <Navbar.Text>
-        <Button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></Button>
+        <Button variant="info" type="button" as={Link} to={ROUTES.DASHBOARD} style={{ color: "white" }}>Back to dashboard</Button>
       </Navbar.Text>
     </Navbar.Collapse>
   </Navbar>
