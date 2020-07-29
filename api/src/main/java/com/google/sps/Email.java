@@ -14,6 +14,7 @@ public class Email {
  private static final StringBuffer turnEmailBody = new StringBuffer("It's time to draw!\n\n Click here to play: http://phoebeliang-step.appspot.com/game/");
  private static final StringBuffer endEmailBody = new StringBuffer("Thanks for playing! Find all the images from the game attached below. Come play again sometime:\n\nhttp://phoebeliang-step.appspot.com/game/");
 
+
   public Email(User player, String subject, String body) {
     this.player = player;
     this.subject = subject;
@@ -22,7 +23,7 @@ public class Email {
 
   public static Email playerTurnEmail(String gameID, User player) {
     String turnBody = turnEmailBody.append(gameID).toString();
-
+  
     return new Email(player, turnEmailSubject, turnBody);
   }
 

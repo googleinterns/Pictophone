@@ -21,6 +21,7 @@ class Canvas extends Component {
     this.fetchGame = this.fetchGame.bind(this);
     this.updateGame = this.updateGame.bind(this);
     this.idToUsername = this.idToUsername.bind(this);
+    this.getImage = this.getImage.bind(this);
   }
 
   async componentDidMount() {
@@ -38,6 +39,16 @@ class Canvas extends Component {
     }, err => {
       console.log(`Encountered error: ${err}`);
     });
+
+    // Get previous user's image
+    game.get().then(snapshot => {
+      const data = snapshot.data();
+      const userIndex = data.players.indexOf(this.props.uid);
+      if (userIndex > 0) {
+        this.getImage(data.drawings[userIndex - 1]);
+      }
+    });
+
   }
 
   async idToUsername(players) {
@@ -55,6 +66,7 @@ class Canvas extends Component {
     // Set state to new game object's state
     this.setState({ currentPlayerIndex: game.currentPlayerIndex,
       players: game.players, drawings: game.drawings,
+      gameName: game.gameName,
       timeLimit: game.timeLimit });
 
     // Determine whether to display drawing
@@ -79,8 +91,8 @@ class Canvas extends Component {
     const image = lc.getImage();
     if (image === null) return;
 
-    const data = await new Promise(resolve => image.toBlob(resolve));;
-    const url = 'https://storage.cloud.google.com/pictophone-drawings/';
+    const data = await new Promise(resolve => image.toBlob(resolve));
+    const url = gameId + userId + '.png';
 
     // Send image URL to backend to sign
     // TODO add error handling
@@ -90,7 +102,7 @@ class Canvas extends Component {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json'
       },
-      body: gameId + userId + '.png',
+      body: url,
     }).then((response) => response.text());
 
     // Send information for email
@@ -122,7 +134,7 @@ class Canvas extends Component {
           // Advance the game if the image was uploaded successfully
           const gameRef = this.props.firebase.game(gameId);
           gameRef.update({
-            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url + gameId + userId + '.png')
+            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(url)
           })
           gameRef.set({
             currentPlayerIndex: currentPlayerIndex + 1,
@@ -132,8 +144,8 @@ class Canvas extends Component {
   }
 
   saveDrawing() {
-    const { gameId, user } = this.state;
-    var filename = gameId + user + '.png';
+    const { gameName } = this.state;
+    var filename = gameName + '.png';
     this.state.lc.getImage().toBlob(function(blob) {
       saveAs(blob, filename);
     });
@@ -143,8 +155,16 @@ class Canvas extends Component {
     this.setState({lc: lc});
   }
 
+  async getImage(filename) {
+    const url = await fetch('/api/signDownload', {
+      method: 'POST',
+      body: filename
+    }).then((response) => response.text());
+    this.setState({ prevImg: url });
+  }
+
   render() {
-    const { players, drawings, userId, usernames,
+    const { players, prevImg, userId, usernames,
       currentPlayerIndex, display, sent } = this.state;
     const userIndex = players.indexOf(userId);
 
@@ -169,8 +189,8 @@ class Canvas extends Component {
               (() => {
                 if (userIndex === 0) {
                  return <p>Draw an image to send to the next person!</p>
-                } else if (display) {
-                  return <img src={drawings[userIndex - 1]} alt="previous drawing" />
+                } else if (display && prevImg) {
+                  return <img src={prevImg} alt="previous drawing" />
                 } else {
                   return <p>It is not your turn yet. Please sit tight to receive the image!</p>
               }})()
