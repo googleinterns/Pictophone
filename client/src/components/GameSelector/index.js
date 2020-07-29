@@ -137,7 +137,7 @@ class ToPlayTurn extends Component {
   render() {
     let status;
 
-    if (this.props.game.turnsToWait == 0) {
+    if (this.props.game.turnsToWait === 0) {
       status = <YourTurn />
     }
     else {
