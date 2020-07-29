@@ -1,6 +1,7 @@
 # renamed from app.yaml
 runtime: java11
 service: api
+instance_class: F2
 automatic_scaling:
   min_idle_instances: automatic
   max_idle_instances: automatic

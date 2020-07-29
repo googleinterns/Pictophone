@@ -53,7 +53,7 @@ public class SendNotifications {
         String hostName = players.document(playerNames.get(0)).get().get().getString("username");
 
         // Adding player to Email object
-        emails.add(emailType.createEmail(gameID, playerEmail, hostName));
+        emails.add(Email.populateEmail(gameID, playerEmail, hostName, emailType));
 
         // Checks if there are any players
         if (emails.isEmpty()) {
@@ -74,6 +74,7 @@ public class SendNotifications {
     String gameID = request.getParameter("gameID");
     DocumentReference game = db.collection("games").document(gameID);
     CollectionReference players = db.collection("users");
+    EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
 
     try {
       DocumentSnapshot gameDocSnap = game.get().get();
@@ -85,7 +86,7 @@ public class SendNotifications {
       // Retrieves player information
       String playerEmail = usersDocSnap.getString("email");
 
-      return Email.playerTurnEmail(gameID, new User(playerEmail, playerName));
+      return Email.populateEmail(gameID, playerEmail, playerName, emailType);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -95,46 +96,42 @@ public class SendNotifications {
   public void sendEmail(HttpServletRequest request, HttpServletResponse response)
       throws IOException, InterruptedException, ExecutionException {
 
-    Firebase.init();
-    Firestore db = FirestoreClient.getFirestore();
-
     EmailType emailType = EmailType.valueOf(request.getParameter("emailType").toUpperCase());
-    String gameID = request.getParameter("gameID");
     final String FROM = "pictophone.noreply@gmail.com";
 
-    DocumentSnapshot docSnap = db.collection("games").document(gameID).get().get();
+    switch(emailType) {
+      case END:
+        List<Email> emails = gatherRecipients(request, response);
 
-    if (emailType == EmailType.START || emailType == EmailType.END) {
-      List<Email> emails = gatherRecipients(request, response);
+        try {
+          for (Email email : emails) {
+            MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
+            Message testMessage = sendMessage(GmailService.service, FROM, encoded);
 
-      try {
-        Gmail service = ServiceCreation.createService();
+            System.out.println("Email: " + testMessage.toPrettyString());
+          }
+        } catch (Exception e) {
+          System.out.println("Exception in End Email: " + e);
+          e.printStackTrace();
+        }
+        break;
+      case TURN:
+        Email player = getNextRecipient(request, response);
 
-        for (Email email : emails) {
-          MimeMessage encoded = createEmail(email.getEmail(), FROM, email.getSubject(), email.getBody());
-          Message testMessage = sendMessage(service, FROM, encoded);
+        try {
+          MimeMessage encoded = createEmail(player.getEmail(), FROM, player.getSubject(), player.getBody());
+          Message testMessage = sendMessage(GmailService.service, FROM, encoded);
 
           System.out.println("Email: " + testMessage.toPrettyString());
+        } catch (Exception e) {
+          System.out.println("Exception in Turn Email: " + e);
+          e.printStackTrace();
         }
-      } catch (Exception e) {
-        System.out.println("Sending Email Exception: " + e);
-        System.err.println(e);
-      }
-    } else if (emailType == EmailType.TURN) {
-      Email player = getNextRecipient(request, response);
-
-      try {
-        Gmail service = ServiceCreation.createService();
-
-        MimeMessage encoded = createEmail(player.getEmail(), FROM, player.getSubject(), player.getBody());
-        Message testMessage = sendMessage(service, FROM, encoded);
-
-        System.out.println("Email: " + testMessage.toPrettyString());
-      } catch (Exception e) {
-        System.out.println("Exception with service: " + e);
-      }
+        break;
+      default:
+        System.out.println("Invalid email type given");
+        throw new RuntimeException();
     }
-
   }
 
   // ***********************HELPER METHODS**********************************
