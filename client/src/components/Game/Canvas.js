@@ -83,7 +83,7 @@ class Canvas extends Component {
     if (game.currentPlayerIndex >= index) {
       this.setState({ display: true });
     }
-    if (game.currentPlayerIndex != index) {
+    if (game.currentPlayerIndex !== index) {
       this.setState({ sendable: false });
     }
     if (game.currentPlayerIndex > index) {
@@ -139,7 +139,7 @@ class Canvas extends Component {
     statusRef.set({
       status: "incomplete"
     })
-    this.statusListener = statusRef.onSnapshot(function(doc) {
+    this.statusListener = statusRef.onSnapshot(doc => {
       const data = doc.data();
       // Ignore first occurence
       if (data.status === "incomplete") return;
@@ -156,7 +156,6 @@ class Canvas extends Component {
       } else {
         alert(`Please try again. ${data.status}`);
       }
-      statusRef.delete(); // Is this allowed
     });
   }
 
@@ -176,9 +175,9 @@ class Canvas extends Component {
   }
 
   sendEmail() {
-    const { currentPlayerIndex, players } = this.state;
+    const { currentPlayerIndex, players, gameId } = this.state;
     const emailType = (currentPlayerIndex === players.length) ? 'end' : 'turn';
-    await fetch('/api/notify', {
+    fetch('/api/notify', {
       method: 'POST',
       headers: {
         'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
