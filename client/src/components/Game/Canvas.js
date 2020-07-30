@@ -24,6 +24,9 @@ class Canvas extends Component {
     this.idToUsername = this.idToUsername.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.getImage = this.getImage.bind(this);
+    this.sendEmail = this.sendEmail.bind(this);
+    this.putImageInBucket = this.putImageInBucket.bind(this);
+    this.setUpBucketListener = this.setUpBucketListener.bind(this);
   }
 
   async componentDidMount() {
@@ -34,6 +37,7 @@ class Canvas extends Component {
 
   componentWillUnmount() {
     this.unsubscribe && this.unsubscribe();
+    this.statusListener && this.statusListener();
   }
 
   fetchGame(gameId) {
@@ -79,8 +83,13 @@ class Canvas extends Component {
     if (game.currentPlayerIndex >= index) {
       this.setState({ display: true });
     }
+    if (game.currentPlayerIndex !== index) {
+      this.setState({ sendable: false });
+    } else {
+      this.setState({ sendable: true });
+    }
     if (game.currentPlayerIndex > index) {
-      this.setState({ sent: true });
+      this.setState({sent: true});
     }
 
     // Convert player IDs to their usernames
@@ -104,11 +113,12 @@ class Canvas extends Component {
     }
 
     const MIMEType = await getMIMEType(data);
-    console.log(MIMEType);
     if (MIMEType === "unknown") {
       alert('This is not a jpeg, png, or gif!');
       return;
     }
+    const filename = `${gameId}${userId}.${MIMEType}`;
+    this.setState({ sendable: false, sending: true });
 
     // Send image URL to backend to sign
     // TODO add error handling
@@ -118,26 +128,42 @@ class Canvas extends Component {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json'
       },
-      body: `${gameId}${userId}.${MIMEType}`,
+      body: filename,
     }).then((response) => response.text());
 
-    // Send information for email
-    let emailType = 'turn';
-    if(currentPlayerIndex+1 >= players.length) {
-      emailType = 'end';
-    }
-    await fetch('/api/notify', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `gameID=${gameId}&emailType=${emailType}`,
-    }).then((response) => {
-      console.log(response.text());
-    });
+    this.setUpBucketListener(filename);
+    this.putImageInBucket(imgUrl, data, MIMEType);
 
-    // PUT data in bucket. For some reason fetch doesn't work, but xhr does
+  }
+
+  setUpBucketListener(filename) {
+    const statusRef = this.props.firebase.db
+      .collection("upload-progress").doc(filename);
+    statusRef.set({
+      status: "incomplete"
+    })
+    this.statusListener = statusRef.onSnapshot(doc => {
+      const data = doc.data();
+      // Ignore first occurence
+      if (data.status === "incomplete") return;
+      this.setState({ sendable: true, sending: false });
+      if (data.ok) {
+        this.sendEmail();
+        // Advance the game if the image was uploaded successfully
+        const gameRef = this.props.firebase.game(this.state.gameId);
+        gameRef.update({
+          drawings: this.props.firebase.firestore.FieldValue.arrayUnion(filename)
+        })
+        gameRef.set({
+          currentPlayerIndex: this.state.currentPlayerIndex + 1,
+        }, { merge: true });
+      } else {
+        alert(`Please try again. ${data.status}`);
+      }
+    });
+  }
+
+  putImageInBucket(imgUrl, data, MIMEType) {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', imgUrl, true);
     xhr.onerror = () => {
@@ -147,17 +173,24 @@ class Canvas extends Component {
     xhr.send(data);
     xhr.onreadystatechange = () => {
        if (xhr.readyState === 4 && xhr.status === 200){
-          // Advance the game if the image was uploaded successfully
-          // TODO listen to main bucket?
-          const gameRef = this.props.firebase.game(gameId);
-          gameRef.update({
-            drawings: this.props.firebase.firestore.FieldValue.arrayUnion(`${gameId}${userId}.${MIMEType}`)
-          })
-          gameRef.set({
-            currentPlayerIndex: currentPlayerIndex + 1,
-          }, { merge: true });
+          console.log('Image successfully in uploaded. Now validating...');
        }
     }
+  }
+
+  sendEmail() {
+    const { currentPlayerIndex, players, gameId } = this.state;
+    const emailType = (currentPlayerIndex === players.length) ? 'end' : 'turn';
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `gameID=${gameId}&emailType=${emailType}`,
+    }).then((response) => {
+      console.log(response.text());
+    });
   }
 
   saveDrawing() {
@@ -195,8 +228,8 @@ class Canvas extends Component {
   }
 
   render() {
-    const { prevImg, usernames, players,
-      currentPlayerIndex, display, sent, file } = this.state;
+    const { prevImg, usernames, players, sent, sending,
+      currentPlayerIndex, display, sendable, file } = this.state;
     const userIndex = players.indexOf(this.props.uid);
 
     return (
@@ -239,8 +272,18 @@ class Canvas extends Component {
             <input type="file" accept="image/*" onChange={this.handleChange} />
             <input type="reset" value="Clear selection" onClick={() => this.setState({ file: null })} />
             </form>
-            {sent ? <p className="send-drawing">Drawing sent!</p>
-              : <button className="send-drawing" onClick={this.send}>Send</button>}
+            <button
+              className="send-drawing"
+              onClick={this.send}
+              disabled={!sendable}>
+                {
+                  (() => {
+                    if (sent) return (<span>Sent!</span>);
+                    if (sending) return (<span>Sending...</span>);
+                    return (<span>Send</span>);
+                  })()
+                }
+             </button>
           </div>
         </div>
       </div>
