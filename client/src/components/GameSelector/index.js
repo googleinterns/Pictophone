@@ -102,7 +102,7 @@ class Game extends Component {
         {this.props.game && (
           <Card border="dark" style={{ width: '97.5%'}}>
             <Link to={`/game/${this.props.game.gameId}`}>
-              <Card.Header>started by <b>{this.props.game.startPlayer}</b> on <b>{this.props.game.startDate.toDate().toDateString()}</b></Card.Header>
+              <Card.Header>started by <b>{this.props.game.startPlayer}</b> on <b>{this.props.game.creationDate.toDate().toDateString()}</b></Card.Header>
               <Card.Body>
                 <Card.Title>{this.props.game.gameName.toUpperCase()}</Card.Title>
                 {turnIndicator}
