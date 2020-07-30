@@ -8,7 +8,7 @@ export async function getUsername(uid) {
     body: uid
   };
 
-  const url = '/getUsername';
+  const url = '/api/getUsername';
 
   const response = await fetch(url, options);
   const username = await response.text();

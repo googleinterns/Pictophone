@@ -89,7 +89,7 @@ class Firebase {
     this.games().add({
       gameName: gameName,
       players: [],
-      startDate: this.fieldValue.serverTimestamp(),
+      creationDate: this.fieldValue.serverTimestamp(),
       currentPlayerIndex: 0,
       hasStarted: false,
       timeLimit: timeLimit,
