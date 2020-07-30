@@ -12,7 +12,7 @@ import com.google.api.core.ApiFuture;
 
 @RestController
 public class GetUsername {
-  @PostMapping("/getUsername")
+  @PostMapping("/api/getUsername")
   String getUsername(@RequestBody String uid) throws Exception {
     Firestore db = FirestoreClient.getFirestore();
 
