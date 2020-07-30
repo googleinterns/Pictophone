@@ -228,7 +228,7 @@ class Canvas extends Component {
             }
           </div>
           <div className="lc-container">
-            <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix="lc-assets/img" />
+            <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix={`${process.env.PUBLIC_URL}/lc-assets/img`} />
             <button onClick={this.saveDrawing}>Download canvas drawing</button>
             <p>
               To send your own image instead of the canvas, upload something below!
