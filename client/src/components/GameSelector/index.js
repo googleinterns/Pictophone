@@ -155,10 +155,10 @@ class ToPlayTurn extends Component {
 const NotYourTurn = (props) => (
   <div>
     <Card.Text>
-      currently <b>{this.props.game.currentPlayer}'s</b> turn ({this.props.game.currentPlayerIndex + 1}/{this.props.game.players.length})
+      currently <b>{props.game.currentPlayer}'s</b> turn ({props.game.currentPlayerIndex + 1}/{props.game.players.length})
     </Card.Text>
     <Card.Text>
-      {this.props.game.turnsToWait} {this.props.game.turnsToWait > 1 ? "players" : "player"} to go before your turn!
+      {props.game.turnsToWait} {props.game.turnsToWait > 1 ? "players" : "player"} to go before your turn!
     </Card.Text>
   </div>
 )
