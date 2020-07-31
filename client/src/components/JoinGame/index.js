@@ -43,16 +43,22 @@ class JoinGameFormBase extends Component {
     const { gameId } = this.state;
 
     this.props.firebase
-      .doAddUserToGame(gameId)
-      .then(() => {
-        this.setState({ ...INITIAL_STATE });
-        this.props.history.push(`/game/${gameId}`);
+      .game(gameId)
+      .get()
+      .then(gameSnapshot => {
+        if (gameSnapshot.exists) {
+          this.setState({ ...INITIAL_STATE });
+          this.props.history.push(`/game/${gameId}`);
+        }
+        else {
+          throw new Error("Invalid game ID. Please double check to make sure you entered it correctly.");
+        }
       })
       .catch(error => {
         this.setState({ error });
       });
 
-      event.preventDefault();
+    event.preventDefault();
   };
 
   onChange = event => {
