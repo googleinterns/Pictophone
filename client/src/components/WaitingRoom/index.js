@@ -34,6 +34,7 @@ class WaitingRoomBase extends Component {
             })
             const usernames = await Promise.all(users);
             this.setState({
+              isHost: snapshot.data().players.indexOf(this.props.uid),
               players: usernames,
               started: snapshot.data().hasStarted,
               gameId: id,
@@ -67,9 +68,9 @@ class WaitingRoomBase extends Component {
   }
 
   render() {
-    const { gameId, players, timeLimit, started } = this.state
+    const { gameId, players, timeLimit, started, isHost} = this.state
 
-    const isInvalid = (players.indexOf(this.props.uid) !== 0 && started === false);
+    const isInvalid = (isHost && started === false);
 
     return (
       <div>
