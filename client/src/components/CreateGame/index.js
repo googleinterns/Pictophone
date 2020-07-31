@@ -1,20 +1,31 @@
 import React, { Component } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
-import { Container, Col, Form, Button } from 'react-bootstrap';
+import { Col, Form, Button, Modal } from 'react-bootstrap';
 
 import { withFirebase } from '../Firebase';
 import { withAuthorization } from '../Session';
-import * as ROUTES from '../../constants/routes';
 
 import './CreateGame.css';
 
-const CreateGamePage = () => (
-  <Container className="create-game-wrapper">
-    <h2 className="create-game-heading">Create a game</h2>
-    <CreateGameForm />
-    <Button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></Button>
-  </Container>
+const CreateGamePage = (props) => (
+  <Modal
+    show={props.show}
+    onHide={props.onHide}
+    size="lg"
+    aria-labelledby="contained-modal-title-vcenter"
+    centered
+  >
+    <Modal.Header closeButton>
+      <Modal.Title id="contained-modal-title-vcenter">Create a game</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <CreateGameForm />
+    </Modal.Body>
+    <Modal.Footer>
+      <Button onClick={props.onHide}>Close</Button>
+    </Modal.Footer>
+  </Modal>
 );
 
 const INITIAL_STATE = {
@@ -33,20 +44,28 @@ class CreateGameFormBase extends Component {
   }
 
   onSubmit = event => {
-    const { gameName, timeLimit, maxNumPlayers } = this.state;
+    let { gameName, timeLimit, maxNumPlayers } = this.state;
 
-    this.props.firebase
-      .doCreateGame(gameName, timeLimit, maxNumPlayers)
-      .then(gameRef => {
-        this.setState({ ...INITIAL_STATE });
-        this.setState({ createdGameId: gameRef.id });
-        this.props.history.push(`/game/${gameRef.id}`);
-      })
-      .catch(error => {
-        this.setState({ error });
-      });
+    timeLimit = parseInt(timeLimit, 10);
+    maxNumPlayers = parseInt(maxNumPlayers, 10);
 
-      event.preventDefault();
+    if (maxNumPlayers && maxNumPlayers < 2) {
+      this.setState({ error: new Error("Please enter at least 2 for maximum number of players.") });
+    }
+    else {
+      this.props.firebase
+        .doCreateGame(gameName, timeLimit, maxNumPlayers)
+        .then(gameRef => {
+          this.setState({ ...INITIAL_STATE });
+          this.setState({ createdGameId: gameRef.id });
+          this.props.history.push(`/game/${gameRef.id}`);
+        })
+        .catch(error => {
+          this.setState({ error });
+        });
+    }
+
+    event.preventDefault();
   };
 
   onChange = event => {
@@ -63,8 +82,7 @@ class CreateGameFormBase extends Component {
     } = this.state;
 
     const isInvalid =
-      gameName === '' ||
-      maxNumPlayers === '';
+      gameName === '';
 
     return (
       <Form className="create-game-form" onSubmit={this.onSubmit}>
@@ -96,7 +114,7 @@ class CreateGameFormBase extends Component {
 
         <Col>
           <Form.Group>
-            <Form.Label>Maximum number of players</Form.Label>
+            <Form.Label>Maximum number of players (leave blank for unlimited players)</Form.Label>
             <Form.Control
               name="maxNumPlayers"
               value={maxNumPlayers}
