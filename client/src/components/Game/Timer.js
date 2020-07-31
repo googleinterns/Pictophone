@@ -95,9 +95,11 @@ class Timer extends Component {
             (() => {
               if(minutes || seconds) {
                 return (
-                   (minutes <= 0 && seconds <= 0)
+                   (days <= 0 && hours <= 0 && minutes <= 0 && seconds <= 0)
                   ? <h3>Times up!</h3>
-                  : <h3>Time Remaining: {days > 0 && `${ days }:`}{hours > 0 && `${ hours }:`}{ minutes }:{ seconds < 10 ? `0${ seconds }` : seconds }</h3>
+                  : <h3>Time Remaining: { days > 0 && `${ days }:`}
+                  { hours > 0 && `${ hours }:`}
+                  { minutes }:{ seconds < 10 ? `0${ seconds }` : seconds }</h3>
                 )
               }
             })()
