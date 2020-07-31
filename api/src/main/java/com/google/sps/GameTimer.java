@@ -11,6 +11,10 @@ public class GameTimer {
 
   @PostMapping("/api/start")
   public void timerInit(HttpServletRequest request, HttpServletResponse response) {
-    
+    //***Backend Timer***//
+    /*
+      This will initalize the timer and allow the web app to know
+      when the turn has ended even if a user doesn't open the web app
+    */
   }
 }

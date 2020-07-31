@@ -24,17 +24,17 @@ class Timer extends Component {
         game.onSnapshot((snapshot) => {
           if(snapshot.data().gameStartTime !== null) {
             this.setState({
-              gameSize: snapshot.data().players.length,
+              currentPlayerIndex: snapshot.data().players.length,
               startTime: snapshot.data().gameStartTime.seconds,
               timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
             })
             this.setState({
-              timeTurnWillEnd: ((this.state.timePerTurnInSeconds * this.state.gameSize) + this.state.startTime),
+              timeTurnWillEnd: ((this.state.timePerTurnInSeconds * this.state.currentPlayerIndex) + this.state.startTime),
               currentTime: Math.floor(new Date().getTime() / 1000),
             })
             this.setState({
-              minutes: Math.floor((this.state.timeTurnWillEnd - this.state.currentTime)/60),
-              seconds: (this.state.timeTurnWillEnd - this.state.currentTime)%60
+              minutes: Math.floor((this.state.timeTurnWillEnd - this.state.currentTime) / 60),
+              seconds: (this.state.timeTurnWillEnd - this.state.currentTime) % 60
             })
           }
         })
@@ -46,21 +46,21 @@ class Timer extends Component {
       const gameRef = await this.props.firebase.game(id).get();
 
       if (seconds > 0) {
-        this.setState(({ seconds }) => ({
+        this.setState({
           seconds: seconds - 1
-        }))
+        })
       }
       if (seconds === 0) {
         if (minutes === 0) {
-          clearInterval(this.myInterval)
           game.set({
             currentPlayerIndex: gameRef.data().currentPlayerIndex + 1,
           }, { merge: true })
+          clearInterval(this.myInterval)
         } else {
-          this.setState(({ minutes }) => ({
+          this.setState({
             minutes: minutes - 1,
             seconds: 59
-          }))
+          })
         }
       }
     }, 1000)
@@ -71,11 +71,17 @@ class Timer extends Component {
 
     return(
       <div>
-            {
-              minutes <= 0 && seconds <= 0
-              ? <h3>Times up!</h3>
-              : <h3>Time Remaining: { minutes }:{ seconds < 10 ? `0${ seconds }` : seconds }</h3>
-            }
+          {
+            (() => {
+              if(minutes || seconds) {
+                return (
+                   (minutes <= 0 && seconds <= 0)
+                  ? <h3>Times up!</h3>
+                  : <h3>Time Remaining: { minutes }:{ seconds < 10 ? `0${ seconds }` : seconds }</h3>
+                )
+              }
+            })()
+          }
       </div>
     )
   }

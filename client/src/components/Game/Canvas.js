@@ -246,7 +246,7 @@ class Canvas extends Component {
             {(index !== usernames.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
         </div>
-        {timeLimit !== '' && userIndex === currentPlayerIndex ? <Timer /> : null}
+        {timeLimit && userIndex === currentPlayerIndex && <Timer />}
         <h4>Draw something based on the left image!</h4>
         <div className="img-displays">
           <div className="prev-img">
