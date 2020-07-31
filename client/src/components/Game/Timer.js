@@ -8,8 +8,6 @@ class Timer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      minutes: 99,
-      seconds: 99,
       initialSet: false
     }
   }
@@ -22,7 +20,7 @@ class Timer extends Component {
     .then(docSnapshot => {
       if(docSnapshot.exists) {
         game.onSnapshot((snapshot) => {
-          if(snapshot.data().gameStartTime !== null) {
+          if(snapshot.data().gameStartTime !== null && snapshot.data().currentPlayerIndex === 0) {
             this.setState({
               currentPlayerIndex: snapshot.data().currentPlayerIndex + 1,
               startTime: snapshot.data().gameStartTime.seconds,
@@ -30,11 +28,27 @@ class Timer extends Component {
             })
             this.setState({
               timeTurnWillEnd: ((this.state.timePerTurnInSeconds * this.state.currentPlayerIndex) + this.state.startTime),
-              currentTime: Math.floor(new Date().getTime() / 1000),
             })
             this.setState({
-              minutes: Math.floor((this.state.timeTurnWillEnd - this.state.currentTime) / 60),
-              seconds: (this.state.timeTurnWillEnd - this.state.currentTime) % 60
+              days: Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24),
+              hours: Math.floor(((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60) % 24,
+              minutes: Math.floor((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) % 60,
+              seconds: (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60
+            })
+          } else if(snapshot.data().gameStartTime !== null) {
+            this.setState({
+              currentPlayerIndex: snapshot.data().currentPlayerIndex + 1,
+              startTime: Math.floor(new Date().getTime() / 1000),
+              timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
+            })
+            this.setState({
+              timeTurnWillEnd: ((this.state.timePerTurnInSeconds * this.state.currentPlayerIndex) + this.state.startTime),
+            })
+            this.setState({
+              days: Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24),
+              hours: Math.floor(((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60) % 24,
+              minutes: Math.floor((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) % 60,
+              seconds: (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60
             })
           }
         })
@@ -42,24 +56,26 @@ class Timer extends Component {
     })
 
     this.myInterval = setInterval(async () => {
-      const { seconds, minutes } = this.state
+      const { days, hours, minutes, seconds } = this.state
       const gameRef = await this.props.firebase.game(id).get();
 
       if (seconds > 0) {
         this.setState({
-          seconds: seconds - 1
+          seconds: (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60
         })
       }
       if (seconds === 0) {
-        if (minutes === 0) {
+        if (minutes === 0 && hours === 0 && days === 0) {
           game.set({
             currentPlayerIndex: gameRef.data().currentPlayerIndex + 1,
           }, { merge: true })
           clearInterval(this.myInterval)
         } else {
           this.setState({
-            minutes: minutes - 1,
-            seconds: 59
+            days: Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24),
+            hours: Math.floor(((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60) % 24,
+            minutes: Math.floor((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) % 60,
+            seconds: (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60
           })
         }
       }
@@ -71,7 +87,7 @@ class Timer extends Component {
   }
 
   render() {
-    const { minutes, seconds } = this.state;
+    const { days, hours, minutes, seconds } = this.state;
 
     return(
       <div>
@@ -81,7 +97,7 @@ class Timer extends Component {
                 return (
                    (minutes <= 0 && seconds <= 0)
                   ? <h3>Times up!</h3>
-                  : <h3>Time Remaining: { minutes }:{ seconds < 10 ? `0${ seconds }` : seconds }</h3>
+                  : <h3>Time Remaining: {days > 0 && `${ days }:`}{hours > 0 && `${ hours }:`}{ minutes }:{ seconds < 10 ? `0${ seconds }` : seconds }</h3>
                 )
               }
             })()
