@@ -30,10 +30,10 @@ class Timer extends Component {
               timeTurnWillEnd: (this.state.timePerTurnInSeconds + this.state.startTime),
             })
             this.setState({
-              days: Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24),
-              hours: Math.floor(((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60) % 24,
-              minutes: Math.floor((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) % 60,
-              seconds: (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60
+              days: this.calculateTime('days'),
+              hours: this.calculateTime('hours'),
+              minutes: this.calculateTime('minutes'),
+              seconds: this.calculateTime('seconds')
             })
           } else if(snapshot.data().gameStartTime !== null) {
             this.setState({
@@ -44,10 +44,10 @@ class Timer extends Component {
               timeTurnWillEnd: (this.state.timePerTurnInSeconds + this.state.startTime),
             })
             this.setState({
-              days: Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24),
-              hours: Math.floor(((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60) % 24,
-              minutes: Math.floor((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) % 60,
-              seconds: (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60
+              days: this.calculateTime('days'),
+              hours: this.calculateTime('hours'),
+              minutes: this.calculateTime('minutes'),
+              seconds: this.calculateTime('seconds')
             })
           }
         })
@@ -60,7 +60,7 @@ class Timer extends Component {
 
       if (seconds > 0) {
         this.setState({
-          seconds: (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60
+          seconds: this.calculateTime('seconds')
         })
       }
       if (seconds === 0) {
@@ -71,14 +71,29 @@ class Timer extends Component {
           clearInterval(this.myInterval)
         } else {
           this.setState({
-            days: Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24),
-            hours: Math.floor(((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60) % 24,
-            minutes: Math.floor((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) % 60,
-            seconds: (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60
+            days: this.calculateTime('days'),
+            hours: this.calculateTime('hours'),
+            minutes: this.calculateTime('minutes'),
+            seconds: this.calculateTime('seconds')
           })
         }
       }
     }, 1000)
+  }
+
+  calculateTime(unitOfTime) {
+    switch(unitOfTime) {
+      case 'days':
+        return Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24);
+      case 'hours':
+        return Math.floor(((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60) % 24;
+      case 'minutes':
+        return Math.floor((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) % 60;
+      case 'seconds':
+        return (this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) % 60;
+      default:
+        throw new Error('invalid case')
+    }
   }
 
   componentWillUnmount() {
@@ -88,7 +103,7 @@ class Timer extends Component {
   render() {
     const { days, hours, minutes, seconds } = this.state;
 
-    return(
+    return (
       <div>
           {
             (() => {
