@@ -25,10 +25,10 @@ class WaitingRoomBase extends Component {
 
 
 
-    this.unsubscribe = gameInstance.get()
+     gameInstance.get()
       .then(docSnapshot => {
         if(docSnapshot.exists) {
-          gameInstance.onSnapshot(async (snapshot) => {
+          this.unsubscribe = gameInstance.onSnapshot(async (snapshot) => {
             const users = snapshot.data().players.map((player) => {
               return getUsername(player)
             })

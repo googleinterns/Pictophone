@@ -8,7 +8,7 @@ class Timer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      initialSet: false
+      
     }
   }
 
@@ -19,7 +19,7 @@ class Timer extends Component {
     game.get()
     .then(docSnapshot => {
       if(docSnapshot.exists) {
-        game.onSnapshot((snapshot) => {
+        this.unsubscribe = game.onSnapshot((snapshot) => {
           if(snapshot.data().gameStartTime !== null && snapshot.data().currentPlayerIndex === 0) {
             this.setState({
               currentPlayerIndex: snapshot.data().currentPlayerIndex + 1,
@@ -83,7 +83,7 @@ class Timer extends Component {
   }
 
   componentWillUnmount() {
-
+    this.unsubscribe && this.unsubscribe()
   }
 
   render() {
