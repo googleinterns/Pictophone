@@ -8,26 +8,42 @@ class Timer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      minutes: 5,
-      seconds: 0,
+      minutes: 99,
+      seconds: 99,
       initialSet: false
     }
   }
 
   async componentDidMount() {
     const { id } = this.props.match.params;
-    const game = await this.props.firebase.game(id).get();
+    const game = this.props.firebase.game(id);
 
-    if(!this.state.initialSet) {
-      this.setState({
-        minutes: game.data().timeLimit - 1,
-        seconds: 59,
-        initialSet: true
-      })
-    }
+    game.get()
+    .then(docSnapshot => {
+      if(docSnapshot.exists) {
+        game.onSnapshot((snapshot) => {
+          if(snapshot.data().gameStartTime !== null) {
+            this.setState({
+              gameSize: snapshot.data().players.length,
+              startTime: snapshot.data().gameStartTime.seconds,
+              timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
+            })
+            this.setState({
+              timeTurnWillEnd: ((this.state.timePerTurnInSeconds * this.state.gameSize) + this.state.startTime),
+              currentTime: Math.floor(new Date().getTime() / 1000),
+            })
+            this.setState({
+              minutes: Math.floor((this.state.timeTurnWillEnd - this.state.currentTime)/60),
+              seconds: (this.state.timeTurnWillEnd - this.state.currentTime)%60
+            })
+          }
+        })
+      }
+    })
 
-    this.myInterval = setInterval(() => {
+    this.myInterval = setInterval(async () => {
       const { seconds, minutes } = this.state
+      const gameRef = await this.props.firebase.game(id).get();
 
       if (seconds > 0) {
         this.setState(({ seconds }) => ({
@@ -37,6 +53,9 @@ class Timer extends Component {
       if (seconds === 0) {
         if (minutes === 0) {
           clearInterval(this.myInterval)
+          game.set({
+            currentPlayerIndex: gameRef.data().currentPlayerIndex + 1,
+          }, { merge: true })
         } else {
           this.setState(({ minutes }) => ({
             minutes: minutes - 1,
@@ -47,20 +66,16 @@ class Timer extends Component {
     }, 1000)
   }
 
-  componentWillUnmount() {
-    clearInterval(this.myInterval);
-  }
-
-
   render() {
     const { minutes, seconds } = this.state;
 
     return(
       <div>
-          { minutes === 0 && seconds === 0
-            ? <h3>Times up!</h3>
-            : <h3>Time Remaining: { minutes }:{ seconds < 10 ? `0${ seconds }` : seconds }</h3>
-          }
+            {
+              minutes <= 0 && seconds <= 0
+              ? <h3>Times up!</h3>
+              : <h3>Time Remaining: { minutes }:{ seconds < 10 ? `0${ seconds }` : seconds }</h3>
+            }
       </div>
     )
   }

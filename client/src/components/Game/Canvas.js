@@ -197,7 +197,7 @@ class Canvas extends Component {
 
   render() {
     const { prevImg, usernames, players,
-      currentPlayerIndex, display, sent, file } = this.state;
+      currentPlayerIndex, display, sent, file, timeLimit } = this.state;
     const userIndex = players.indexOf(this.props.uid);
 
     return (
@@ -213,7 +213,7 @@ class Canvas extends Component {
             {(index !== usernames.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
         </div>
-        <Timer />
+        {timeLimit !== '' && userIndex === currentPlayerIndex ? <Timer /> : null}
         <h4>Draw something based on the left image!</h4>
         <div className="img-displays">
           <div className="prev-img">

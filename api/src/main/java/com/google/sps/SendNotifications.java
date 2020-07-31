@@ -79,7 +79,7 @@ public class SendNotifications {
     try {
       DocumentSnapshot gameDocSnap = game.get().get();
       int currentPlayerIndex = (int) ((long) gameDocSnap.get("currentPlayerIndex"));
-      String playerName = ((List<String>) gameDocSnap.get("players")).get(currentPlayerIndex);
+      String playerName = ((List<String>) gameDocSnap.get("players")).get(currentPlayerIndex+1);
 
       DocumentSnapshot usersDocSnap = players.document(playerName).get().get();
 

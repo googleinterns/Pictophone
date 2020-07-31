@@ -37,7 +37,7 @@ class WaitingRoomBase extends Component {
       });
   }
 
-  async componentWillUnmount() {
+  componentWillUnmount() {
     this.unsubcribe && this.unsubscribe();
   }
 
@@ -50,6 +50,9 @@ class WaitingRoomBase extends Component {
           this.props.history.push(`/game/${gameId}`);
         })
     } else {
+      game.set({
+        gameStartTime: this.props.firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
       game.update({
         hasStarted: true
       });
