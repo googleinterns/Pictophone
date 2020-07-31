@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { withFirebase } from '../Firebase'
 import { compose } from 'recompose';
 import { withAuthorization } from '../Session';
+import { getUsername } from '../Helpers';
 
 class WaitingRoomBase extends Component {
   constructor(props) {
@@ -22,12 +23,18 @@ class WaitingRoomBase extends Component {
 
     // Listens for changes in the database for player list & status of whether the game has started
 
+
+
     this.unsubscribe = gameInstance.get()
       .then(docSnapshot => {
         if(docSnapshot.exists) {
-          gameInstance.onSnapshot((snapshot) => {
+          gameInstance.onSnapshot(async (snapshot) => {
+            const users = snapshot.data().players.map((player) => {
+              return getUsername(player)
+            })
+            const usernames = await Promise.all(users);
             this.setState({
-              players: snapshot.data().players,
+              players: usernames,
               started: snapshot.data().hasStarted,
               gameId: id,
               timeLimit: snapshot.data().timeLimit,
