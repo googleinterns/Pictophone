@@ -24,7 +24,7 @@ class Timer extends Component {
         game.onSnapshot((snapshot) => {
           if(snapshot.data().gameStartTime !== null) {
             this.setState({
-              currentPlayerIndex: snapshot.data().players.length,
+              currentPlayerIndex: snapshot.data().currentPlayerIndex + 1,
               startTime: snapshot.data().gameStartTime.seconds,
               timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
             })
@@ -64,6 +64,10 @@ class Timer extends Component {
         }
       }
     }, 1000)
+  }
+
+  componentWillUnmount() {
+
   }
 
   render() {
