@@ -8,7 +8,7 @@ class Timer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      
+
     }
   }
 
@@ -27,7 +27,7 @@ class Timer extends Component {
               timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
             })
             this.setState({
-              timeTurnWillEnd: ((this.state.timePerTurnInSeconds * this.state.currentPlayerIndex) + this.state.startTime),
+              timeTurnWillEnd: (this.state.timePerTurnInSeconds + this.state.startTime),
             })
             this.setState({
               days: Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24),
@@ -37,12 +37,11 @@ class Timer extends Component {
             })
           } else if(snapshot.data().gameStartTime !== null) {
             this.setState({
-              currentPlayerIndex: snapshot.data().currentPlayerIndex + 1,
               startTime: Math.floor(new Date().getTime() / 1000),
               timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
             })
             this.setState({
-              timeTurnWillEnd: ((this.state.timePerTurnInSeconds * this.state.currentPlayerIndex) + this.state.startTime),
+              timeTurnWillEnd: (this.state.timePerTurnInSeconds + this.state.startTime),
             })
             this.setState({
               days: Math.floor((((this.state.timeTurnWillEnd - Math.floor(new Date().getTime() / 1000)) / 60) / 60)/ 24),
