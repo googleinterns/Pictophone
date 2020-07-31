@@ -13,6 +13,10 @@ handlers:
     static_files: build/\1
     upload: build/.*\.(json|ico|js)$
 
+  - url: /lc-assets/img/(.+\.png)$
+    static_files: build/lc-assets/img/\1
+    upload: build/lc-assets/img/(.+\.png)$
+
   - url: .*
     static_files: build/index.html
     upload: build/index.html
