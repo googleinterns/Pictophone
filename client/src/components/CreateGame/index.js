@@ -10,7 +10,8 @@ import './CreateGame.css';
 
 const CreateGamePage = (props) => (
   <Modal
-    { ...props }
+    show={props.show}
+    onHide={props.onHide}
     size="lg"
     aria-labelledby="contained-modal-title-vcenter"
     centered
