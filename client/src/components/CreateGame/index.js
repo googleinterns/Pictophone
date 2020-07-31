@@ -43,20 +43,28 @@ class CreateGameFormBase extends Component {
   }
 
   onSubmit = event => {
-    const { gameName, timeLimit, maxNumPlayers } = this.state;
+    let { gameName, timeLimit, maxNumPlayers } = this.state;
 
-    this.props.firebase
-      .doCreateGame(gameName, timeLimit, maxNumPlayers)
-      .then(gameRef => {
-        this.setState({ ...INITIAL_STATE });
-        this.setState({ createdGameId: gameRef.id });
-        this.props.history.push(`/game/${gameRef.id}`);
-      })
-      .catch(error => {
-        this.setState({ error });
-      });
+    timeLimit = parseInt(timeLimit, 10);
+    maxNumPlayers = parseInt(maxNumPlayers, 10);
 
-      event.preventDefault();
+    if (maxNumPlayers && maxNumPlayers < 2) {
+      this.setState({ error: new Error("Please enter at least 2 for maximum number of players.") });
+    }
+    else {
+      this.props.firebase
+        .doCreateGame(gameName, timeLimit, maxNumPlayers)
+        .then(gameRef => {
+          this.setState({ ...INITIAL_STATE });
+          this.setState({ createdGameId: gameRef.id });
+          this.props.history.push(`/game/${gameRef.id}`);
+        })
+        .catch(error => {
+          this.setState({ error });
+        });
+    }
+
+    event.preventDefault();
   };
 
   onChange = event => {
@@ -73,8 +81,7 @@ class CreateGameFormBase extends Component {
     } = this.state;
 
     const isInvalid =
-      gameName === '' ||
-      maxNumPlayers === '';
+      gameName === '';
 
     return (
       <Form className="create-game-form" onSubmit={this.onSubmit}>
@@ -106,7 +113,7 @@ class CreateGameFormBase extends Component {
 
         <Col>
           <Form.Group>
-            <Form.Label>Maximum number of players</Form.Label>
+            <Form.Label>Maximum number of players (leave blank for unlimited players)</Form.Label>
             <Form.Control
               name="maxNumPlayers"
               value={maxNumPlayers}
