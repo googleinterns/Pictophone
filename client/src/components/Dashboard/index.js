@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import { compose } from 'recompose';
-import { Link } from 'react-router-dom';
 
 import Banner from '../Banner';
 import GameSelector from '../GameSelector';
 import CreateGamePage from '../CreateGame';
+import JoinGamePage from '../JoinGame';
 import {
   withAuthorization,
   withEmailVerification,
   AuthUserContext,
 } from '../Session';
-
-import * as ROUTES from '../../constants/routes';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './Dashboard.css';
@@ -23,6 +21,7 @@ class Dashboard extends Component {
 
     this.state = {
       createGameModalShow: false,
+      joinGameModalShow: false,
     }
   }
 
@@ -36,12 +35,16 @@ class Dashboard extends Component {
           </div>
           <div className="dashboard-buttons">
             <Button variant="secondary" onClick={() => this.setState({ createGameModalShow: true })}>host</Button>{' '}
-            <Button variant="secondary" as={Link} to={ROUTES.JOIN_GAME}>join</Button>
+            <Button variant="secondary" onClick={() => this.setState({ joinGameModalShow: true })}>join</Button>
           </div>
           <div>
             <CreateGamePage
               show={this.state.createGameModalShow}
               onHide={() => this.setState({ createGameModalShow: false })}
+            />
+            <JoinGamePage
+              show={this.state.joinGameModalShow}
+              onHide={() => this.setState({ joinGameModalShow: false })}
             />
           </div>
           <div className="games-list">

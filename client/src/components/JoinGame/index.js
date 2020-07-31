@@ -1,20 +1,30 @@
 import React, { Component } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
-import { Container, Col, Form, Button } from 'react-bootstrap';
+import { Col, Form, Button, Modal } from 'react-bootstrap';
 
 import { withFirebase } from '../Firebase';
 import { withAuthorization } from '../Session';
-import * as ROUTES from '../../constants/routes';
 
 import './JoinGame.css';
 
-const JoinGamePage = () => (
-  <Container className="join-game-wrapper">
-    <h2 className="join-game-heading">Join a game</h2>
-    <JoinGameForm />
-    <Button type="button"><Link to={ROUTES.DASHBOARD}>Back to dashboard</Link></Button>
-  </Container>
+const JoinGamePage = (props) => (
+  <Modal
+    { ...props }
+    size="lg"
+    aria-labelledby="contained-modal-title-vcenter"
+    centered
+  >
+    <Modal.Header closeButton>
+      <Modal.Title id="contained-modal-title-vcenter">Join a game</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <JoinGameForm />
+    </Modal.Body>
+    <Modal.Footer>
+      <Button onClick={props.onHide}>Close</Button>
+    </Modal.Footer>
+  </Modal>
 );
 
 const INITIAL_STATE = {
