@@ -15,7 +15,10 @@ export const FabricContextProvider = props => {
 
   return (
     <FabricContext.Provider value={[canvas, initCanvas]}>
-      <Endgame />
+      <FabricContext.Consumer>
+        {context => <Endgame context={context}/>}
+      </FabricContext.Consumer>
+
     </FabricContext.Provider>
   );
 };

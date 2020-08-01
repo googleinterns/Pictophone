@@ -41,7 +41,7 @@ class SignUpFormBase extends Component {
       body: username
     };
 
-    const url = '/validateUsername';
+    const url = '/api/validateUsername';
 
     const response = await fetch(url, options);
     const isUnique = await response.json();
