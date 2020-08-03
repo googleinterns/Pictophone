@@ -21,25 +21,17 @@ class Timer extends Component {
       if(docSnapshot.exists) {
         this.unsubscribe = game.onSnapshot((snapshot) => {
           if(snapshot.data().gameStartTime !== null && snapshot.data().currentPlayerIndex === 0) {
-            this.setState({
-              currentPlayerIndex: snapshot.data().currentPlayerIndex + 1,
-              startTime: snapshot.data().gameStartTime.seconds,
-              timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
-            })
-            this.setState({
-              timeTurnWillEnd: (this.state.timePerTurnInSeconds + this.state.startTime),
-            })
-            this.setState({
-              days: this.calculateTime('days'),
-              hours: this.calculateTime('hours'),
-              minutes: this.calculateTime('minutes'),
-              seconds: this.calculateTime('seconds')
-            })
-          } else if(snapshot.data().gameStartTime !== null) {
-            this.setState({
-              startTime: Math.floor(new Date().getTime() / 1000),
-              timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
-            })
+            if(snapshot.data().currentPlayerIndex === 0) {
+              this.setState({
+                startTime: snapshot.data().gameStartTime.seconds,
+                timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
+              })
+            } else {
+              this.setState({
+                startTime: Math.floor(new Date().getTime() / 1000),
+                timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
+              })
+            }
             this.setState({
               timeTurnWillEnd: (this.state.timePerTurnInSeconds + this.state.startTime),
             })
@@ -65,6 +57,7 @@ class Timer extends Component {
       }
       if (seconds === 0) {
         if (minutes === 0 && hours === 0 && days === 0) {
+          this.sendEmail(gameRef, id);
           game.set({
             currentPlayerIndex: gameRef.data().currentPlayerIndex + 1,
           }, { merge: true })
@@ -94,6 +87,20 @@ class Timer extends Component {
       default:
         throw new Error('invalid case')
     }
+  }
+
+  sendEmail(snapshot, gameId) {
+    const emailType = (snapshot.data().currentPlayerIndex === snapshot.data().players.length) ? 'end' : 'turn';
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `gameID=${gameId}&emailType=${emailType}`,
+    }).then((response) => {
+      console.log(response.text());
+    });
   }
 
   componentWillUnmount() {

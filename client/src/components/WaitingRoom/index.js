@@ -74,7 +74,7 @@ class WaitingRoomBase extends Component {
 
     return (
       <div>
-        {timeLimit && <h3>Time Limit Per Turn: {timeLimit}</h3>}
+        {timeLimit && <h3>Time Limit Per Turn: {timeLimit} minutes</h3>}
         <nav>
           <header>Host: {players[0]}</header>
           <header>Players:</header>
