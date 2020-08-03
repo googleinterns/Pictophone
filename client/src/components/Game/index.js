@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withFirebase } from '../Firebase';
-import '../App/App.css';
+import { Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import Banner from '../Banner';
@@ -10,7 +10,7 @@ import WaitingRoom from '../WaitingRoom';
 import { FabricContextProvider } from './FabricContextProvider';
 import * as ROUTES from '../../constants/routes';
 import { withAuthorization, withEmailVerification, AuthUserContext } from '../Session';
-const url = 'phoebeliang-step.appspot.com/game/';
+import './Game.css';
 
 class Game extends Component {
 
@@ -73,16 +73,18 @@ class Game extends Component {
     } else if (inProgress) {
       return <AuthUserContext.Consumer>
         {authUser =>
-          <Canvas uid={authUser.uid} />
+          <div className="in-game">
+            <Canvas uid={authUser.uid} />
+          </div>
         }
       </AuthUserContext.Consumer>
     } else {
-      return <FabricContextProvider />
+      return <div className="end-game"><FabricContextProvider /></div>
     }
   }
 
   copyGameId() {
-    navigator.clipboard.writeText(url + this.state.gameId);
+    navigator.clipboard.writeText(this.state.gameId);
     this.setState({
       copied: true
     });
@@ -90,20 +92,25 @@ class Game extends Component {
   }
 
   render() {
-    const { inProgress, gameExists, gameName, copied, gameId, gameStarted, playerInGame} = this.state;
+    const { inProgress, gameExists, gameName, gameId,
+      copied, gameStarted, playerInGame} = this.state;
 
     return (
-      <div className="Game">
+      <div className="banner-wrapper">
         <Banner />
-        <Link to={ROUTES.DASHBOARD}><button>Back to home</button></Link>
-        <h3>{ gameName }</h3>
-        <p>Game ID: { gameId }</p>
-        <button onClick={this.copyGameId}>
-          {copied ? 'Copied!' : 'Copy Game Link'}
-        </button>
-        { // Render according to game existence and status.
-          this.pageReturned(inProgress, gameExists, gameStarted, playerInGame)
-        }
+        <div className="heading">
+          <Button variant="secondary" as={Link} to={ROUTES.DASHBOARD}>Back to dashboard</Button>
+          <p className="title">{ gameName }</p>
+          <p>Game ID: { gameId }</p>
+          <Button variant="outline-secondary" onClick={this.copyGameId}>
+            {copied ? 'Copied!' : 'Copy Game ID'}
+          </Button>
+        </div>
+        <div className="content-wrapper">
+          { // Render according to game existence and status.
+            this.pageReturned(inProgress, gameExists, gameStarted, playerInGame)
+          }
+        </div>
       </div>
     );
   }

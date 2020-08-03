@@ -1,22 +1,30 @@
 import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import { compose } from 'recompose';
-import { Link } from 'react-router-dom';
 
 import Banner from '../Banner';
 import GameSelector from '../GameSelector';
+import CreateGamePage from '../CreateGame';
+import JoinGamePage from '../JoinGame';
 import {
   withAuthorization,
   withEmailVerification,
   AuthUserContext,
 } from '../Session';
 
-import * as ROUTES from '../../constants/routes';
-
 import 'bootstrap/dist/css/bootstrap.css';
 import './Dashboard.css';
 
 class Dashboard extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      createGameModalShow: false,
+      joinGameModalShow: false,
+    }
+  }
+
   render() {
     return (
       <div className="banner-wrapper">
@@ -26,8 +34,18 @@ class Dashboard extends Component {
             <p>Hi, {this.props.authUser.username}! Here are your games:</p>
           </div>
           <div className="dashboard-buttons">
-            <HostButton />{' '}
-            <JoinButton />{' '}
+            <Button variant="secondary" onClick={() => this.setState({ createGameModalShow: true })}>host</Button>{' '}
+            <Button variant="secondary" onClick={() => this.setState({ joinGameModalShow: true })}>join</Button>
+          </div>
+          <div>
+            <CreateGamePage
+              show={this.state.createGameModalShow}
+              onHide={() => this.setState({ createGameModalShow: false })}
+            />
+            <JoinGamePage
+              show={this.state.joinGameModalShow}
+              onHide={() => this.setState({ joinGameModalShow: false })}
+            />
           </div>
           <div className="games-list">
             <AuthUserContext.Consumer>
@@ -38,22 +56,6 @@ class Dashboard extends Component {
           </div>
         </div>
       </div>
-    );
-  }
-}
-
-class HostButton extends Component {
-  render() {
-    return (
-      <Button variant="secondary" as={Link} to={ROUTES.CREATE_GAME}>host</Button>
-    );
-  }
-}
-
-class JoinButton extends Component {
-  render() {
-    return (
-      <Button variant="secondary" as={Link} to={ROUTES.JOIN_GAME}>join</Button>
     );
   }
 }

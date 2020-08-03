@@ -1,24 +1,3 @@
 .App {
   text-align: left;
 }
-
-.img-displays {
-  display: flex;
-  flex-direction: row;
-}
-
-.lc-container {
-  width: 50%;
-  height: 50%;
-}
-
-.send-drawing {
-  height: 75px;
-  width: 150px;
-  float: right;
-}
-
-.player-list {
-  display: flex;
-  flex-direction: row;
-}
