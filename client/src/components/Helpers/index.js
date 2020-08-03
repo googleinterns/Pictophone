@@ -67,3 +67,18 @@ export function getMIMEType(blob) {
     });
 
   }
+
+  export function sendEmail() {
+    const { currentPlayerIndex, players, gameId } = this.state;
+    const emailType = (currentPlayerIndex === players.length) ? 'end' : 'turn';
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `gameID=${gameId}&emailType=${emailType}`,
+    }).then((response) => {
+      console.log(response.text());
+    });
+  }

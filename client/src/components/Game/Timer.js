@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { withFirebase } from '../Firebase';
 import { withRouter } from 'react-router';
 import { compose } from 'recompose';
+import { sendEmail } from '../Helpers'
 
 class Timer extends Component {
 
@@ -20,6 +21,13 @@ class Timer extends Component {
     .then(docSnapshot => {
       if(docSnapshot.exists) {
         this.unsubscribe = game.onSnapshot((snapshot) => {
+
+          this.setState({
+            currentPlayerIndex: snapshot.data().currentPlayerIndex,
+            players: snapshot.data().players,
+            gameId: id
+          })
+
           if(snapshot.data().gameStartTime !== null && snapshot.data().currentPlayerIndex === 0) {
             if(snapshot.data().currentPlayerIndex === 0) {
               this.setState({
@@ -57,7 +65,7 @@ class Timer extends Component {
       }
       if (seconds === 0) {
         if (minutes === 0 && hours === 0 && days === 0) {
-          this.sendEmail(gameRef, id);
+          sendEmail();
           game.set({
             currentPlayerIndex: gameRef.data().currentPlayerIndex + 1,
           }, { merge: true })
@@ -87,20 +95,6 @@ class Timer extends Component {
       default:
         throw new Error('invalid case')
     }
-  }
-
-  sendEmail(snapshot, gameId) {
-    const emailType = (snapshot.data().currentPlayerIndex === snapshot.data().players.length) ? 'end' : 'turn';
-    fetch('/api/notify', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `gameID=${gameId}&emailType=${emailType}`,
-    }).then((response) => {
-      console.log(response.text());
-    });
   }
 
   componentWillUnmount() {
