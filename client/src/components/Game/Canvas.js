@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import '../App/App.css';
 import { withRouter } from 'react-router';
 import Player from './Player.js';
 import { saveAs } from 'file-saver';
@@ -8,7 +7,8 @@ import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
 import Timer from './Timer';
-import { getUsername, getMIMEType } from '../Helpers';
+import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { getUsername, getMIMEType, sendEmail } from '../Helpers';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
@@ -28,6 +28,7 @@ class Canvas extends Component {
     this.sendEmail = this.sendEmail.bind(this);
     this.putImageInBucket = this.putImageInBucket.bind(this);
     this.setUpBucketListener = this.setUpBucketListener.bind(this);
+    this.renderTooltip = this.renderTooltip.bind(this);
   }
 
   async componentDidMount() {
@@ -149,7 +150,7 @@ class Canvas extends Component {
       if (data.status === "incomplete") return;
       this.setState({ sendable: true, sending: false });
       if (data.ok) {
-        this.sendEmail();
+        sendEmail();
         // Advance the game if the image was uploaded successfully
         const gameRef = this.props.firebase.game(this.state.gameId);
         gameRef.update({
@@ -177,21 +178,6 @@ class Canvas extends Component {
           console.log('Image successfully in uploaded. Now validating...');
        }
     }
-  }
-
-  sendEmail() {
-    const { currentPlayerIndex, players, gameId } = this.state;
-    const emailType = (currentPlayerIndex === players.length) ? 'end' : 'turn';
-    fetch('/api/notify', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `gameID=${gameId}&emailType=${emailType}`,
-    }).then((response) => {
-      console.log(response.text());
-    });
   }
 
   saveDrawing() {
@@ -228,13 +214,23 @@ class Canvas extends Component {
     this.setState({ prevImg: url });
   }
 
+  renderTooltip(props) {
+    return (
+      <Tooltip id="button-tooltip" {...props}>
+        To send your own image instead of the canvas, upload something below! <br />
+        Make sure to clear the selection if you change your mind and decide to use the built-in canvas. <br />
+        Please choose a jpeg, png, or gif under 5MB.
+      </Tooltip>
+    );
+  }
+
   render() {
     const { prevImg, usernames, players, sent, sending,
       currentPlayerIndex, display, sendable, file, timeLimit } = this.state;
     const userIndex = players.indexOf(this.props.uid);
 
     return (
-      <div>
+      <div className="Canvas">
         <div className="player-list">
           {/*
             Dynamically render the player chain with a name list. The 'status'
@@ -247,13 +243,13 @@ class Canvas extends Component {
           ))}
         </div>
         {timeLimit && userIndex === currentPlayerIndex && <Timer />}
-        <h4>Draw something based on the left image!</h4>
+        <p className="title">Draw something based on the left image!</p>
         <div className="img-displays">
           <div className="prev-img">
             { // Check whether or not to display the previous image.
               (() => {
                 if (userIndex === 0) {
-                 return <p>Draw an image to send to the next person!</p>
+                 return <p>You are the first to draw. Create an image to send to the next person!</p>
                 } else if (display && prevImg) {
                   return <img src={prevImg} style={{ maxWidth: 400 }} alt="previous drawing" />
                 } else {
@@ -262,18 +258,31 @@ class Canvas extends Component {
             }
           </div>
           <div className="lc-container">
-            <LC.LiterallyCanvasReactComponent onInit={this.setLC} imageURLPrefix={`${process.env.PUBLIC_URL}/lc-assets/img`} />
-            <button onClick={this.saveDrawing}>Download canvas drawing</button>
-            <p>
-              To send your own image instead of the canvas, upload something below!
-              Please choose a jpeg, png, or gif under 5MB.
-            </p>
+            <div className="lc-component">
+              <LC.LiterallyCanvasReactComponent
+                onInit={this.setLC}
+                imageURLPrefix={`${process.env.PUBLIC_URL}/lc-assets/img`}
+              />
+            </div>
+            <Button variant="outline-secondary" onClick={this.saveDrawing} className="download-drawing">
+              Download canvas drawing
+            </Button>
+
             {file && <img src={file} width="100" alt="upload preview" />}
             <form>
-            <input type="file" accept="image/*" onChange={this.handleChange} />
-            <input type="reset" value="Clear selection" onClick={() => this.setState({ file: null })} />
+              <input type="file" accept="image/*" onChange={this.handleChange} />
+              <input type="reset" value="Clear selection" onClick={() => this.setState({file: null})} />
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 100, hide: 400 }}
+                overlay={this.renderTooltip}
+              >
+                <span><Button variant="link" disabled><u>?</u></Button></span>
+              </OverlayTrigger>
             </form>
-            <button
+
+            <Button
+              variant="outline-secondary"
               className="send-drawing"
               onClick={this.send}
               disabled={!sendable}>
@@ -284,7 +293,7 @@ class Canvas extends Component {
                     return (<span>Send</span>);
                   })()
                 }
-             </button>
+             </Button>
           </div>
         </div>
       </div>

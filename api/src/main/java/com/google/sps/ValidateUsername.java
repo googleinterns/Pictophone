@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 public class ValidateUsername {
-  @PostMapping("/validateUsername")
+  @PostMapping("/api/validateUsername")
   Boolean checkUsername(@RequestBody String username) throws Exception {
     return isUniqueUsername(username);
   }

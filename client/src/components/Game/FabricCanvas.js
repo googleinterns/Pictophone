@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { FabricContext } from './FabricContextProvider';
 import { fabric } from 'fabric';
-import { saveAs } from 'file-saver';
 
 const FabricCanvas = props => {
   const [canvas, initCanvas] = useContext(FabricContext);
@@ -14,12 +13,6 @@ const FabricCanvas = props => {
   const PLAYER_FONTSIZE = 20;
   const TITLE_FONTSIZE = 36;
   const IMG_TOP = MARGIN_SIZE + (TITLE_FONTSIZE * 2);
-
-  const saveCollage = () => {
-    canvas.toCanvasElement().toBlob(function(blob) {
-      saveAs(blob, props.title + '.png');
-    });
-  };
 
   useEffect(() => {
     const canvas = new fabric.Canvas('c');
@@ -79,9 +72,8 @@ const FabricCanvas = props => {
         id='c'
         width={CANVAS_X}
         height={CANVAS_Y}
-        style={{'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'}}
+        style={{'boxShadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'}}
       />
-      <button onClick={saveCollage}>download collage</button>
     </div>
   );
 }

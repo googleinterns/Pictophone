@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import '../App/App.css';
 import { withRouter } from 'react-router';
 import { saveAs } from 'file-saver';
 import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
 import { getUsername, getMIMEType } from '../Helpers';
+import { Button } from 'react-bootstrap';
 import JSZip from "jszip";
 import FabricCanvas from './FabricCanvas';
+import './Game.css';
 const zip = new JSZip();
 
 class Endgame extends Component {
@@ -19,6 +20,7 @@ class Endgame extends Component {
     this.downloadAll = this.downloadAll.bind(this);
     this.fetchGame = this.fetchGame.bind(this);
     this.idToUsername = this.idToUsername.bind(this);
+    this.saveCollage = this.saveCollage.bind(this);
   }
 
   async componentDidMount() {
@@ -82,19 +84,32 @@ class Endgame extends Component {
     });
   }
 
+  saveCollage() {
+    const canvas = this.props.context[0];
+    canvas.toCanvasElement().toBlob((blob) => {
+      saveAs(blob, this.state.gameName + '.png');
+    });
+  }
+
   render() {
     const { drawings, usernames, gameName } = this.state;
 
     return (
       <div className="Endgame">
-        <h4>The game is finished! Here are the drawings:</h4>
+        <p className="title">The game is finished! Here are the drawings:</p>
         <p>The artwork may be overlapped.
           Feel free to arrange the canvas however you like!</p>
+        <div className="Fabric">
         { usernames.length ?
-          <FabricCanvas drawings={drawings} players={usernames} title={gameName} />
+          <FabricCanvas
+            drawings={drawings} players={usernames} title={gameName} />
           : null
         }
-        <button onClick={this.downloadAll}>download images in .zip</button>
+        </div>
+        <div className="download-buttons">
+          <Button variant="outline-secondary" onClick={this.saveCollage}>download collage</Button>{' '}
+          <Button variant="outline-secondary" onClick={this.downloadAll}>download images in .zip</Button>
+        </div>
       </div>
     );
   }
