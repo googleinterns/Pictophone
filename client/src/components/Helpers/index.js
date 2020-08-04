@@ -68,9 +68,9 @@ export function getMIMEType(blob) {
 
   }
 
-  export function sendEmail() {
-    const { currentPlayerIndex, players, gameId } = this.state;
-    const emailType = (currentPlayerIndex === players.length) ? 'end' : 'turn';
+  export async function sendEmail(game, gameId) {
+    const gameRef = await game.get();
+    const emailType = (gameRef.data().currentPlayerIndex+1 === gameRef.data().players.length) ? 'end' : 'turn';
     fetch('/api/notify', {
       method: 'POST',
       headers: {

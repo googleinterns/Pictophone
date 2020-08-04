@@ -9,7 +9,6 @@ class Timer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-
     }
   }
 
@@ -28,8 +27,8 @@ class Timer extends Component {
             gameId: id
           })
 
-          if(snapshot.data().gameStartTime !== null && snapshot.data().currentPlayerIndex === 0) {
-            if(snapshot.data().currentPlayerIndex === 0) {
+          if(snapshot.data().gameStartTime !== null) {
+            if(snapshot.data().currentPlayerIndex === 0 && this.state.noPlayersSkipped) {
               this.setState({
                 startTime: snapshot.data().gameStartTime.seconds,
                 timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
@@ -65,9 +64,13 @@ class Timer extends Component {
       }
       if (seconds === 0) {
         if (minutes === 0 && hours === 0 && days === 0) {
-          sendEmail();
+          sendEmail(game, id);
+          this.props.firebase.doRemoveUserFromGame(id)
+          this.setState({
+            noPlayersSkipped: false
+          })
           game.set({
-            currentPlayerIndex: gameRef.data().currentPlayerIndex + 1,
+            currentPlayerIndex: gameRef.data().currentPlayerIndex,
           }, { merge: true })
           clearInterval(this.myInterval)
         } else {

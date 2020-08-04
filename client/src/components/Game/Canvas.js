@@ -25,7 +25,6 @@ class Canvas extends Component {
     this.idToUsername = this.idToUsername.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.getImage = this.getImage.bind(this);
-    this.sendEmail = this.sendEmail.bind(this);
     this.putImageInBucket = this.putImageInBucket.bind(this);
     this.setUpBucketListener = this.setUpBucketListener.bind(this);
     this.renderTooltip = this.renderTooltip.bind(this);
@@ -56,8 +55,10 @@ class Canvas extends Component {
     game.get().then(snapshot => {
       const data = snapshot.data();
       const userIndex = data.players.indexOf(this.props.uid);
-      if (userIndex > 0) {
-        this.getImage(data.drawings[userIndex - 1]);
+      if (data.drawings !== undefined) {
+        if (data.drawings.length > 0) {
+          this.getImage(data.drawings[data.drawings.length - 1]);
+        }
       }
     });
 
@@ -139,6 +140,8 @@ class Canvas extends Component {
   }
 
   setUpBucketListener(filename) {
+    const { gameId } = this.state;
+    const game = this.props.firebase.game(gameId)
     const statusRef = this.props.firebase.db
       .collection("upload-progress").doc(filename);
     statusRef.set({
@@ -150,7 +153,7 @@ class Canvas extends Component {
       if (data.status === "incomplete") return;
       this.setState({ sendable: true, sending: false });
       if (data.ok) {
-        sendEmail();
+        sendEmail(game, gameId);
         // Advance the game if the image was uploaded successfully
         const gameRef = this.props.firebase.game(this.state.gameId);
         gameRef.update({
