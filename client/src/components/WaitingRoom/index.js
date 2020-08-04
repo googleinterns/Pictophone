@@ -11,7 +11,8 @@ class WaitingRoomBase extends Component {
     this.state = {
       players: [],
       gameId: '',
-      started: false
+      started: false,
+      joined: false
     };
 
     this.enterGame = this.enterGame.bind(this);
@@ -24,11 +25,17 @@ class WaitingRoomBase extends Component {
     // Listens for changes in the database for player list & status of whether the game has started
 
 
-
      gameInstance.get()
       .then(docSnapshot => {
         if(docSnapshot.exists) {
           this.unsubscribe = gameInstance.onSnapshot(async (snapshot) => {
+            
+            if(snapshot.data().players.includes(this.props.uid)) {
+              this.setState({
+                joined: true
+              })
+            }
+
             const users = snapshot.data().players.map((player) => {
               return getUsername(player)
             })
@@ -51,12 +58,18 @@ class WaitingRoomBase extends Component {
 
   async enterGame(gameId){
     const game = this.props.firebase.db.doc(`games/${gameId}`);
-    if(this.state.started) {
+    if(this.state.started && !this.state.joined) {
       this.props.firebase
         .doAddUserToGame(gameId)
         .then(() => {
           this.props.history.push(`/game/${gameId}`);
         })
+    } else if(!this.state.started && !this.state.joined) {
+      this.props.firebase
+        .doAddUserToGame(gameId)
+      this.setState({
+        joined: true
+      })
     } else {
       game.set({
         gameStartTime: this.props.firebase.firestore.FieldValue.serverTimestamp()
@@ -68,9 +81,9 @@ class WaitingRoomBase extends Component {
   }
 
   render() {
-    const { gameId, players, timeLimit, started, isHost} = this.state
+    const { gameId, players, timeLimit, started, isHost, joined} = this.state
 
-    const isInvalid = (isHost && started === false);
+    const isInvalid = (isHost && started === false && joined === true);
 
     return (
       <div>
@@ -87,7 +100,19 @@ class WaitingRoomBase extends Component {
         </nav>
         <button disabled= {isInvalid} type="button" onClick={() =>
           this.enterGame(gameId)}>
-          {started ? 'Join' : 'Start'}
+          {
+            (() => {
+              if(started) {
+                return (
+                   'Join'
+                )
+              } else {
+                return (
+                  joined ? 'Start' : 'Join Lobby'
+                )
+              }
+            })()
+          }
         </button>
       </div>
     );
