@@ -90,6 +90,7 @@ class Firebase {
       gameName: gameName,
       players: [],
       creationDate: this.fieldValue.serverTimestamp(),
+      drawings: [],
       currentPlayerIndex: 0,
       hasStarted: false,
       timeLimit: timeLimit,
