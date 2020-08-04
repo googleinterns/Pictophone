@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from 'react-bootstrap'
 
 import AuthUserContext from './context';
 import { withFirebase } from '../Firebase';
@@ -44,13 +45,13 @@ const withEmailVerification = Component => {
                   </p>
                 )}
 
-                <button
+                <Button
                   type="button"
                   onClick={this.onSendEmailVerification}
                   disabled={this.state.isSent}
                 >
                   Send confirmation E-Mail
-                </button>
+                </Button>
               </div>
             ) : (
               <Component {...this.props} />
