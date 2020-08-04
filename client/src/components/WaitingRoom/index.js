@@ -29,7 +29,7 @@ class WaitingRoomBase extends Component {
       .then(docSnapshot => {
         if(docSnapshot.exists) {
           this.unsubscribe = gameInstance.onSnapshot(async (snapshot) => {
-            
+
             if(snapshot.data().players.includes(this.props.uid)) {
               this.setState({
                 joined: true
@@ -41,7 +41,7 @@ class WaitingRoomBase extends Component {
             })
             const usernames = await Promise.all(users);
             this.setState({
-              isHost: snapshot.data().players.indexOf(this.props.uid),
+              isHost: snapshot.data().players.indexOf(this.props.uid) === 0,
               players: usernames,
               started: snapshot.data().hasStarted,
               gameId: id,
@@ -83,7 +83,7 @@ class WaitingRoomBase extends Component {
   render() {
     const { gameId, players, timeLimit, started, isHost, joined} = this.state
 
-    const isInvalid = (isHost && started === false && joined === true);
+    const isInvalid = (!isHost && started === false && joined === true);
 
     return (
       <div>
