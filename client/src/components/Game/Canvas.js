@@ -54,7 +54,6 @@ class Canvas extends Component {
     // Get previous user's image
     game.get().then(snapshot => {
       const data = snapshot.data();
-      const userIndex = data.players.indexOf(this.props.uid);
       if (data.drawings !== undefined) {
         if (data.drawings.length > 0) {
           this.getImage(data.drawings[data.drawings.length - 1]);
@@ -161,6 +160,7 @@ class Canvas extends Component {
         })
         gameRef.set({
           currentPlayerIndex: this.state.currentPlayerIndex + 1,
+          turnStartTime: this.props.firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
       } else {
         alert(`Please try again. ${data.status}`);

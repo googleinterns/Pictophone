@@ -28,16 +28,18 @@ class Timer extends Component {
           })
 
           if(snapshot.data().gameStartTime !== null) {
-            if(snapshot.data().currentPlayerIndex === 0 && this.state.noPlayersSkipped) {
+            if(snapshot.data().currentPlayerIndex === 0 && !this.state.playerSkipped) {
               this.setState({
                 startTime: snapshot.data().gameStartTime.seconds,
                 timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
               })
             } else {
-              this.setState({
-                startTime: Math.floor(new Date().getTime() / 1000),
-                timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
-              })
+              if(snapshot.data().turnStartTime !== null) {
+                this.setState({
+                  startTime: snapshot.data().turnStartTime.seconds,
+                  timePerTurnInSeconds: parseInt(snapshot.data().timeLimit, 10) * 60,
+                })
+              }
             }
             this.setState({
               timeTurnWillEnd: (this.state.timePerTurnInSeconds + this.state.startTime),
@@ -67,10 +69,11 @@ class Timer extends Component {
           sendEmail(game, id);
           this.props.firebase.doRemoveUserFromGame(id)
           this.setState({
-            noPlayersSkipped: false
+            playersSkipped: true
           })
           game.set({
             currentPlayerIndex: gameRef.data().currentPlayerIndex,
+            turnStartTime: this.props.firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true })
           clearInterval(this.myInterval)
         } else {
@@ -129,5 +132,5 @@ class Timer extends Component {
 
 export default compose(
   withFirebase,
-  withRouter
+  withRouter,
 )(Timer);
