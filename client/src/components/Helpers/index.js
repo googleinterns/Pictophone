@@ -67,3 +67,18 @@ export function getMIMEType(blob) {
     });
 
   }
+
+  export async function sendEmail(game, gameId) {
+    const gameRef = await game.get();
+    const emailType = (gameRef.data().currentPlayerIndex+1 === gameRef.data().players.length) ? 'end' : 'turn';
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `gameID=${gameId}&emailType=${emailType}`,
+    }).then((response) => {
+      console.log(response.text());
+    });
+  }

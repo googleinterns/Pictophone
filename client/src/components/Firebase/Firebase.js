@@ -132,6 +132,27 @@ class Firebase {
       games: this.fieldValue.arrayUnion(gameId)
     });
   }
+
+  doRemoveUserFromGame = async (gameId) => {
+    const gameDoc = await this.game(gameId).get();
+    const game = gameDoc.data();
+
+    if (!gameDoc.exists) {
+      throw new Error('Invalid game ID');
+    }
+
+    if (game.currentPlayerIndex >= game.players.length) {
+      throw new Error('This game has already ended!');
+    }
+
+    await this.game(gameId).update({
+      players: this.fieldValue.arrayRemove(this.auth.currentUser.uid)
+    });
+
+    await this.user(this.auth.currentUser.uid).update({
+      games: this.fieldValue.arrayRemove(gameId)
+    });
+  }
 }
 
 export default Firebase;

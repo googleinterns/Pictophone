@@ -6,8 +6,9 @@ import './literallycanvas.css';
 import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from '../Firebase';
 import { compose } from 'recompose';
+import Timer from './Timer';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { getUsername, getMIMEType } from '../Helpers';
+import { getUsername, getMIMEType, sendEmail } from '../Helpers';
 const LC = require('literallycanvas');
 
 class Canvas extends Component {
@@ -24,7 +25,6 @@ class Canvas extends Component {
     this.idToUsername = this.idToUsername.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.getImage = this.getImage.bind(this);
-    this.sendEmail = this.sendEmail.bind(this);
     this.putImageInBucket = this.putImageInBucket.bind(this);
     this.setUpBucketListener = this.setUpBucketListener.bind(this);
     this.renderTooltip = this.renderTooltip.bind(this);
@@ -54,9 +54,10 @@ class Canvas extends Component {
     // Get previous user's image
     game.get().then(snapshot => {
       const data = snapshot.data();
-      const userIndex = data.players.indexOf(this.props.uid);
-      if (userIndex > 0) {
-        this.getImage(data.drawings[userIndex - 1]);
+      if (data.drawings !== undefined) {
+        if (data.drawings.length > 0) {
+          this.getImage(data.drawings[data.drawings.length - 1]);
+        }
       }
     });
 
@@ -138,6 +139,8 @@ class Canvas extends Component {
   }
 
   setUpBucketListener(filename) {
+    const { gameId } = this.state;
+    const game = this.props.firebase.game(gameId)
     const statusRef = this.props.firebase.db
       .collection("upload-progress").doc(filename);
     statusRef.set({
@@ -149,7 +152,7 @@ class Canvas extends Component {
       if (data.status === "incomplete") return;
       this.setState({ sendable: true, sending: false });
       if (data.ok) {
-        this.sendEmail();
+        sendEmail(game, gameId);
         // Advance the game if the image was uploaded successfully
         const gameRef = this.props.firebase.game(this.state.gameId);
         gameRef.update({
@@ -157,6 +160,7 @@ class Canvas extends Component {
         })
         gameRef.set({
           currentPlayerIndex: this.state.currentPlayerIndex + 1,
+          turnStartTime: this.props.firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
       } else {
         alert(`Please try again. ${data.status}`);
@@ -177,21 +181,6 @@ class Canvas extends Component {
           console.log('Image successfully in uploaded. Now validating...');
        }
     }
-  }
-
-  sendEmail() {
-    const { currentPlayerIndex, players, gameId } = this.state;
-    const emailType = (currentPlayerIndex === players.length) ? 'end' : 'turn';
-    fetch('/api/notify', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/x-www-form-urlencoded, multipart/form-data, text/plain',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `gameID=${gameId}&emailType=${emailType}`,
-    }).then((response) => {
-      console.log(response.text());
-    });
   }
 
   saveDrawing() {
@@ -240,7 +229,7 @@ class Canvas extends Component {
 
   render() {
     const { prevImg, usernames, players, sent, sending,
-      currentPlayerIndex, display, sendable, file } = this.state;
+      currentPlayerIndex, display, sendable, file, timeLimit } = this.state;
     const userIndex = players.indexOf(this.props.uid);
 
     return (
@@ -256,7 +245,7 @@ class Canvas extends Component {
             {(index !== usernames.length - 1) ? <span>&rarr;</span> : null}</span>
           ))}
         </div>
-
+        {timeLimit && userIndex === currentPlayerIndex && <Timer />}
         <p className="title">Draw something based on the left image!</p>
         <div className="img-displays">
           <div className="prev-img">
