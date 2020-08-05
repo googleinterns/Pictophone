@@ -25,7 +25,7 @@ public class Firebase {
       .setCredentials(GoogleCredentials.getApplicationDefault())
       .setProjectId(projectId)
       .build();
-    if(FirebaseApp.getApps().isEmpty()) {
+    if (FirebaseApp.getApps().isEmpty()) {
       FirebaseApp.initializeApp(options);
     }
   }
