@@ -17,7 +17,7 @@ public class Firebase {
   public static void init() throws IOException, ParseException {
     JSONParser parser = new JSONParser();
 
-    Object obj = parser.parse(new FileReader("./config.json"));
+    Object obj = parser.parse(new FileReader("./service_account.json"));
     JSONObject jsonObject = (JSONObject) obj;
     String projectId = (String) jsonObject.get("project_id");
 
@@ -25,7 +25,7 @@ public class Firebase {
       .setCredentials(GoogleCredentials.getApplicationDefault())
       .setProjectId(projectId)
       .build();
-    if(FirebaseApp.getApps().isEmpty()) {
+    if (FirebaseApp.getApps().isEmpty()) {
       FirebaseApp.initializeApp(options);
     }
   }

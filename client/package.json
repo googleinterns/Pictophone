@@ -31,8 +31,8 @@
     "typescript": "^3.9.5"
   },
   "scripts": {
-    "start": "PORT=3000 react-scripts start",
-    "build": "PORT=8080 react-scripts build",
+    "start": "cross-env PORT=3000 react-scripts start",
+    "build": "cross-env PORT=8080 react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -51,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.2"
   }
 }

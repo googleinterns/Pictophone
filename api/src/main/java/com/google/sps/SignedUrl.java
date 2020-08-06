@@ -14,15 +14,33 @@ import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.activation.MimetypesFileTypeMap;
 
 @RestController
 public class SignedUrl {
-  private static final String projectId = "phoebeliang-step";
+
+  private static String projectId;
+  private static String uploadBucket;
+  private static String finalBucket;
+  private static final Properties p = new Properties();
+
+  public static void init() throws IOException {
+    // Get gcloud project settings
+    FileReader reader = new FileReader("./src/main/resources/gcloud.properties");
+    p.load(reader);
+
+    projectId = p.getProperty("project_id");
+    uploadBucket = p.getProperty("upload_bucket");
+    finalBucket = p.getProperty("final_bucket");
+  }
 
   @PostMapping("/api/signUpload")
   String signUpload(@RequestBody String url) throws Exception {
@@ -36,7 +54,7 @@ public class SignedUrl {
 
   private static Storage initStorage() throws Exception {
     Credentials credentials = GoogleCredentials
-      .fromStream(new FileInputStream("./config.json"));
+      .fromStream(new FileInputStream("./service_account.json"));
     return StorageOptions.newBuilder().setCredentials(credentials)
       .setProjectId(projectId).build().getService();
   }
@@ -48,7 +66,7 @@ public class SignedUrl {
   // Taken from https://cloud.google.com/storage/docs/access-control/signing-urls-with-helpers
   public static String generateV4GPutObjectSignedUrl(String objectName) throws Exception {
     Storage storage = initStorage();
-    BlobInfo blobInfo = defineResource("pictophone-images", objectName);
+    BlobInfo blobInfo = defineResource(uploadBucket, objectName);
     String mimeType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(objectName);
 
     Map<String, String> extensionHeaders = new HashMap<>();
@@ -68,7 +86,7 @@ public class SignedUrl {
 
   public static String generateV4GetObjectSignedUrl(String objectName) throws Exception {
     Storage storage = initStorage();
-    BlobInfo blobInfo = defineResource("pictophone-drawings", objectName);
+    BlobInfo blobInfo = defineResource(finalBucket, objectName);
 
     URL url =
         storage.signUrl(blobInfo, 5, TimeUnit.MINUTES,
