@@ -94,10 +94,10 @@ func validateByVisionAPI(ctx context.Context, obj *storage.ObjectHandle) error {
         // Returns an unretryable error if there is any possibility of inappropriate image.
         // Likelihood has been defined in the following:
         // https://github.com/google/go-genproto/blob/5fe7a883aa19554f42890211544aa549836af7b7/googleapis/cloud/vision/v1/image_annotator.pb.go#L37-L50
-        if ssa.Adult >= pb.Likelihood_POSSIBLE ||
-                ssa.Medical >= pb.Likelihood_POSSIBLE ||
-                ssa.Violence >= pb.Likelihood_POSSIBLE ||
-                ssa.Racy >= pb.Likelihood_POSSIBLE {
+        if ssa.Adult >= pb.Likelihood_VERY_LIKELY ||
+                ssa.Medical >= pb.Likelihood_VERY_LIKELY ||
+                ssa.Violence >= pb.Likelihood_VERY_LIKELY ||
+                ssa.Racy >= pb.Likelihood_VERY_LIKELY {
                 return errors.New("upload: exceeds the prescribed likelihood")
         }
         return nil

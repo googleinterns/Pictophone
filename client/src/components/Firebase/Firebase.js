@@ -4,14 +4,14 @@ import 'firebase/auth';
 import 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyABhi5kPuJNuIQ1EowYCxHtcU0P3RfImks",
-  authDomain: "phoebeliang-step.firebaseapp.com",
-  databaseURL: "https://phoebeliang-step.firebaseio.com",
-  projectId: "phoebeliang-step",
-  storageBucket: "phoebeliang-step.appspot.com",
-  messagingSenderId: "148022077758",
-  appId: "1:148022077758:web:7634da3c587d507783a46f",
-  measurementId: "G-46TXPPSF3P"
+  apiKey: process.env.REACT_APP_apiKey,
+  authDomain: process.env.REACT_APP_authDomain,
+  databaseURL: process.env.REACT_APP_databaseURL,
+  projectId: process.env.REACT_APP_projectId,
+  storageBucket: process.env.REACT_APP_storageBucket,
+  messagingSenderId: process.env.REACT_APP_messagingSenderId,
+  appId: process.env.REACT_APP_appId,
+  measurementId: process.env.REACT_APP_measurementId,
 };
 
 class Firebase {
@@ -45,7 +45,7 @@ class Firebase {
 
   doSendEmailVerification = () =>
     this.auth.currentUser.sendEmailVerification({
-      url: 'http://phoebeliang-step.appspot.com',
+      url: `https://${process.env.REACT_APP_projectId}.appspot.com`,
     });
 
   // *** Merge Auth and DB User API *** //
