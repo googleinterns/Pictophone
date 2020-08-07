@@ -3,10 +3,13 @@
 Pictophone is a real-time multiplayer drawing game built to solve the logistical problems around playing visual telephone between friends.
 
 ## Screenshots
-Coming soon :) Meanwhile, check out our [live website](https://phoebeliang-step.appspot.com/)!
+Dashboard <br />
+<img src="https://user-images.githubusercontent.com/44682631/89606323-7f09ea80-d824-11ea-8194-7c9a8b57e5f1.png" width=400>
+<br /> 
+In-game canvas ability <br />
+<img src="https://user-images.githubusercontent.com/44682631/89606480-ecb61680-d824-11ea-91fa-bea6484cee16.png" width=400>
 
 ## Technologies Used
-Coming soon: How each technology is used to develop our features!
 ### Frontend
 - [React](https://reactjs.org/)
 - [literallycanvas](http://literallycanvas.com/)
