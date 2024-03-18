@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@google-cloud/firestore": "^4.0.0",
+    "@google-cloud/firestore": "^6.2.0",
     "@google-cloud/storage": "^5.1.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
