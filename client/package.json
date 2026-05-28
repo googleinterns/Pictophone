@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@google-cloud/firestore": "^4.0.0",
+    "@google-cloud/firestore": "^8.6.0",
     "@google-cloud/storage": "^5.1.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
@@ -13,7 +13,7 @@
     "create-react-class": "^15.6.3",
     "fabric": "^3.6.3",
     "file-saver": "^2.0.2",
-    "firebase": "^7.15.5",
+    "firebase": "^12.13.0",
     "jquery": "^3.5.1",
     "jszip": "^3.8.0",
     "literallycanvas": "^0.5.2",
